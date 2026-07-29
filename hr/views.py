@@ -625,6 +625,7 @@ def monthly_attendance_summary(request):
         month = int(request.GET.get('month', now.month))
         year = int(request.GET.get('year', now.year))
     month_name = calendar.month_name[month]
+    days_in_month = calendar.monthrange(year, month)[1]
 
     config = SalaryConfig.objects.filter(month=month, year=year).first()
     if not config:
@@ -649,32 +650,36 @@ def monthly_attendance_summary(request):
                 late_days = int(request.POST.get(f'late_{emp.id}', 0))
                 remarks = request.POST.get(f'remarks_{emp.id}', '')
 
-                # Calculate days present
-                days_present = max(0, total_working_days - days_absent - unpaid_leaves)
+                days_present = max(0, days_in_month - days_absent)
 
-                monthly, created = MonthlySalary.objects.get_or_create(
-                    employee=emp, month=month, year=year,
-                    defaults={
-                        'salary_config': config,
-                        'total_working_days': total_working_days,
-                        'days_absent': days_absent,
-                        'paid_leaves': paid_leaves,
-                        'unpaid_leaves': unpaid_leaves,
-                        'late_coming_days': late_days,
-                        'remarks': remarks,
-                    }
-                )
-                if created:
-                    created_count += 1
-                else:
-                    monthly.days_absent = days_absent
-                    monthly.paid_leaves = paid_leaves
-                    monthly.unpaid_leaves = unpaid_leaves
-                    monthly.late_coming_days = late_days
-                    monthly.total_working_days = total_working_days
-                    monthly.remarks = remarks
-                    monthly.save()
+                existing_ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
+                if existing_ms:
+                    existing_ms.salary_config = config
+                    existing_ms.total_working_days = total_working_days
+                    existing_ms.days_absent = days_absent
+                    existing_ms.paid_leaves = paid_leaves
+                    existing_ms.unpaid_leaves = unpaid_leaves
+                    existing_ms.late_coming_days = late_days
+                    existing_ms.days_present = days_present
+                    existing_ms.remarks = remarks
+                    existing_ms.save()
                     updated_count += 1
+                else:
+                    ms = MonthlySalary(
+                        employee=emp,
+                        salary_config=config,
+                        month=month,
+                        year=year,
+                        total_working_days=total_working_days,
+                        days_absent=days_absent,
+                        paid_leaves=paid_leaves,
+                        unpaid_leaves=unpaid_leaves,
+                        late_coming_days=late_days,
+                        days_present=days_present,
+                        remarks=remarks,
+                    )
+                    ms.save()
+                    created_count += 1
             except Exception as e:
                 error_count += 1
                 import traceback
