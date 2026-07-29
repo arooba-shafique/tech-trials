@@ -619,7 +619,9 @@ def monthly_attendance_summary(request):
         year = int(request.GET.get('year', now.year))
     month_name = calendar.month_name[month]
 
-    config = SalaryConfig.objects.first()
+    config = SalaryConfig.objects.filter(month=month, year=year).first()
+    if not config:
+        config = SalaryConfig.objects.create(month=month, year=year)
     total_working_days = config.default_working_days if config else 26
 
     # Get existing monthly salary records for this month
