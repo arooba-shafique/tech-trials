@@ -210,8 +210,9 @@ def salary_config(request):
         config.bonus_percentage = float(request.POST.get('bonus_percentage', 0))
         config.save()
 
-        # Recalculate all existing MonthlySalary records using the new config
-        for ms in MonthlySalary.objects.filter(salary_config=config):
+        # Recalculate all existing MonthlySalary records for this month/year
+        for ms in MonthlySalary.objects.filter(month=month, year=year):
+            ms.salary_config = config
             ms.total_working_days = config.default_working_days
             ms.save()
 
