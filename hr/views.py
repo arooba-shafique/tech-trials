@@ -211,12 +211,18 @@ def salary_config(request):
         config.save()
 
         # Recalculate all existing MonthlySalary records for this month/year
+        recalculated = 0
         for ms in MonthlySalary.objects.filter(month=month, year=year):
-            ms.salary_config = config
-            ms.total_working_days = config.default_working_days
-            ms.save()
+            try:
+                ms.salary_config = config
+                ms.total_working_days = config.default_working_days
+                ms.save()
+                recalculated += 1
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
 
-        messages.success(request, 'Salary configuration updated.')
+        messages.success(request, f'Salary configuration updated. {recalculated} records recalculated.')
         return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
