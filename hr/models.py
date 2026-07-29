@@ -187,17 +187,11 @@ class MonthlySalary(models.Model):
         if not config:
             config = SalaryConfig.objects.create()
 
-        # Use config percentages for allowances (only if employee salary structure has overrides)
-        if emp_salary_obj and (emp_salary_obj.housing_allowance > 0 or emp_salary_obj.medical_allowance > 0 or emp_salary_obj.transport_allowance > 0 or emp_salary_obj.fuel_allowance > 0):
-            self.housing_allowance = emp_salary_obj.housing_allowance
-            self.medical_allowance = emp_salary_obj.medical_allowance
-            self.transport_allowance = emp_salary_obj.transport_allowance
-            self.fuel_allowance = emp_salary_obj.fuel_allowance
-        else:
-            self.housing_allowance = config.get_housing(basic)
-            self.medical_allowance = config.get_medical(basic)
-            self.transport_allowance = config.get_transport(basic)
-            self.fuel_allowance = config.get_fuel(basic)
+        # Always use config percentages for allowances
+        self.housing_allowance = config.get_housing(basic)
+        self.medical_allowance = config.get_medical(basic)
+        self.transport_allowance = config.get_transport(basic)
+        self.fuel_allowance = config.get_fuel(basic)
 
         # Calculate per day salary
         working = self.total_working_days if self.total_working_days > 0 else config.default_working_days
