@@ -53,7 +53,20 @@ def get_active_sessions():
 
                 ip = data.get('ip_address', 'Unknown')
                 user_agent_str = data.get('user_agent', '')
-                login_time = data.get('login_time', '')
+                login_time_str = data.get('login_time', '')
+
+                login_time_display = '-'
+                if login_time_str:
+                    try:
+                        from datetime import datetime
+                        lt = datetime.fromisoformat(login_time_str)
+                        if timezone.is_naive(lt):
+                            lt = timezone.make_aware(lt)
+                        lt_pakistan = timezone.localtime(tz=timezone.get_current_timezone())
+                        lt_pakistan = lt.astimezone(timezone.get_current_timezone())
+                        login_time_display = lt_pakistan.strftime('%b %d, %Y %I:%M %p')
+                    except Exception:
+                        login_time_display = login_time_str
 
                 browser, os_name, device = parse_user_agent(user_agent_str)
 
@@ -64,7 +77,7 @@ def get_active_sessions():
                     'browser': browser,
                     'os': os_name,
                     'device': device,
-                    'login_time': login_time,
+                    'login_time': login_time_display,
                     'last_activity': session.expire_date,
                 })
         except Exception:
