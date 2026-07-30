@@ -11,6 +11,7 @@ urlpatterns = [
     path('', include('accounts.urls')),
     path('', include('academics.urls')),
     path('hr/', include('hr.urls')),
+    path('', include('activity.urls')),
     path('accounts/logout/', auth_views.LogoutView.as_view(
         template_name='logout.html'
     ), name='logout'),

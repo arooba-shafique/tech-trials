@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'accounts',
     'academics',
     'hr',
+    'activity',
 ]
 
 MIDDLEWARE = [
@@ -45,6 +46,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'dps_ravi.middleware.TrialExpiryMiddleware',
+    'activity.middleware.ActivityTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'dps_ravi.urls'
