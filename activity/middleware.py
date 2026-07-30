@@ -23,10 +23,16 @@ class ActivityTrackingMiddleware:
                 path = request.path
 
                 if not any(path.startswith(p) for p in EXEMPT_PATHS):
-                    if 'activity_activitylog' in connection.introspection.table_names():
-                        from .models import ActivityLog
-                        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-                        ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else request.META.get('REMOTE_ADDR')
+                        if 'activity_activitylog' in connection.introspection.table_names():
+                            from .models import ActivityLog
+                            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+                            x_real_ip = request.META.get('HTTP_X_REAL_IP')
+                            if x_forwarded_for:
+                                ip = x_forwarded_for.split(',')[0].strip()
+                            elif x_real_ip:
+                                ip = x_real_ip
+                            else:
+                                ip = request.META.get('REMOTE_ADDR')
 
                         ActivityLog.objects.create(
                             user=request.user,
