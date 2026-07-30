@@ -16,7 +16,7 @@ def activity_dashboard(request):
         return redirect('admin_login')
 
     if not table_exists():
-        return render(request, 'activity_dashboard.html', {
+        return render(request, 'activity/activity_dashboard.html', {
             'activities': [],
             'stats': [],
             'user_stats': [],
@@ -77,4 +77,4 @@ def activity_dashboard(request):
         'action_choices': ActivityLog.ACTION_CHOICES,
     }
 
-    return render(request, 'activity_dashboard.html', context)
+    return render(request, 'activity/activity_dashboard.html', context)
