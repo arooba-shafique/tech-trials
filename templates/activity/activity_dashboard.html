@@ -9,6 +9,7 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; color: #333; }
         .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
         h1 { color: #2c3e50; margin-bottom: 30px; text-align: center; }
+        h2 { padding: 20px; border-bottom: 1px solid #eee; color: #2c3e50; }
 
         .filters {
             background: white; padding: 20px; border-radius: 10px;
@@ -35,14 +36,10 @@
         }
         .stat-card h3 { color: #666; font-size: 14px; margin-bottom: 10px; }
         .stat-card .number { font-size: 32px; font-weight: bold; color: #2c3e50; }
-        .stat-card .label { color: #999; font-size: 12px; margin-top: 5px; }
 
         .table-container {
             background: white; border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;
-        }
-        .table-container h2 {
-            padding: 20px; border-bottom: 1px solid #eee; color: #2c3e50;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 30px;
         }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; }
@@ -60,15 +57,86 @@
         .badge-create { background: #d1ecf1; color: #0c5460; }
         .badge-update { background: #ffeeba; color: #856404; }
         .badge-delete { background: #f5c6cb; color: #721c24; }
+        .badge-force { background: #e2d5f1; color: #5b2c8e; }
 
-        .user-stats { margin-top: 30px; }
-        .user-stats table { width: 100%; }
+        .online-dot {
+            display: inline-block; width: 8px; height: 8px;
+            background: #27ae60; border-radius: 50%; margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .btn-logout {
+            padding: 5px 12px; background: #e74c3c; color: white; border: none;
+            border-radius: 4px; cursor: pointer; font-size: 12px;
+        }
+        .btn-logout:hover { background: #c0392b; }
+        .btn-logout:disabled { background: #ccc; cursor: not-allowed; }
+
+        .no-users { text-align: center; color: #999; padding: 30px; }
+
+        .active-count {
+            display: inline-block; background: #27ae60; color: white;
+            padding: 2px 10px; border-radius: 12px; font-size: 14px; margin-left: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Activity Tracking Dashboard</h1>
 
+        <!-- Active Users Section -->
+        <div class="table-container">
+            <h2>
+                <span class="online-dot"></span>
+                Active Users Now
+                <span class="active-count">{{ active_users|length }}</span>
+            </h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Browser</th>
+                        <th>Device / OS</th>
+                        <th>IP Address</th>
+                        <th>Login Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in active_users %}
+                    <tr id="session-{{ session.session_key }}">
+                        <td><strong>{{ session.user.username }}</strong></td>
+                        <td>{{ session.user.role|default:"-" }}</td>
+                        <td>{{ session.browser }}</td>
+                        <td>{{ session.device }} / {{ session.os }}</td>
+                        <td>{{ session.ip }}</td>
+                        <td>{{ session.login_time|default:"-" }}</td>
+                        <td>
+                            {% if session.user.id != request.user.id %}
+                            <button class="btn-logout" onclick="forceLogout('{{ session.session_key }}', '{{ session.user.username }}')">
+                                Logout
+                            </button>
+                            {% else %}
+                            <em style="color: #999;">You</em>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="no-users">No active users found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Filters -->
         <div class="filters">
             <form method="GET" action="{% url 'activity_dashboard' %}" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
                 <div>
@@ -106,6 +174,7 @@
             </form>
         </div>
 
+        <!-- Stats Cards -->
         <div class="stats-grid">
             {% for stat in stats %}
             <div class="stat-card">
@@ -120,7 +189,8 @@
             {% endfor %}
         </div>
 
-        <div class="table-container user-stats">
+        <!-- User Activity Summary -->
+        <div class="table-container">
             <h2>User Activity Summary</h2>
             <table>
                 <thead>
@@ -150,7 +220,8 @@
             </table>
         </div>
 
-        <div class="table-container" style="margin-top: 30px;">
+        <!-- Recent Activities -->
+        <div class="table-container">
             <h2>Recent Activities</h2>
             <table>
                 <thead>
@@ -191,6 +262,8 @@
                                 <span class="badge badge-update">UPDATE</span>
                             {% elif activity.action == 'DELETE' %}
                                 <span class="badge badge-delete">DELETE</span>
+                            {% elif activity.action == 'FORCE_LOGOUT' %}
+                                <span class="badge badge-force">FORCE LOGOUT</span>
                             {% else %}
                                 <span class="badge">{{ activity.action }}</span>
                             {% endif %}
@@ -201,6 +274,8 @@
                             {% elif activity.details %}
                                 {% if activity.details.attempted_username %}
                                     Username: {{ activity.details.attempted_username }}
+                                {% elif activity.details.target_user %}
+                                    Kicked: {{ activity.details.target_user }}
                                 {% else %}
                                     {{ activity.details }}
                                 {% endif %}
@@ -220,5 +295,46 @@
             </table>
         </div>
     </div>
+
+    <script>
+        function forceLogout(sessionKey, username) {
+            if (!confirm('Are you sure you want to logout ' + username + '?')) return;
+
+            fetch('/activity/force-logout/' + sessionKey + '/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    document.getElementById('session-' + sessionKey).remove();
+                    alert(username + ' has been logged out.');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('Error logging out user.');
+            });
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
 </body>
 </html>
