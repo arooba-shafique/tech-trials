@@ -1,15 +1,35 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q
+from django.db import connection
 from django.utils import timezone
 from datetime import timedelta
-from .models import ActivityLog
 
 
-@staff_member_required
+def table_exists():
+    return 'activity_activitylog' in connection.introspection.table_names()
+
+
+@login_required(login_url='/admin/login/')
 def activity_dashboard(request):
-    """Activity tracking dashboard for superusers."""
+    if not request.user.is_superuser:
+        return redirect('admin_login')
+
+    if not table_exists():
+        return render(request, 'activity_dashboard.html', {
+            'activities': [],
+            'stats': [],
+            'user_stats': [],
+            'all_users': [],
+            'selected_days': 7,
+            'selected_user': None,
+            'selected_action': None,
+            'action_choices': [],
+            'error': 'Activity log table not found. Migrations may not have run yet.',
+        })
+
+    from .models import ActivityLog
+
     days = int(request.GET.get('days', 7))
     user_id = request.GET.get('user')
     action_filter = request.GET.get('action')
