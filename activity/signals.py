@@ -27,6 +27,16 @@ def get_client_ip(request):
 @receiver(user_logged_in)
 def log_user_login(sender, request, user, **kwargs):
     try:
+        ip = get_client_ip(request)
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        request.session['ip_address'] = ip
+        request.session['user_agent'] = user_agent
+        from django.utils import timezone
+        request.session['login_time'] = timezone.now().isoformat()
+        request.session.save()
+    except Exception:
+        pass
+    try:
         if table_exists():
             from .models import ActivityLog
             ActivityLog.objects.create(
