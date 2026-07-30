@@ -19,27 +19,62 @@ def table_exists():
 
 
 def parse_user_agent(ua_string):
+    if not ua_string:
+        return 'Unknown Browser', 'Unknown OS', 'Unknown Device'
     try:
-        from user_agents import parse
-        ua = parse(ua_string)
+        from user_agents import parse as ua_parse
+        ua = ua_parse(ua_string)
         browser = f"{ua.browser.family} {ua.browser.version_string}" if ua.browser.family != 'Other' else 'Unknown Browser'
         os_name = f"{ua.os.family} {ua.os.version_string}" if ua.os.family != 'Other' else 'Unknown OS'
-        device = ua.device.family if ua.device.family != 'Other' else 'Desktop'
         if ua.is_mobile:
             device = 'Mobile'
         elif ua.is_tablet:
             device = 'Tablet'
         elif ua.is_pc:
             device = 'Desktop'
+        elif ua.is_bot:
+            device = 'Bot'
+        else:
+            device = 'Other'
         return browser, os_name, device
     except Exception:
-        return 'Unknown Browser', 'Unknown OS', 'Unknown'
+        ua_lower = ua_string.lower()
+        if 'mobile' in ua_lower or 'android' in ua_lower and 'tablet' not in ua_lower:
+            device = 'Mobile'
+        elif 'tablet' in ua_lower or 'ipad' in ua_lower:
+            device = 'Tablet'
+        else:
+            device = 'Desktop'
+        if 'chrome' in ua_lower:
+            browser = 'Chrome'
+        elif 'firefox' in ua_lower:
+            browser = 'Firefox'
+        elif 'safari' in ua_lower:
+            browser = 'Safari'
+        elif 'edge' in ua_lower:
+            browser = 'Edge'
+        else:
+            browser = 'Unknown Browser'
+        if 'windows' in ua_lower:
+            os_name = 'Windows'
+        elif 'mac' in ua_lower:
+            os_name = 'macOS'
+        elif 'linux' in ua_lower:
+            os_name = 'Linux'
+        elif 'android' in ua_lower:
+            os_name = 'Android'
+        elif 'iphone' in ua_lower or 'ipad' in ua_lower:
+            os_name = 'iOS'
+        else:
+            os_name = 'Unknown OS'
+        return browser, os_name, device
 
 
 def get_active_sessions():
     active_sessions = []
     now = timezone.now()
     sessions = Session.objects.filter(expire_date__gte=now)
+    pakistan_tz = timezone.get_current_timezone()
 
     for session in sessions:
         try:
@@ -61,12 +96,11 @@ def get_active_sessions():
                         from datetime import datetime
                         lt = datetime.fromisoformat(login_time_str)
                         if timezone.is_naive(lt):
-                            lt = timezone.make_aware(lt)
-                        lt_pakistan = timezone.localtime(tz=timezone.get_current_timezone())
-                        lt_pakistan = lt.astimezone(timezone.get_current_timezone())
-                        login_time_display = lt_pakistan.strftime('%b %d, %Y %I:%M %p')
+                            lt = timezone.make_aware(lt, timezone=timezone.utc)
+                        lt_local = lt.astimezone(pakistan_tz)
+                        login_time_display = lt_local.strftime('%b %d, %Y %I:%M %p')
                     except Exception:
-                        login_time_display = login_time_str
+                        login_time_display = '-'
 
                 browser, os_name, device = parse_user_agent(user_agent_str)
 
