@@ -30,8 +30,8 @@ class SalaryConfig(models.Model):
     
     # Deductions
     provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
-    security_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Security deduction amount per employee")
-    van_child_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Van/Child deduction amount per employee")
+    security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic")
+    van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
     
     # Late deduction
@@ -58,6 +58,10 @@ class SalaryConfig(models.Model):
         return basic * (self.fuel_allowance_pct / 100)
     def get_pf(self, basic):
         return basic * (self.provident_fund_pct / 100)
+    def get_security(self, basic):
+        return basic * (self.security_pct / 100)
+    def get_van_child(self, basic):
+        return basic * (self.van_child_pct / 100)
     def get_tax(self, gross):
         return gross * (self.tax_percentage / 100)
     def get_bonus(self, basic):
@@ -229,9 +233,9 @@ class MonthlySalary(models.Model):
 
         # Security & Van/Child — use config defaults if per-employee value is 0
         if self.security_deduction == 0:
-            self.security_deduction = config.security_amount
+            self.security_deduction = config.get_security(basic)
         if self.van_child_deduction == 0:
-            self.van_child_deduction = config.van_child_amount
+            self.van_child_deduction = config.get_van_child(basic)
 
         # Overtime
         overtime_pay = self.overtime_hours * self.overtime_rate if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
