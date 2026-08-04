@@ -190,9 +190,11 @@ class MonthlySalary(models.Model):
         self.basic_salary = basic
 
         # Get config
-        config = self.salary_config or SalaryConfig.objects.first()
+        config = self.salary_config
         if not config:
-            config = SalaryConfig.objects.create()
+            config = SalaryConfig.objects.filter(month=self.month, year=self.year).first()
+        if not config:
+            return
 
         # Always use config percentages for allowances
         self.housing_allowance = config.get_housing(basic)

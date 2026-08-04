@@ -214,15 +214,21 @@ def salary_config(request):
 
         # Recalculate all existing MonthlySalary records for this month/year
         recalculated = 0
-        for ms in MonthlySalary.objects.filter(month=month, year=year):
-            try:
-                ms.salary_config = config
-                ms.total_working_days = config.default_working_days
-                ms.save()
-                recalculated += 1
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
+        all_employees = TeacherProfile.objects.filter(is_employee_separated=False)
+        school = get_user_school(request.user)
+        if school and not request.user.is_superuser:
+            all_employees = all_employees.filter(school=school)
+        for emp in all_employees:
+            ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
+            if ms:
+                try:
+                    ms.salary_config = config
+                    ms.total_working_days = config.default_working_days
+                    ms.save()
+                    recalculated += 1
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
 
         messages.success(request, f'Salary configuration updated. {recalculated} records recalculated.')
         return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
