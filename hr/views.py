@@ -311,13 +311,14 @@ def generate_monthly_salary(request):
     month = int(request.POST.get('month', timezone.now().month)) if request.method == 'POST' else int(request.GET.get('month', timezone.now().month))
     year = int(request.POST.get('year', timezone.now().year)) if request.method == 'POST' else int(request.GET.get('year', timezone.now().year))
     config = SalaryConfig.objects.filter(month=month, year=year).first()
-    total_working_days = config.default_working_days if config else 26
-    bonus_per_day = 0
 
     if request.method == 'POST':
+        if not config:
+            messages.error(request, f'No salary configuration found for {calendar.month_name[month]} {year}. Please save salary configuration first.')
+            return redirect('admin_console')
         month = int(request.POST.get('month', timezone.now().month))
         year = int(request.POST.get('year', timezone.now().year))
-        total_working_days = int(request.POST.get('total_working_days', total_working_days))
+        total_working_days = int(request.POST.get('total_working_days', config.default_working_days))
         bonus_per_day = request.POST.get('bonus_per_day', '0')
         bonus_per_day = float(bonus_per_day) if bonus_per_day else 0
 
@@ -631,8 +632,6 @@ def monthly_attendance_summary(request):
     days_in_month = calendar.monthrange(year, month)[1]
 
     config = SalaryConfig.objects.filter(month=month, year=year).first()
-    if not config:
-        config = SalaryConfig.objects.create(month=month, year=year)
     total_working_days = config.default_working_days if config else 26
 
     # Get existing monthly salary records for this month

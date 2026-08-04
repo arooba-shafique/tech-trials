@@ -116,7 +116,23 @@ def admin_dashboard(request):
 
             hr_config = SalaryConfig.objects.filter(month=sheet_month, year=sheet_year).first()
             if not hr_config:
-                hr_config = SalaryConfig.objects.create(month=sheet_month, year=sheet_year)
+                class _DefaultConfig:
+                    month = sheet_month
+                    year = sheet_year
+                    default_working_days = 26
+                    max_allowed_leaves = 0
+                    late_deduction_per = 3
+                    housing_allowance_pct = 0
+                    medical_allowance_pct = 0
+                    transport_allowance_pct = 0
+                    fuel_allowance_pct = 0
+                    tax_percentage = 0
+                    provident_fund_pct = 0
+                    security_pct = 0
+                    van_child_pct = 0
+                    bonus_per_day = 0
+                    bonus_percentage = 0
+                hr_config = _DefaultConfig()
 
             hr_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
             hr_month_name = calendar.month_name[sheet_month]
