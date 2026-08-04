@@ -21,11 +21,11 @@ var titles = {
     credentials: 'Credentials Generator',
     dashboard:   'Dashboard',
     students:    'Students',
-    teachers:    'Teachers',
+    staff:       'Staff',
     parents:     'Parents',
     classes:     'Classes',
     subjects:    'Subjects',
-    assignments: 'Teacher Assignments',
+    assignments: 'Staff Assignments',
     timetable:   'Timetable',
     exams:       'Exams',
     results:     'Grades & Results',
@@ -64,7 +64,7 @@ window.addEventListener('load', function () {
     var section = '';
     var urlParams = new URLSearchParams(window.location.search);
     var urlSection = urlParams.get('section');
-    var valid   = ['students','teachers','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials'];
+    var valid   = ['students','staff','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials'];
 
     if (urlSection && valid.indexOf(urlSection) !== -1) {
         section = urlSection;
@@ -193,6 +193,33 @@ function filterAttendance(clsId, status, btn) {
         if (show) visible++;
     });
     document.getElementById('att-empty-' + clsId).style.display = visible === 0 ? 'block' : 'none';
+}
+
+// ════════════════════════════════════════════
+// STAFF DESIGNATION FILTER
+// ════════════════════════════════════════════
+var activeStaffDesignation = 'all';
+
+function filterStaff(designation, btn) {
+    activeStaffDesignation = designation;
+    document.querySelectorAll('.staff-filter-btn').forEach(function (b) {
+        b.style.background = '#fff';
+        b.style.color      = 'var(--text-secondary)';
+    });
+    if (btn) {
+        btn.style.background = '#1a1d23';
+        btn.style.color      = '#fff';
+    }
+    var cards   = document.querySelectorAll('.staff-card');
+    var visible = 0;
+    cards.forEach(function (card) {
+        var desig = card.dataset.designation || 'teacher';
+        var show  = designation === 'all' || desig === designation;
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    var noResults = document.getElementById('staff-no-results');
+    if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
 }
 
 // ════════════════════════════════════════════
