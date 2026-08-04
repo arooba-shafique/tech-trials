@@ -459,6 +459,7 @@ def edit_monthly_salary(request, pk):
         salary.advance_deduction = float(request.POST.get('advance_deduction', salary.advance_deduction))
         salary.provident_fund = float(request.POST.get('provident_fund', salary.provident_fund))
         salary.security_deduction = float(request.POST.get('security_deduction', salary.security_deduction))
+        salary.van_child_deduction = float(request.POST.get('van_child_deduction', salary.van_child_deduction))
         salary.other_deduction = float(request.POST.get('other_deduction', salary.other_deduction))
         salary.overtime_hours = float(request.POST.get('overtime_hours', salary.overtime_hours))
         salary.overtime_rate = float(request.POST.get('overtime_rate', salary.overtime_rate))

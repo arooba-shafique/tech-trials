@@ -147,6 +147,7 @@ class MonthlySalary(models.Model):
     advance_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     provident_fund = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     security_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    van_child_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     tax_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
@@ -238,7 +239,8 @@ class MonthlySalary(models.Model):
         # Total deductions
         self.total_deductions = (self.leave_deduction + self.late_coming_deduction +
                                self.advance_deduction + self.provident_fund +
-                               self.security_deduction + self.tax_deduction + self.other_deduction)
+                               self.security_deduction + self.van_child_deduction +
+                               self.tax_deduction + self.other_deduction)
 
         # Net salary
         self.net_salary = self.gross_salary - self.total_deductions
