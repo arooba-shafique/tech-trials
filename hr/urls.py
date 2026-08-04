@@ -10,6 +10,7 @@ urlpatterns = [
     path('employee/<int:employee_id>/salary/edit/', views.edit_employee_salary, name='hr_edit_employee_salary'),
     path('employee/<int:employee_id>/salary/delete/', views.delete_employee_salary, name='hr_delete_employee_salary'),
     path('salary-config/', views.salary_config, name='hr_salary_config'),
+    path('salary-config/save-overrides/', views.save_employee_overrides, name='hr_save_employee_overrides'),
     path('salary/generate/', views.generate_monthly_salary, name='hr_generate_salary'),
     path('salary/monthly/', views.monthly_salary_list, name='hr_monthly_salary_list'),
     path('salary/<int:pk>/edit/', views.edit_monthly_salary, name='hr_edit_monthly_salary'),

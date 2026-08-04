@@ -59,9 +59,9 @@ def admin_dashboard(request):
 
     students_qs = StudentProfile.objects.filter(**school_filter)
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True))
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True)).select_related('salary_detail')
     else:
-        teachers_qs = TeacherProfile.objects.all()
+        teachers_qs = TeacherProfile.objects.all().select_related('salary_detail')
     parents_qs = ParentProfile.objects.filter(**school_filter)
     classes_qs = Class.objects.filter(**school_filter)
     subjects_qs = Subject.objects.filter(**school_filter)

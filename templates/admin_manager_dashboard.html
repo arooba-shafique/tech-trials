@@ -496,6 +496,7 @@
                         {% empty %}<div style="font-size:11px;color:var(--text-muted);padding:2px 0;">No subjects assigned.</div>{% endfor %}
                     </div>
                     <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
+                        <a href="{% url 'hr_employee_detail' teacher.id %}" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Salary</a>
                         <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
                         <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-danger" style="padding:5px 12px;font-size:11.5px;" onclick="return confirm('Delete?')">Delete</a>
                     </div>
@@ -1002,7 +1003,68 @@
                                 <input type="number" name="bonus_percentage" value="{{ hr_config.bonus_percentage }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
                             </label>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="align-self:flex-start;padding:10px 28px;margin-top:8px;">Save Configuration</button>
+                        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+                            <button type="submit" class="btn btn-primary" style="padding:10px 28px;">Save Configuration</button>
+                            <button type="button" class="btn btn-warning" style="padding:10px 28px;" onclick="document.getElementById('employee-overrides-section').style.display=document.getElementById('employee-overrides-section').style.display==='none'?'block':'none'">Customize for Employees</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Per-Employee Overrides Section -->
+            <div id="employee-overrides-section" class="table-card" style="display:none;margin-top:16px;">
+                <div class="table-card-header"><h2>Per-Employee Salary Overrides</h2></div>
+                <div style="padding:22px;">
+                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Employees listed below will use custom percentages instead of the global config above. Leave all fields at 0 to use global config.</p>
+                    <form method="post" action="{% url 'hr_save_employee_overrides' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="month" value="{{ hr_config.month }}">
+                        <input type="hidden" name="year" value="{{ hr_config.year }}">
+                        <div class="table-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Housing %</th>
+                                        <th>Medical %</th>
+                                        <th>Transport %</th>
+                                        <th>Fuel %</th>
+                                        <th>Tax %</th>
+                                        <th>PF %</th>
+                                        <th>Security %</th>
+                                        <th>Van/Child %</th>
+                                        <th>Bonus/Day</th>
+                                        <th>Bonus %</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for teacher in teachers %}
+                                    {% with emp_sal=teacher.salary_detail %}
+                                    <tr>
+                                        <td style="font-weight:600;white-space:nowrap;">{{ teacher.full_name }}</td>
+                                        <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ emp_sal.custom_housing_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ emp_sal.custom_medical_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ emp_sal.custom_transport_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_fuel_{{ teacher.id }}" value="{{ emp_sal.custom_fuel_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ emp_sal.custom_tax_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{{ emp_sal.custom_pf_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_security_{{ teacher.id }}" value="{{ emp_sal.custom_security_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{{ emp_sal.custom_van_child_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_bonus_per_day_{{ teacher.id }}" value="{{ emp_sal.custom_bonus_per_day|default:'0' }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_bonus_pct_{{ teacher.id }}" value="{{ emp_sal.custom_bonus_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td>
+                                            {% if emp_sal.use_custom_config %}
+                                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:#dbeafe;color:#1d4ed8;">Active</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endwith %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top:16px;padding:10px 28px;">Save Employee Overrides</button>
                     </form>
                 </div>
             </div>

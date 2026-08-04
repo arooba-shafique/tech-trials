@@ -236,6 +236,49 @@ def salary_config(request):
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 
 
+@login_required(login_url='admin_login')
+def save_employee_overrides(request):
+    """Save per-employee salary config overrides from the Salary Config page."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    if request.method != 'POST':
+        return redirect('admin_console')
+
+    month = int(request.POST.get('month', timezone.now().month))
+    year = int(request.POST.get('year', timezone.now().year))
+
+    for key, val in request.POST.items():
+        if key.startswith('custom_housing_'):
+            emp_id = key.replace('custom_housing_', '')
+            try:
+                emp = TeacherProfile.objects.get(pk=emp_id)
+            except TeacherProfile.DoesNotExist:
+                continue
+            sal, _ = EmployeeSalary.objects.get_or_create(employee=emp, defaults={'basic_salary': emp.salary})
+            sal.use_custom_config = True
+            sal.custom_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
+            sal.custom_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
+            sal.custom_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
+            sal.custom_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
+            sal.custom_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
+            sal.custom_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
+            sal.custom_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
+            sal.custom_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
+            sal.custom_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
+            sal.custom_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
+            sal.save()
+
+            # Recalculate existing MonthlySalary for this month/year
+            ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
+            if ms:
+                ms.save()
+
+    messages.success(request, f'Employee salary overrides saved.')
+    return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
+
+
 # ─────────────────────────────────────────────
 # EMPLOYEE SALARY STRUCTURE (Add/Edit/Delete)
 # ─────────────────────────────────────────────
