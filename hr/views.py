@@ -202,6 +202,8 @@ def salary_config(request):
         config.late_deduction_per = int(request.POST.get('late_deduction_per', 3))
         config.tax_percentage = float(request.POST.get('tax_percentage', 0))
         config.provident_fund_pct = float(request.POST.get('provident_fund_pct', 0))
+        config.security_amount = float(request.POST.get('security_amount', 0))
+        config.van_child_amount = float(request.POST.get('van_child_amount', 0))
         config.housing_allowance_pct = float(request.POST.get('housing_allowance_pct', 0))
         config.medical_allowance_pct = float(request.POST.get('medical_allowance_pct', 0))
         config.transport_allowance_pct = float(request.POST.get('transport_allowance_pct', 0))

@@ -30,6 +30,8 @@ class SalaryConfig(models.Model):
     
     # Deductions
     provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
+    security_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Security deduction amount per employee")
+    van_child_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Van/Child deduction amount per employee")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
     
     # Late deduction
@@ -224,6 +226,12 @@ class MonthlySalary(models.Model):
 
         # Provident fund
         self.provident_fund = config.get_pf(basic)
+
+        # Security & Van/Child — use config defaults if per-employee value is 0
+        if self.security_deduction == 0:
+            self.security_deduction = config.security_amount
+        if self.van_child_deduction == 0:
+            self.van_child_deduction = config.van_child_amount
 
         # Overtime
         overtime_pay = self.overtime_hours * self.overtime_rate if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
