@@ -248,6 +248,10 @@ def save_employee_overrides(request):
 
     month = int(request.POST.get('month', timezone.now().month))
     year = int(request.POST.get('year', timezone.now().year))
+    config = SalaryConfig.objects.filter(month=month, year=year).first()
+    if not config:
+        messages.error(request, 'No salary config found for this month/year.')
+        return redirect('admin_console')
 
     for key, val in request.POST.items():
         if key.startswith('custom_housing_'):
@@ -267,12 +271,20 @@ def save_employee_overrides(request):
             sal.custom_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
             sal.custom_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
             sal.custom_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
-            sal.use_custom_config = any([
-                sal.custom_housing_pct, sal.custom_medical_pct, sal.custom_transport_pct,
-                sal.custom_fuel_pct, sal.custom_tax_pct, sal.custom_pf_pct,
-                sal.custom_security_pct, sal.custom_van_child_pct,
-                sal.custom_bonus_per_day, sal.custom_bonus_pct,
-            ])
+
+            differs = (
+                sal.custom_housing_pct != float(config.housing_allowance_pct) or
+                sal.custom_medical_pct != float(config.medical_allowance_pct) or
+                sal.custom_transport_pct != float(config.transport_allowance_pct) or
+                sal.custom_fuel_pct != float(config.fuel_allowance_pct) or
+                sal.custom_tax_pct != float(config.tax_percentage) or
+                sal.custom_pf_pct != float(config.provident_fund_pct) or
+                sal.custom_security_pct != float(config.security_pct) or
+                sal.custom_van_child_pct != float(config.van_child_pct) or
+                sal.custom_bonus_per_day != float(config.bonus_per_day) or
+                sal.custom_bonus_pct != float(config.bonus_percentage)
+            )
+            sal.use_custom_config = differs
             sal.save()
 
             # Recalculate existing MonthlySalary for this month/year
