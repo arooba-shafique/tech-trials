@@ -356,9 +356,9 @@ def generate_monthly_salary(request):
             if created:
                 created_count += 1
             else:
-                if monthly.total_working_days != total_working_days:
-                    monthly.total_working_days = total_working_days
-                    monthly.save()
+                monthly.salary_config = config
+                monthly.total_working_days = total_working_days
+                monthly.save()
                 updated_count += 1
 
         month_name = calendar.month_name[month]
