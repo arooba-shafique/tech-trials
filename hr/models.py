@@ -231,11 +231,9 @@ class MonthlySalary(models.Model):
         # Provident fund
         self.provident_fund = config.get_pf(basic)
 
-        # Security & Van/Child — use config defaults if per-employee value is 0
-        if self.security_deduction == 0:
-            self.security_deduction = config.get_security(basic)
-        if self.van_child_deduction == 0:
-            self.van_child_deduction = config.get_van_child(basic)
+        # Security & Van/Child — always apply from config percentages
+        self.security_deduction = config.get_security(basic)
+        self.van_child_deduction = config.get_van_child(basic)
 
         # Overtime
         overtime_pay = self.overtime_hours * self.overtime_rate if self.overtime_hours > 0 and self.overtime_rate > 0 else 0

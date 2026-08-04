@@ -110,13 +110,13 @@ def admin_dashboard(request):
             current_month = today.month
             current_year = today.year
 
-            hr_config = SalaryConfig.objects.filter(month=current_month, year=current_year).first()
-            if not hr_config:
-                hr_config = SalaryConfig.objects.create(month=current_month, year=current_year)
-
             # Salary sheet month/year from GET params
             sheet_month = int(request.GET.get('month', today.month)) if request.GET.get('month') else today.month
             sheet_year = int(request.GET.get('year', today.year)) if request.GET.get('year') else today.year
+
+            hr_config = SalaryConfig.objects.filter(month=sheet_month, year=sheet_year).first()
+            if not hr_config:
+                hr_config = SalaryConfig.objects.create(month=sheet_month, year=sheet_year)
 
             hr_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
             hr_month_name = calendar.month_name[sheet_month]
