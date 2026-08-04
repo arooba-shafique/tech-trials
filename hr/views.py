@@ -257,7 +257,6 @@ def save_employee_overrides(request):
             except TeacherProfile.DoesNotExist:
                 continue
             sal, _ = EmployeeSalary.objects.get_or_create(employee=emp, defaults={'basic_salary': emp.salary})
-            sal.use_custom_config = True
             sal.custom_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
             sal.custom_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
             sal.custom_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
@@ -268,6 +267,12 @@ def save_employee_overrides(request):
             sal.custom_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
             sal.custom_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
             sal.custom_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
+            sal.use_custom_config = any([
+                sal.custom_housing_pct, sal.custom_medical_pct, sal.custom_transport_pct,
+                sal.custom_fuel_pct, sal.custom_tax_pct, sal.custom_pf_pct,
+                sal.custom_security_pct, sal.custom_van_child_pct,
+                sal.custom_bonus_per_day, sal.custom_bonus_pct,
+            ])
             sal.save()
 
             # Recalculate existing MonthlySalary for this month/year
