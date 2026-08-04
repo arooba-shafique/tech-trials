@@ -189,10 +189,10 @@ class MonthlySalary(models.Model):
         basic = emp.salary if emp.salary > 0 else (emp_salary_obj.basic_salary if emp_salary_obj else 0)
         self.basic_salary = basic
 
-        # Get config
-        config = self.salary_config
+        # Get config — always prefer the one matching this record's month/year
+        config = SalaryConfig.objects.filter(month=self.month, year=self.year).first()
         if not config:
-            config = SalaryConfig.objects.filter(month=self.month, year=self.year).first()
+            config = self.salary_config
         if not config:
             return
 
