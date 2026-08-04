@@ -1040,26 +1040,24 @@
                                 </thead>
                                 <tbody>
                                     {% for teacher in teachers %}
-                                    {% with emp_sal=teacher.salary_detail %}
                                     <tr>
                                         <td style="font-weight:600;white-space:nowrap;">{{ teacher.full_name }}</td>
-                                        <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ emp_sal.custom_housing_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ emp_sal.custom_medical_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ emp_sal.custom_transport_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_fuel_{{ teacher.id }}" value="{{ emp_sal.custom_fuel_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ emp_sal.custom_tax_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{{ emp_sal.custom_pf_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_security_{{ teacher.id }}" value="{{ emp_sal.custom_security_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{{ emp_sal.custom_van_child_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_bonus_per_day_{{ teacher.id }}" value="{{ emp_sal.custom_bonus_per_day|default:'0' }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_bonus_pct_{{ teacher.id }}" value="{{ emp_sal.custom_bonus_pct|default:'0' }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ teacher.ov_housing }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ teacher.ov_medical }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ teacher.ov_transport }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_fuel_{{ teacher.id }}" value="{{ teacher.ov_fuel }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ teacher.ov_tax }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{{ teacher.ov_pf }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_security_{{ teacher.id }}" value="{{ teacher.ov_security }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{{ teacher.ov_van_child }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_bonus_per_day_{{ teacher.id }}" value="{{ teacher.ov_bonus_per_day }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
+                                        <td><input type="number" name="custom_bonus_pct_{{ teacher.id }}" value="{{ teacher.ov_bonus_pct }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td>
-                                            {% if emp_sal.use_custom_config %}
-                                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:#dbeafe;color:#1d4ed8;">Active</span>
+                                            {% if teacher.ov_active %}
+                                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:#dbeafe;color:#1d4ed8;">Custom</span>
                                             {% endif %}
                                         </td>
                                     </tr>
-                                    {% endwith %}
                                     {% endfor %}
                                 </tbody>
                             </table>
