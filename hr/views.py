@@ -212,25 +212,42 @@ def salary_config(request):
         config.bonus_percentage = float(request.POST.get('bonus_percentage', 0))
         config.save()
 
-        # Recalculate all existing MonthlySalary records for this month/year
-        recalculated = 0
+        # Create or update MonthlySalary records for ALL employees
+        created_count = 0
+        updated_count = 0
         all_employees = TeacherProfile.objects.filter(is_employee_separated=False)
         school = get_user_school(request.user)
         if school and not request.user.is_superuser:
             all_employees = all_employees.filter(school=school)
         for emp in all_employees:
-            ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
-            if ms:
-                try:
+            try:
+                emp_salary, _ = EmployeeSalary.objects.get_or_create(
+                    employee=emp, defaults={'basic_salary': emp.salary}
+                )
+                if emp.salary > 0 and emp_salary.basic_salary != emp.salary:
+                    emp_salary.basic_salary = emp.salary
+                    emp_salary.save()
+
+                ms, created = MonthlySalary.objects.get_or_create(
+                    employee=emp, month=month, year=year,
+                    defaults={
+                        'salary_config': config,
+                        'total_working_days': config.default_working_days,
+                        'basic_salary': emp.salary,
+                    }
+                )
+                if created:
+                    created_count += 1
+                else:
                     ms.salary_config = config
                     ms.total_working_days = config.default_working_days
                     ms.save()
-                    recalculated += 1
-                except Exception as e:
-                    import traceback
-                    traceback.print_exc()
+                    updated_count += 1
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
 
-        messages.success(request, f'Salary configuration updated. {recalculated} records recalculated.')
+        messages.success(request, f'Salary configuration saved. {created_count} new salary sheets created, {updated_count} updated.')
         return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
