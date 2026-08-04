@@ -37,7 +37,7 @@
             </div>
         </div>
 
-        <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);">Allowances (Flat PKR)</h3>
+        <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);">Allowances</h3>
         <div class="form-row">
             <div class="form-group">
                 <label>Housing Allowance (PKR)</label>
@@ -61,67 +61,6 @@
             </div>
         </div>
 
-        <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);">Custom Salary Configuration</h3>
-        <div class="form-row">
-            <div class="form-group" style="flex:0 0 100%;">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                    <input type="checkbox" name="use_custom_config" value="true" {% if form.use_custom_config.value %}checked{% endif %} style="width:18px;height:18px;">
-                    <span>Enable custom allowance/deduction percentages for this employee (overrides global config)</span>
-                </label>
-            </div>
-        </div>
-        <div id="customConfigSection" style="{% if not form.use_custom_config.value %}display:none;{% endif %}">
-            <h4 style="font-size:13px;font-weight:600;margin:12px 0 8px;color:var(--text-muted);">Allowance Percentages (% of Basic Salary)</h4>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Housing (%)</label>
-                    <input type="number" name="custom_housing_pct" value="{{ form.custom_housing_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Medical (%)</label>
-                    <input type="number" name="custom_medical_pct" value="{{ form.custom_medical_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Transport (%)</label>
-                    <input type="number" name="custom_transport_pct" value="{{ form.custom_transport_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Fuel (%)</label>
-                    <input type="number" name="custom_fuel_pct" value="{{ form.custom_fuel_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-            </div>
-            <h4 style="font-size:13px;font-weight:600;margin:12px 0 8px;color:var(--text-muted);">Deduction Percentages (% of Basic or Gross as applicable)</h4>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Tax (%)</label>
-                    <input type="number" name="custom_tax_pct" value="{{ form.custom_tax_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Provident Fund (%)</label>
-                    <input type="number" name="custom_pf_pct" value="{{ form.custom_pf_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Security (%)</label>
-                    <input type="number" name="custom_security_pct" value="{{ form.custom_security_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Van/Child (%)</label>
-                    <input type="number" name="custom_van_child_pct" value="{{ form.custom_van_child_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-            </div>
-            <h4 style="font-size:13px;font-weight:600;margin:12px 0 8px;color:var(--text-muted);">Bonus</h4>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Bonus Per Day (PKR, if 0 absent)</label>
-                    <input type="number" name="custom_bonus_per_day" value="{{ form.custom_bonus_per_day.value|default:'0' }}" step="0.01" min="0" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Bonus (% of Basic, if 0 absent & 0 per-day)</label>
-                    <input type="number" name="custom_bonus_pct" value="{{ form.custom_bonus_pct.value|default:'0' }}" step="0.01" min="0" max="100" class="form-control">
-                </div>
-            </div>
-        </div>
-
         <h3 style="font-size:14px;font-weight:700;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border);">Bank Details</h3>
         <div class="form-row">
             <div class="form-group">
@@ -140,9 +79,4 @@
         </div>
     </form>
 </div>
-<script>
-document.querySelector('input[name="use_custom_config"]').addEventListener('change', function() {
-    document.getElementById('customConfigSection').style.display = this.checked ? 'block' : 'none';
-});
-</script>
 {% endblock %}

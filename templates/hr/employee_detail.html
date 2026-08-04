@@ -144,23 +144,6 @@
             <div style="font-size:14px;">{{ emp_salary.bank_account|default:"-" }}</div>
         </div>
     </div>
-    {% if emp_salary.use_custom_config %}
-    <div style="margin-top:16px;padding:12px 16px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;">
-        <div style="font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;">Custom Salary Configuration Enabled</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;font-size:13px;">
-            <div>Housing: <strong>{{ emp_salary.custom_housing_pct }}%</strong></div>
-            <div>Medical: <strong>{{ emp_salary.custom_medical_pct }}%</strong></div>
-            <div>Transport: <strong>{{ emp_salary.custom_transport_pct }}%</strong></div>
-            <div>Fuel: <strong>{{ emp_salary.custom_fuel_pct }}%</strong></div>
-            <div>Tax: <strong>{{ emp_salary.custom_tax_pct }}%</strong></div>
-            <div>PF: <strong>{{ emp_salary.custom_pf_pct }}%</strong></div>
-            <div>Security: <strong>{{ emp_salary.custom_security_pct }}%</strong></div>
-            <div>Van/Child: <strong>{{ emp_salary.custom_van_child_pct }}%</strong></div>
-            <div>Bonus/Day: <strong>PKR {{ emp_salary.custom_bonus_per_day|floatformat:0 }}</strong></div>
-            <div>Bonus %: <strong>{{ emp_salary.custom_bonus_pct }}%</strong></div>
-        </div>
-    </div>
-    {% endif %}
 </div>
 {% else %}
 <div class="card" style="text-align:center;padding:30px;">

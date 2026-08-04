@@ -11,10 +11,6 @@ class EmployeeSalaryForm(forms.ModelForm):
             'working_days_per_week', 'bank_account', 'bank_name',
             'housing_allowance', 'medical_allowance', 'transport_allowance',
             'fuel_allowance', 'other_allowance',
-            'use_custom_config',
-            'custom_housing_pct', 'custom_medical_pct', 'custom_transport_pct', 'custom_fuel_pct',
-            'custom_tax_pct', 'custom_pf_pct', 'custom_security_pct', 'custom_van_child_pct',
-            'custom_bonus_per_day', 'custom_bonus_pct',
         ]
 
 
