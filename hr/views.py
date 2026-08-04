@@ -226,7 +226,20 @@ def salary_config(request):
                 )
                 if emp.salary > 0 and emp_salary.basic_salary != emp.salary:
                     emp_salary.basic_salary = emp.salary
-                    emp_salary.save()
+
+                # Reset custom overrides to use global config
+                emp_salary.use_custom_config = False
+                emp_salary.custom_housing_pct = config.housing_allowance_pct
+                emp_salary.custom_medical_pct = config.medical_allowance_pct
+                emp_salary.custom_transport_pct = config.transport_allowance_pct
+                emp_salary.custom_fuel_pct = config.fuel_allowance_pct
+                emp_salary.custom_tax_pct = config.tax_percentage
+                emp_salary.custom_pf_pct = config.provident_fund_pct
+                emp_salary.custom_security_pct = config.security_pct
+                emp_salary.custom_van_child_pct = config.van_child_pct
+                emp_salary.custom_bonus_per_day = config.bonus_per_day
+                emp_salary.custom_bonus_pct = config.bonus_percentage
+                emp_salary.save()
 
                 ms, created = MonthlySalary.objects.get_or_create(
                     employee=emp, month=month, year=year,
