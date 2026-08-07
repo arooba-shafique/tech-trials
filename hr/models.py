@@ -235,10 +235,10 @@ class MonthlySalary(models.Model):
 
         # Allowances — use stored percentages if set, else global config
         if has_cfg:
-            self.housing_allowance = basic * (self.cfg_housing_pct / 100)
-            self.medical_allowance = basic * (self.cfg_medical_pct / 100)
-            self.transport_allowance = basic * (self.cfg_transport_pct / 100)
-            self.fuel_allowance = basic * (self.cfg_fuel_pct / 100)
+            self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
+            self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
+            self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
+            self.fuel_allowance = float(basic) * float(self.cfg_fuel_pct) / 100
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
@@ -267,10 +267,10 @@ class MonthlySalary(models.Model):
         # Bonus: only if 0 absent days AND 0 unpaid leaves
         if self.days_absent == 0 and self.unpaid_leaves == 0:
             if has_cfg:
-                if self.cfg_bonus_per_day > 0:
-                    self.bonus_amount = self.cfg_bonus_per_day * self.total_working_days
+                if float(self.cfg_bonus_per_day) > 0:
+                    self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
                 else:
-                    self.bonus_amount = basic * (self.cfg_bonus_pct / 100)
+                    self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
             else:
                 if config.bonus_per_day > 0:
                     self.bonus_amount = config.bonus_per_day * self.total_working_days
@@ -281,14 +281,14 @@ class MonthlySalary(models.Model):
 
         # Provident fund
         if has_cfg:
-            self.provident_fund = basic * (self.cfg_pf_pct / 100)
+            self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
         else:
             self.provident_fund = config.get_pf(basic)
 
         # Security & Van/Child
         if has_cfg:
-            self.security_deduction = basic * (self.cfg_security_pct / 100)
-            self.van_child_deduction = basic * (self.cfg_van_child_pct / 100)
+            self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
+            self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
         else:
             self.security_deduction = config.get_security(basic)
             self.van_child_deduction = config.get_van_child(basic)
@@ -303,7 +303,7 @@ class MonthlySalary(models.Model):
 
         # Tax
         if has_cfg:
-            self.tax_deduction = self.gross_salary * (self.cfg_tax_pct / 100)
+            self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
         else:
             self.tax_deduction = config.get_tax(self.gross_salary)
 
