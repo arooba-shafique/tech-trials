@@ -319,6 +319,7 @@ def save_employee_overrides(request):
 
     saved_count = 0
     migrated = False
+    error_msgs = []
     for emp in employees:
         try:
             if _save_one(emp):
@@ -334,10 +335,14 @@ def save_employee_overrides(request):
                 except Exception as e2:
                     import traceback
                     traceback.print_exc()
+                    error_msgs.append(f'{emp.full_name}: {e2}')
             else:
                 import traceback
                 traceback.print_exc()
+                error_msgs.append(f'{emp.full_name}: {e}')
 
+    if error_msgs:
+        messages.warning(request, f'Errors for {len(error_msgs)} employees: {"; ".join(error_msgs[:3])}')
     messages.success(request, f'Salary config saved for {saved_count} employees.')
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 

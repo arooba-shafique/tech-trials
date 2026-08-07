@@ -317,7 +317,11 @@ class MonthlySalary(models.Model):
         self.net_salary = self.gross_salary - self.total_deductions
 
     def save(self, *args, **kwargs):
-        self.calculate_salary()
+        try:
+            self.calculate_salary()
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
         super().save(*args, **kwargs)
 
     @property
