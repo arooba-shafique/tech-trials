@@ -825,7 +825,6 @@
                                     <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Unpaid Leaves</th>
                                     <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Late Days</th>
                                     <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#16a34a;border-bottom:2px solid var(--border);">Days Present</th>
-                                    <th style="padding:10px 14px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -886,16 +885,6 @@
                                         {% endfor %}
                                         {% if emp.id not in hr_att_existing %}
                                         <span class="badge badge-green" id="present_{{ emp.id }}" style="font-size:13px;">{{ att_days_in_month }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td style="padding:10px 14px;">
-                                        {% for key, val in hr_att_existing.items %}
-                                            {% if key == emp.id %}
-                                        <input type="text" name="remarks_{{ emp.id }}" value="{{ val.remarks }}" class="form-control" placeholder="Optional" style="min-width:110px;">
-                                            {% endif %}
-                                        {% endfor %}
-                                        {% if emp.id not in hr_att_existing %}
-                                        <input type="text" name="remarks_{{ emp.id }}" value="" class="form-control" placeholder="Optional" style="min-width:110px;">
                                         {% endif %}
                                     </td>
                                 </tr>
