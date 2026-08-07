@@ -22,10 +22,12 @@ def setup_database():
     
     try:
         print("Running migrations...")
-        call_command('migrate', '--run-syncdb', verbosity=0)
+        call_command('migrate', verbosity=1)
         print("Migrations completed.")
     except Exception as e:
         print(f"Migration error: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Create superuser if it doesn't exist
     try:
