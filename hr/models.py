@@ -222,12 +222,16 @@ class MonthlySalary(models.Model):
             return
 
         # Check if this record has month-specific config percentages
-        has_cfg = any([
-            self.cfg_housing_pct, self.cfg_medical_pct, self.cfg_transport_pct,
-            self.cfg_fuel_pct, self.cfg_tax_pct, self.cfg_pf_pct,
-            self.cfg_security_pct, self.cfg_van_child_pct,
-            self.cfg_bonus_per_day, self.cfg_bonus_pct
-        ])
+        has_cfg = False
+        try:
+            has_cfg = any([
+                self.cfg_housing_pct, self.cfg_medical_pct, self.cfg_transport_pct,
+                self.cfg_fuel_pct, self.cfg_tax_pct, self.cfg_pf_pct,
+                self.cfg_security_pct, self.cfg_van_child_pct,
+                self.cfg_bonus_per_day, self.cfg_bonus_pct
+            ])
+        except Exception:
+            pass
 
         # Allowances — use stored percentages if set, else global config
         if has_cfg:
