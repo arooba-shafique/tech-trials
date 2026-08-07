@@ -204,7 +204,6 @@ def salary_config(request):
         config.provident_fund_pct = float(request.POST.get('provident_fund_pct', 0))
         config.security_pct = float(request.POST.get('security_pct', 0))
         config.van_child_pct = float(request.POST.get('van_child_pct', 0))
-        config.probation_security_pct = float(request.POST.get('probation_security_pct', 50))
         config.housing_allowance_pct = float(request.POST.get('housing_allowance_pct', 0))
         config.medical_allowance_pct = float(request.POST.get('medical_allowance_pct', 0))
         config.transport_allowance_pct = float(request.POST.get('transport_allowance_pct', 0))

@@ -32,7 +32,6 @@ class SalaryConfig(models.Model):
     provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
     security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic")
     van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
-    probation_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=50, help_text="Security deduction % of basic during first 2 months (probation)")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
     
     # Late deduction
@@ -61,8 +60,6 @@ class SalaryConfig(models.Model):
         return basic * (self.provident_fund_pct / 100)
     def get_security(self, basic):
         return basic * (self.security_pct / 100)
-    def get_probation_security(self, basic):
-        return basic * (self.probation_security_pct / 100)
     def get_van_child(self, basic):
         return basic * (self.van_child_pct / 100)
     def get_tax(self, gross):
@@ -282,33 +279,14 @@ class MonthlySalary(models.Model):
         else:
             self.bonus_amount = 0
 
-        # ── Probation check: first 2 months after joining ──
-        is_probation = False
-        joining_date = getattr(emp, 'joining_date', None)
-        if joining_date:
-            join_month = joining_date.month
-            join_year = joining_date.year
-            months_since_joining = (self.year - join_year) * 12 + (self.month - join_month)
-            if months_since_joining <= 1:
-                is_probation = True
-
-        # Provident fund (skip during probation)
-        if is_probation:
-            self.provident_fund = 0
-        elif has_cfg:
+        # Provident fund
+        if has_cfg:
             self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
         else:
             self.provident_fund = config.get_pf(basic)
 
         # Security & Van/Child
-        if is_probation:
-            # Probation: only security at probation rate, no van/child
-            if has_cfg:
-                self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
-            else:
-                self.security_deduction = config.get_probation_security(basic)
-            self.van_child_deduction = 0
-        elif has_cfg:
+        if has_cfg:
             self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
             self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
         else:
@@ -323,10 +301,8 @@ class MonthlySalary(models.Model):
         self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
                            - float(self.leave_deduction) - float(self.late_coming_deduction))
 
-        # Tax (skip during probation)
-        if is_probation:
-            self.tax_deduction = 0
-        elif has_cfg:
+        # Tax
+        if has_cfg:
             self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
         else:
             self.tax_deduction = config.get_tax(self.gross_salary)

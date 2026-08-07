@@ -130,7 +130,6 @@ def admin_dashboard(request):
                     provident_fund_pct = 0
                     security_pct = 0
                     van_child_pct = 0
-                    probation_security_pct = 50
                     bonus_per_day = 0
                     bonus_percentage = 0
                 hr_config = _DefaultConfig()
