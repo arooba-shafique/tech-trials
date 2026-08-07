@@ -930,11 +930,26 @@
             <div id="employee-overrides-section" class="table-card">
                 <div class="table-card-header"><h2>Per-Employee Salary Overrides</h2></div>
                 <div style="padding:22px;">
+                    <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px;">
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
+                            <select id="cfg-month" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+                                {% for m_num, m_name in hr_months %}
+                                <option value="{{ m_num }}" {% if m_num == hr_config.month %}selected{% endif %}>{{ m_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Year</span>
+                            <input type="number" id="cfg-year" value="{{ hr_config.year }}" min="2020" max="2030" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:100px;">
+                        </label>
+                        <button type="button" class="btn btn-primary" style="padding:8px 20px;font-size:12px;" onclick="loadSalaryConfig()">Load</button>
+                    </div>
                     <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set salary configuration for each employee individually. Leave all fields at 0 to use default values.</p>
                     <form method="post" action="{% url 'hr_save_employee_overrides' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="month" value="{{ hr_config.month }}">
-                        <input type="hidden" name="year" value="{{ hr_config.year }}">
+                        <input type="hidden" name="month" id="hidden-month" value="{{ hr_config.month }}">
+                        <input type="hidden" name="year" id="hidden-year" value="{{ hr_config.year }}">
                         <div class="table-scroll">
                             <table>
                                 <thead>
@@ -982,6 +997,16 @@
                 </div>
             </div>
         </div>
+
+        <script>
+        function loadSalaryConfig() {
+            var m = document.getElementById('cfg-month').value;
+            var y = document.getElementById('cfg-year').value;
+            document.getElementById('hidden-month').value = m;
+            document.getElementById('hidden-year').value = y;
+            window.location.href = '{% url "admin_console" %}?section=salary-config&month=' + m + '&year=' + y;
+        }
+        </script>
 
         <!-- ═══════════ HR: GENERATE SALARY ═══════════ -->
         <div id="section-generate-salary" class="section">
