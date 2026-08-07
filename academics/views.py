@@ -399,6 +399,22 @@ def add_teacher(request):
             teacher.save()
             form.save_m2m()  # save ManyToMany fields like subjects
 
+            # Handle document uploads
+            from hr.models import EmployeeDocument
+            doc_types = request.POST.getlist('doc_type[]')
+            doc_titles = request.POST.getlist('doc_title[]')
+            doc_files = request.FILES.getlist('doc_file[]')
+            for i, f in enumerate(doc_files):
+                if f:
+                    doc_type = doc_types[i] if i < len(doc_types) else 'other'
+                    doc_title = doc_titles[i] if i < len(doc_titles) else ''
+                    EmployeeDocument.objects.create(
+                        employee=teacher,
+                        document_type=doc_type,
+                        title=doc_title,
+                        file=f,
+                    )
+
             messages.success(request, 'Teacher added successfully.', extra_tags='teachers')
             return redirect('admin_console')
     else:

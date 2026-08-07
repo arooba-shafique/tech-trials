@@ -20,4 +20,7 @@ urlpatterns = [
     path('salary/slip/all/', views.salary_slip_all, name='hr_salary_slip_all'),
     path('salary/export/csv/', views.export_salary_csv, name='hr_export_salary_csv'),
     path('attendance/monthly/', views.monthly_attendance_summary, name='hr_monthly_attendance'),
+    path('employee/<int:employee_id>/upload-doc/', views.upload_employee_document, name='hr_upload_employee_document'),
+    path('document/<int:doc_id>/delete/', views.delete_employee_document, name='hr_delete_employee_document'),
+    path('document/<int:doc_id>/download/', views.download_employee_document, name='hr_download_employee_document'),
 ]
