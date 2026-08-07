@@ -144,6 +144,18 @@ class MonthlySalary(models.Model):
     allowed_leaves = models.PositiveIntegerField(default=0, help_text="Auto-calculated from config")
     late_coming_days = models.PositiveIntegerField(default=0)
 
+    # Month-specific salary config percentages (stored per-month for edit/update)
+    cfg_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_fuel_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
     # Overtime
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Overtime hours this month")
     overtime_rate = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Overtime rate per hour")
@@ -209,15 +221,20 @@ class MonthlySalary(models.Model):
         if not config:
             return
 
-        # Check if employee has custom config override
-        custom = emp_salary_obj if (emp_salary_obj and emp_salary_obj.use_custom_config) else None
+        # Check if this record has month-specific config percentages
+        has_cfg = any([
+            self.cfg_housing_pct, self.cfg_medical_pct, self.cfg_transport_pct,
+            self.cfg_fuel_pct, self.cfg_tax_pct, self.cfg_pf_pct,
+            self.cfg_security_pct, self.cfg_van_child_pct,
+            self.cfg_bonus_per_day, self.cfg_bonus_pct
+        ])
 
-        # Allowances — use employee override if enabled, else global config
-        if custom:
-            self.housing_allowance = basic * (custom.custom_housing_pct / 100)
-            self.medical_allowance = basic * (custom.custom_medical_pct / 100)
-            self.transport_allowance = basic * (custom.custom_transport_pct / 100)
-            self.fuel_allowance = basic * (custom.custom_fuel_pct / 100)
+        # Allowances — use stored percentages if set, else global config
+        if has_cfg:
+            self.housing_allowance = basic * (self.cfg_housing_pct / 100)
+            self.medical_allowance = basic * (self.cfg_medical_pct / 100)
+            self.transport_allowance = basic * (self.cfg_transport_pct / 100)
+            self.fuel_allowance = basic * (self.cfg_fuel_pct / 100)
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
@@ -245,11 +262,11 @@ class MonthlySalary(models.Model):
 
         # Bonus: only if 0 absent days AND 0 unpaid leaves
         if self.days_absent == 0 and self.unpaid_leaves == 0:
-            if custom:
-                if custom.custom_bonus_per_day > 0:
-                    self.bonus_amount = custom.custom_bonus_per_day * self.total_working_days
+            if has_cfg:
+                if self.cfg_bonus_per_day > 0:
+                    self.bonus_amount = self.cfg_bonus_per_day * self.total_working_days
                 else:
-                    self.bonus_amount = basic * (custom.custom_bonus_pct / 100)
+                    self.bonus_amount = basic * (self.cfg_bonus_pct / 100)
             else:
                 if config.bonus_per_day > 0:
                     self.bonus_amount = config.bonus_per_day * self.total_working_days
@@ -259,15 +276,15 @@ class MonthlySalary(models.Model):
             self.bonus_amount = 0
 
         # Provident fund
-        if custom:
-            self.provident_fund = basic * (custom.custom_pf_pct / 100)
+        if has_cfg:
+            self.provident_fund = basic * (self.cfg_pf_pct / 100)
         else:
             self.provident_fund = config.get_pf(basic)
 
         # Security & Van/Child
-        if custom:
-            self.security_deduction = basic * (custom.custom_security_pct / 100)
-            self.van_child_deduction = basic * (custom.custom_van_child_pct / 100)
+        if has_cfg:
+            self.security_deduction = basic * (self.cfg_security_pct / 100)
+            self.van_child_deduction = basic * (self.cfg_van_child_pct / 100)
         else:
             self.security_deduction = config.get_security(basic)
             self.van_child_deduction = config.get_van_child(basic)
@@ -281,8 +298,8 @@ class MonthlySalary(models.Model):
                            - self.leave_deduction - self.late_coming_deduction)
 
         # Tax
-        if custom:
-            self.tax_deduction = self.gross_salary * (custom.custom_tax_pct / 100)
+        if has_cfg:
+            self.tax_deduction = self.gross_salary * (self.cfg_tax_pct / 100)
         else:
             self.tax_deduction = config.get_tax(self.gross_salary)
 

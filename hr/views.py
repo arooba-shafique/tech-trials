@@ -268,7 +268,7 @@ def salary_config(request):
 
 @login_required(login_url='admin_login')
 def save_employee_overrides(request):
-    """Save per-employee salary config overrides from the Salary Config page."""
+    """Save per-employee salary config overrides for a specific month."""
     role = getattr(request.user, 'role', None)
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return HttpResponse("Unauthorized", status=403)
@@ -282,46 +282,43 @@ def save_employee_overrides(request):
     if not config:
         config = SalaryConfig.objects.create(month=month, year=year)
 
-    for key, val in request.POST.items():
-        if key.startswith('custom_housing_'):
-            emp_id = key.replace('custom_housing_', '')
-            try:
-                emp = TeacherProfile.objects.get(pk=emp_id)
-            except TeacherProfile.DoesNotExist:
-                continue
-            sal, _ = EmployeeSalary.objects.get_or_create(employee=emp, defaults={'basic_salary': emp.salary})
-            sal.custom_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
-            sal.custom_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
-            sal.custom_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
-            sal.custom_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
-            sal.custom_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
-            sal.custom_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
-            sal.custom_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
-            sal.custom_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
-            sal.custom_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
-            sal.custom_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
+    school = get_user_school(request.user)
+    employees = TeacherProfile.objects.filter(is_employee_separated=False)
+    if school and not request.user.is_superuser:
+        employees = employees.filter(school=school)
 
-            differs = (
-                sal.custom_housing_pct != float(config.housing_allowance_pct) or
-                sal.custom_medical_pct != float(config.medical_allowance_pct) or
-                sal.custom_transport_pct != float(config.transport_allowance_pct) or
-                sal.custom_fuel_pct != float(config.fuel_allowance_pct) or
-                sal.custom_tax_pct != float(config.tax_percentage) or
-                sal.custom_pf_pct != float(config.provident_fund_pct) or
-                sal.custom_security_pct != float(config.security_pct) or
-                sal.custom_van_child_pct != float(config.van_child_pct) or
-                sal.custom_bonus_per_day != float(config.bonus_per_day) or
-                sal.custom_bonus_pct != float(config.bonus_percentage)
-            )
-            sal.use_custom_config = differs
-            sal.save()
+    saved_count = 0
+    for emp in employees:
+        emp_id = str(emp.id)
+        # Check if this employee has any data in the POST
+        if f'custom_housing_{emp_id}' not in request.POST:
+            continue
 
-            # Recalculate existing MonthlySalary for this month/year
-            ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
-            if ms:
-                ms.save()
+        # Get or create MonthlySalary for this employee/month/year
+        ms, created = MonthlySalary.objects.get_or_create(
+            employee=emp, month=month, year=year,
+            defaults={
+                'salary_config': config,
+                'total_working_days': config.default_working_days,
+                'basic_salary': emp.salary,
+            }
+        )
 
-    messages.success(request, f'Employee salary overrides saved.')
+        # Save month-specific percentages
+        ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
+        ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
+        ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
+        ms.cfg_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
+        ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
+        ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
+        ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
+        ms.cfg_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
+        ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
+        ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
+        ms.save()  # triggers calculate_salary()
+        saved_count += 1
+
+    messages.success(request, f'Salary config saved for {saved_count} employees.')
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 
 

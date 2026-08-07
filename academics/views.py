@@ -160,32 +160,39 @@ def admin_dashboard(request):
                 ms.days_present = max(0, att_days_in_month - ms.days_absent)
                 hr_att_existing[ms.employee_id] = ms
 
-            # Pre-compute display values for per-employee override table
+            # Pre-compute display values for per-employee override table (from MonthlySalary)
+            ms_lookup = {}
+            for ms in MonthlySalary.objects.filter(month=sheet_month, year=sheet_year, employee__in=teachers_qs):
+                ms_lookup[ms.employee_id] = ms
+
             for teacher in teachers_qs:
-                emp_sal = getattr(teacher, 'salary_detail', None)
-                if emp_sal and emp_sal.use_custom_config:
-                    teacher.ov_housing = float(emp_sal.custom_housing_pct)
-                    teacher.ov_medical = float(emp_sal.custom_medical_pct)
-                    teacher.ov_transport = float(emp_sal.custom_transport_pct)
-                    teacher.ov_fuel = float(emp_sal.custom_fuel_pct)
-                    teacher.ov_tax = float(emp_sal.custom_tax_pct)
-                    teacher.ov_pf = float(emp_sal.custom_pf_pct)
-                    teacher.ov_security = float(emp_sal.custom_security_pct)
-                    teacher.ov_van_child = float(emp_sal.custom_van_child_pct)
-                    teacher.ov_bonus_per_day = float(emp_sal.custom_bonus_per_day)
-                    teacher.ov_bonus_pct = float(emp_sal.custom_bonus_pct)
+                ms = ms_lookup.get(teacher.id)
+                if ms and any([ms.cfg_housing_pct, ms.cfg_medical_pct, ms.cfg_transport_pct,
+                              ms.cfg_fuel_pct, ms.cfg_tax_pct, ms.cfg_pf_pct,
+                              ms.cfg_security_pct, ms.cfg_van_child_pct,
+                              ms.cfg_bonus_per_day, ms.cfg_bonus_pct]):
+                    teacher.ov_housing = float(ms.cfg_housing_pct)
+                    teacher.ov_medical = float(ms.cfg_medical_pct)
+                    teacher.ov_transport = float(ms.cfg_transport_pct)
+                    teacher.ov_fuel = float(ms.cfg_fuel_pct)
+                    teacher.ov_tax = float(ms.cfg_tax_pct)
+                    teacher.ov_pf = float(ms.cfg_pf_pct)
+                    teacher.ov_security = float(ms.cfg_security_pct)
+                    teacher.ov_van_child = float(ms.cfg_van_child_pct)
+                    teacher.ov_bonus_per_day = float(ms.cfg_bonus_per_day)
+                    teacher.ov_bonus_pct = float(ms.cfg_bonus_pct)
                     teacher.ov_active = True
                 else:
-                    teacher.ov_housing = float(hr_config.housing_allowance_pct)
-                    teacher.ov_medical = float(hr_config.medical_allowance_pct)
-                    teacher.ov_transport = float(hr_config.transport_allowance_pct)
-                    teacher.ov_fuel = float(hr_config.fuel_allowance_pct)
-                    teacher.ov_tax = float(hr_config.tax_percentage)
-                    teacher.ov_pf = float(hr_config.provident_fund_pct)
-                    teacher.ov_security = float(hr_config.security_pct)
-                    teacher.ov_van_child = float(hr_config.van_child_pct)
-                    teacher.ov_bonus_per_day = float(hr_config.bonus_per_day)
-                    teacher.ov_bonus_pct = float(hr_config.bonus_percentage)
+                    teacher.ov_housing = 0
+                    teacher.ov_medical = 0
+                    teacher.ov_transport = 0
+                    teacher.ov_fuel = 0
+                    teacher.ov_tax = 0
+                    teacher.ov_pf = 0
+                    teacher.ov_security = 0
+                    teacher.ov_van_child = 0
+                    teacher.ov_bonus_per_day = 0
+                    teacher.ov_bonus_pct = 0
                     teacher.ov_active = False
 
             context.update({
