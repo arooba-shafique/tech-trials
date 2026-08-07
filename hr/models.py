@@ -211,7 +211,7 @@ class MonthlySalary(models.Model):
         emp_salary_obj = EmployeeSalary.objects.filter(employee=emp).first()
 
         # Get basic salary from employee profile (teacher's salary field)
-        basic = emp.salary if emp.salary > 0 else (emp_salary_obj.basic_salary if emp_salary_obj else 0)
+        basic = float(emp.salary if emp.salary > 0 else (emp_salary_obj.basic_salary if emp_salary_obj else 0))
         self.basic_salary = basic
 
         # Get config — always prefer the one matching this record's month/year
@@ -294,12 +294,12 @@ class MonthlySalary(models.Model):
             self.van_child_deduction = config.get_van_child(basic)
 
         # Overtime
-        overtime_pay = self.overtime_hours * self.overtime_rate if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
+        overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
         # Gross salary
-        total_allow = self.housing_allowance + self.medical_allowance + self.transport_allowance + self.fuel_allowance + self.other_allowance
-        self.gross_salary = (basic + self.increment + total_allow + self.bonus_amount + overtime_pay
-                           - self.leave_deduction - self.late_coming_deduction)
+        total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
+        self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
+                           - float(self.leave_deduction) - float(self.late_coming_deduction))
 
         # Tax
         if has_cfg:
@@ -308,10 +308,10 @@ class MonthlySalary(models.Model):
             self.tax_deduction = config.get_tax(self.gross_salary)
 
         # Total deductions
-        self.total_deductions = (self.leave_deduction + self.late_coming_deduction +
-                               self.advance_deduction + self.provident_fund +
-                               self.security_deduction + self.van_child_deduction +
-                               self.tax_deduction + self.other_deduction)
+        self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
+                               float(self.advance_deduction) + float(self.provident_fund) +
+                               float(self.security_deduction) + float(self.van_child_deduction) +
+                               float(self.tax_deduction) + float(self.other_deduction))
 
         # Net salary
         self.net_salary = self.gross_salary - self.total_deductions
