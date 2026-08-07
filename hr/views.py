@@ -700,7 +700,7 @@ def export_salary_excel(request):
         'Fuel Allowance', 'Bonus', 'Gross Salary',
         'Tax Deduction', 'Provident Fund', 'Security Deduction', 'Van/Child Deduction',
         'Leave Deduction', 'Late Deduction',
-        'Total Deductions', 'Net Salary', 'Pay Status', 'Transaction Type',
+        'Total Deductions', 'Net Salary', 'Transaction Type',
     ]
 
     for col_num, header in enumerate(headers, 1):
@@ -739,7 +739,6 @@ def export_salary_excel(request):
             float(s.late_coming_deduction),
             float(s.total_deductions),
             float(s.net_salary),
-            s.get_pay_status_display(),
             s.get_transaction_type_display() if hasattr(s, 'get_transaction_type_display') else '',
         ]
 
@@ -753,8 +752,8 @@ def export_salary_excel(request):
             else:
                 cell.font = data_font
 
-        ws.cell(row=row_num, column=19).font = green_font
-        ws.cell(row=row_num, column=18).font = red_font
+        ws.cell(row=row_num, column=18).font = green_font
+        ws.cell(row=row_num, column=17).font = red_font
 
     if salaries:
         total_row = len(salaries) + 2
@@ -777,7 +776,7 @@ def export_salary_excel(request):
             cell.number_format = '#,##0'
             cell.border = thin_border
 
-    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 10, 14, 12, 12, 14, 14, 12, 12, 14, 14, 12, 16]
+    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 10, 14, 12, 12, 14, 14, 12, 12, 14, 14, 16]
     for i, width in enumerate(col_widths, 1):
         ws.column_dimensions[chr(64 + i)].width = width
 
