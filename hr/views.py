@@ -287,15 +287,16 @@ def save_employee_overrides(request):
     if school and not request.user.is_superuser:
         employees = employees.filter(school=school)
 
-    saved_count = 0
-    for emp in employees:
-        emp_id = str(emp.id)
-        # Check if this employee has any data in the POST
-        if f'custom_housing_{emp_id}' not in request.POST:
-            continue
+    def _run_migrate():
+        from django.core.management import call_command
+        call_command('migrate', verbosity=0)
 
-        # Get or create MonthlySalary for this employee/month/year
-        ms, created = MonthlySalary.objects.get_or_create(
+    def _save_one(emp):
+        emp_id = str(emp.id)
+        if f'custom_housing_{emp_id}' not in request.POST:
+            return False
+
+        ms, _ = MonthlySalary.objects.get_or_create(
             employee=emp, month=month, year=year,
             defaults={
                 'salary_config': config,
@@ -303,49 +304,39 @@ def save_employee_overrides(request):
                 'basic_salary': emp.salary,
             }
         )
+        ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
+        ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
+        ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
+        ms.cfg_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
+        ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
+        ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
+        ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
+        ms.cfg_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
+        ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
+        ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
+        ms.save()
+        return True
 
-        # Save month-specific percentages
+    saved_count = 0
+    migrated = False
+    for emp in employees:
         try:
-            ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
-            ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
-            ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
-            ms.cfg_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
-            ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
-            ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
-            ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
-            ms.cfg_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
-            ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
-            ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
-            ms.save()  # triggers calculate_salary()
-            saved_count += 1
+            if _save_one(emp):
+                saved_count += 1
         except Exception as e:
-            # If columns don't exist yet, try running migration and retry
-            if 'column' in str(e).lower() or 'does not exist' in str(e).lower():
+            err_str = str(e).lower()
+            if not migrated and ('column' in err_str or 'does not exist' in err_str or 'operational' in err_str):
                 try:
-                    from django.core.management import call_command
-                    call_command('migrate', verbosity=0)
-                    ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
-                    ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
-                    ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
-                    ms.cfg_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
-                    ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
-                    ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
-                    ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
-                    ms.cfg_van_child_pct = float(request.POST.get(f'custom_van_child_{emp_id}', 0))
-                    ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
-                    ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
-                    ms.save()
-                    saved_count += 1
+                    _run_migrate()
+                    migrated = True
+                    if _save_one(emp):
+                        saved_count += 1
                 except Exception as e2:
                     import traceback
                     traceback.print_exc()
-                    messages.warning(request, f'Error saving config for {emp.full_name}: {e2}')
-                    continue
             else:
                 import traceback
                 traceback.print_exc()
-                messages.warning(request, f'Error saving config for {emp.full_name}: {e}')
-                continue
 
     messages.success(request, f'Salary config saved for {saved_count} employees.')
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
