@@ -1172,6 +1172,7 @@
                                     <th style="padding:10px 12px;text-align:right;border-bottom:2px solid #e2e8f0;">Late Ded</th>
                                     <th style="padding:10px 12px;text-align:right;border-bottom:2px solid #e2e8f0;">Total Ded</th>
                                     <th style="padding:10px 12px;text-align:right;border-bottom:2px solid #e2e8f0;">Net</th>
+                                    <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;">Transaction Type</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1194,6 +1195,7 @@
                                     <td style="padding:10px 12px;text-align:right;color:#dc2626;">PKR {{ s.late_coming_deduction|floatformat:0 }}</td>
                                     <td style="padding:10px 12px;text-align:right;color:#dc2626;font-weight:700;">PKR {{ s.total_deductions|floatformat:0 }}</td>
                                     <td style="padding:10px 12px;text-align:right;font-weight:700;color:#16a34a;">PKR {{ s.net_salary|floatformat:0 }}</td>
+                                    <td style="padding:10px 12px;font-size:12px;">{{ s.get_transaction_type_display|default:"-" }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -1206,6 +1208,7 @@
                                     <td colspan="6" style="padding:10px 12px;"></td>
                                     <td style="padding:10px 12px;text-align:right;color:#dc2626;">PKR {{ hr_total_deductions|floatformat:0 }}</td>
                                     <td style="padding:10px 12px;text-align:right;font-weight:700;color:#16a34a;">PKR {{ hr_total_net|floatformat:0 }}</td>
+                                    <td style="padding:10px 12px;"></td>
                                 </tr>
                             </tfoot>
                         </table>

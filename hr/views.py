@@ -315,6 +315,7 @@ def save_employee_overrides(request):
         ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
         ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
         ms.transaction_type = request.POST.get(f'custom_transaction_type_{emp_id}', 'bank_islami')
+        ms.has_custom_config = True
         ms.save()
         return True
 

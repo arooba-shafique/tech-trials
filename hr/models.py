@@ -163,6 +163,7 @@ class MonthlySalary(models.Model):
         ('personal', 'Personal Account'),
     )
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES, default='bank_islami')
+    has_custom_config = models.BooleanField(default=False, help_text="True if per-month overrides were saved via salary config")
 
     # Overtime
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Overtime hours this month")
@@ -230,16 +231,7 @@ class MonthlySalary(models.Model):
             return
 
         # Check if this record has month-specific config percentages
-        has_cfg = False
-        try:
-            has_cfg = any([
-                self.cfg_housing_pct, self.cfg_medical_pct, self.cfg_transport_pct,
-                self.cfg_fuel_pct, self.cfg_tax_pct, self.cfg_pf_pct,
-                self.cfg_security_pct, self.cfg_van_child_pct,
-                self.cfg_bonus_per_day, self.cfg_bonus_pct
-            ])
-        except Exception:
-            pass
+        has_cfg = self.has_custom_config
 
         # Allowances — use stored percentages if set, else global config
         if has_cfg:
