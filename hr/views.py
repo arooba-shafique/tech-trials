@@ -695,7 +695,7 @@ def export_salary_excel(request):
     )
 
     headers = [
-        'Sr#', 'Employee Name', 'Employee ID', 'Designation', 'Bank Name', 'Account Number',
+        'Sr#', 'Employee Name', 'Employee ID', 'Designation',
         'Basic Salary', 'Housing Allowance', 'Medical Allowance', 'Transport Allowance',
         'Fuel Allowance', 'Other Allowance', 'Bonus', 'Gross Salary',
         'Tax Deduction', 'Provident Fund', 'Security Deduction', 'Van/Child Deduction',
@@ -718,15 +718,12 @@ def export_salary_excel(request):
 
     for row_num, s in enumerate(salaries, 2):
         emp = s.employee
-        emp_sal = EmployeeSalary.objects.filter(employee=emp).first()
 
         row_data = [
             row_num - 1,
             emp.full_name,
             emp.employee_id or '',
             emp.designation or '',
-            emp_sal.bank_name if emp_sal else '',
-            emp_sal.bank_account if emp_sal else '',
             float(s.basic_salary),
             float(s.housing_allowance),
             float(s.medical_allowance),
@@ -752,17 +749,15 @@ def export_salary_excel(request):
         for col_num, value in enumerate(row_data, 1):
             cell = ws.cell(row=row_num, column=col_num, value=value)
             cell.border = thin_border
-            if col_num >= 7 and col_num <= 24:
+            if col_num >= 5 and col_num <= 22:
                 cell.font = amount_font
                 cell.alignment = amount_alignment
                 cell.number_format = '#,##0'
             else:
                 cell.font = data_font
 
-        net_cell = ws.cell(row=row_num, column=24)
-        net_cell.font = green_font
-        ded_cell = ws.cell(row=row_num, column=23)
-        ded_cell.font = red_font
+        ws.cell(row=row_num, column=22).font = green_font
+        ws.cell(row=row_num, column=21).font = red_font
 
     if salaries:
         total_row = len(salaries) + 2
@@ -770,12 +765,12 @@ def export_salary_excel(request):
         ws.cell(row=total_row, column=1).border = thin_border
 
         total_fields = {
-            7: 'basic_salary', 8: 'housing_allowance', 9: 'medical_allowance',
-            10: 'transport_allowance', 11: 'fuel_allowance', 12: 'other_allowance',
-            13: 'bonus_amount', 14: 'gross_salary', 15: 'tax_deduction',
-            16: 'provident_fund', 17: 'security_deduction', 18: 'van_child_deduction',
-            19: 'leave_deduction', 20: 'late_coming_deduction', 21: 'advance_deduction',
-            22: 'other_deduction', 23: 'total_deductions', 24: 'net_salary',
+            5: 'basic_salary', 6: 'housing_allowance', 7: 'medical_allowance',
+            8: 'transport_allowance', 9: 'fuel_allowance', 10: 'other_allowance',
+            11: 'bonus_amount', 12: 'gross_salary', 13: 'tax_deduction',
+            14: 'provident_fund', 15: 'security_deduction', 16: 'van_child_deduction',
+            17: 'leave_deduction', 18: 'late_coming_deduction', 19: 'advance_deduction',
+            20: 'other_deduction', 21: 'total_deductions', 22: 'net_salary',
         }
         for col_num, field in total_fields.items():
             total_val = sum(getattr(s, field) for s in salaries)
@@ -785,9 +780,9 @@ def export_salary_excel(request):
             cell.number_format = '#,##0'
             cell.border = thin_border
 
-    col_widths = [5, 22, 14, 18, 16, 18, 14, 14, 14, 14, 12, 12, 12, 14, 12, 12, 14, 14, 12, 12, 12, 12, 14, 14, 12, 16]
+    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 12, 12, 14, 12, 12, 14, 14, 12, 12, 12, 12, 14, 14, 12, 16]
     for i, width in enumerate(col_widths, 1):
-        ws.column_dimensions[chr(64 + i) if i <= 26 else 'A' + chr(64 + i - 26)].width = width
+        ws.column_dimensions[chr(64 + i)].width = width
 
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
