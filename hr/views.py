@@ -697,9 +697,9 @@ def export_salary_excel(request):
     headers = [
         'Sr#', 'Employee Name', 'Employee ID', 'Designation',
         'Basic Salary', 'Housing Allowance', 'Medical Allowance', 'Transport Allowance',
-        'Fuel Allowance', 'Other Allowance', 'Bonus', 'Gross Salary',
+        'Fuel Allowance', 'Bonus', 'Gross Salary',
         'Tax Deduction', 'Provident Fund', 'Security Deduction', 'Van/Child Deduction',
-        'Leave Deduction', 'Late Deduction', 'Advance Deduction', 'Other Deduction',
+        'Leave Deduction', 'Late Deduction',
         'Total Deductions', 'Net Salary', 'Pay Status', 'Transaction Type',
     ]
 
@@ -729,7 +729,6 @@ def export_salary_excel(request):
             float(s.medical_allowance),
             float(s.transport_allowance),
             float(s.fuel_allowance),
-            float(s.other_allowance),
             float(s.bonus_amount),
             float(s.gross_salary),
             float(s.tax_deduction),
@@ -738,8 +737,6 @@ def export_salary_excel(request):
             float(s.van_child_deduction),
             float(s.leave_deduction),
             float(s.late_coming_deduction),
-            float(s.advance_deduction),
-            float(s.other_deduction),
             float(s.total_deductions),
             float(s.net_salary),
             s.get_pay_status_display(),
@@ -749,15 +746,15 @@ def export_salary_excel(request):
         for col_num, value in enumerate(row_data, 1):
             cell = ws.cell(row=row_num, column=col_num, value=value)
             cell.border = thin_border
-            if col_num >= 5 and col_num <= 22:
+            if col_num >= 5 and col_num <= 19:
                 cell.font = amount_font
                 cell.alignment = amount_alignment
                 cell.number_format = '#,##0'
             else:
                 cell.font = data_font
 
-        ws.cell(row=row_num, column=22).font = green_font
-        ws.cell(row=row_num, column=21).font = red_font
+        ws.cell(row=row_num, column=19).font = green_font
+        ws.cell(row=row_num, column=18).font = red_font
 
     if salaries:
         total_row = len(salaries) + 2
@@ -766,11 +763,11 @@ def export_salary_excel(request):
 
         total_fields = {
             5: 'basic_salary', 6: 'housing_allowance', 7: 'medical_allowance',
-            8: 'transport_allowance', 9: 'fuel_allowance', 10: 'other_allowance',
-            11: 'bonus_amount', 12: 'gross_salary', 13: 'tax_deduction',
-            14: 'provident_fund', 15: 'security_deduction', 16: 'van_child_deduction',
-            17: 'leave_deduction', 18: 'late_coming_deduction', 19: 'advance_deduction',
-            20: 'other_deduction', 21: 'total_deductions', 22: 'net_salary',
+            8: 'transport_allowance', 9: 'fuel_allowance',
+            10: 'bonus_amount', 11: 'gross_salary', 12: 'tax_deduction',
+            13: 'provident_fund', 14: 'security_deduction', 15: 'van_child_deduction',
+            16: 'leave_deduction', 17: 'late_coming_deduction',
+            18: 'total_deductions', 19: 'net_salary',
         }
         for col_num, field in total_fields.items():
             total_val = sum(getattr(s, field) for s in salaries)
@@ -780,7 +777,7 @@ def export_salary_excel(request):
             cell.number_format = '#,##0'
             cell.border = thin_border
 
-    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 12, 12, 14, 12, 12, 14, 14, 12, 12, 12, 12, 14, 14, 12, 16]
+    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 10, 14, 12, 12, 14, 14, 12, 12, 14, 14, 12, 16]
     for i, width in enumerate(col_widths, 1):
         ws.column_dimensions[chr(64 + i)].width = width
 
