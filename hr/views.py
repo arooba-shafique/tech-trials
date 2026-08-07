@@ -894,7 +894,11 @@ def import_salary_excel(request):
             if idx is None or idx >= len(row):
                 return default
             val = row[idx]
-            return str(val).strip() if val else default
+            if val is None:
+                return default
+            if isinstance(val, float):
+                val = str(int(val)) if val == int(val) else str(val)
+            return str(val).strip()
 
         imported = 0
         updated = 0
@@ -913,7 +917,17 @@ def import_salary_excel(request):
             if id_val:
                 emp = TeacherProfile.objects.filter(employee_id=id_val).first()
             if not emp and name_val:
-                emp = TeacherProfile.objects.filter(full_name__iexact=name_val).first()
+                clean_name = name_val.strip()
+                emp = TeacherProfile.objects.filter(full_name__iexact=clean_name).first()
+            if not emp and name_val:
+                clean_name = name_val.strip()
+                emp = TeacherProfile.objects.filter(full_name__icontains=clean_name).first()
+            if not emp and name_val:
+                clean_name = name_val.strip()
+                emp = TeacherProfile.objects.filter(phone__iexact=clean_name).first()
+            if not emp and name_val:
+                clean_name = name_val.strip()
+                emp = TeacherProfile.objects.filter(cnic__iexact=clean_name).first()
             if not emp:
                 skipped += 1
                 continue
