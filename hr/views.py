@@ -661,6 +661,143 @@ def export_salary_csv(request):
 
 
 # ─────────────────────────────────────────────
+# EXCEL EXPORT
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def export_salary_excel(request):
+    """Export salary sheet as Excel for the selected month/year."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    month = int(request.GET.get('month', timezone.now().month))
+    year = int(request.GET.get('year', timezone.now().year))
+
+    salaries = MonthlySalary.objects.filter(month=month, year=year).select_related('employee')
+    month_name = calendar.month_name[month]
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = f"Salary {month_name} {year}"
+
+    header_font = Font(name='Calibri', bold=True, color='FFFFFF', size=11)
+    header_fill = PatternFill(start_color='0D9488', end_color='0D9488', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='thin', color='D1D5DB'),
+    )
+
+    headers = [
+        'Sr#', 'Employee Name', 'Employee ID', 'Designation', 'Bank Name', 'Account Number',
+        'Basic Salary', 'Housing Allowance', 'Medical Allowance', 'Transport Allowance',
+        'Fuel Allowance', 'Other Allowance', 'Bonus', 'Gross Salary',
+        'Tax Deduction', 'Provident Fund', 'Security Deduction', 'Van/Child Deduction',
+        'Leave Deduction', 'Late Deduction', 'Advance Deduction', 'Other Deduction',
+        'Total Deductions', 'Net Salary', 'Pay Status', 'Transaction Type',
+    ]
+
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+
+    data_font = Font(name='Calibri', size=10)
+    amount_font = Font(name='Calibri', size=10, bold=True)
+    green_font = Font(name='Calibri', size=10, bold=True, color='16A34A')
+    red_font = Font(name='Calibri', size=10, bold=True, color='DC2626')
+    amount_alignment = Alignment(horizontal='right')
+
+    for row_num, s in enumerate(salaries, 2):
+        emp = s.employee
+        emp_sal = EmployeeSalary.objects.filter(employee=emp).first()
+
+        row_data = [
+            row_num - 1,
+            emp.full_name,
+            emp.employee_id or '',
+            emp.designation or '',
+            emp_sal.bank_name if emp_sal else '',
+            emp_sal.bank_account if emp_sal else '',
+            float(s.basic_salary),
+            float(s.housing_allowance),
+            float(s.medical_allowance),
+            float(s.transport_allowance),
+            float(s.fuel_allowance),
+            float(s.other_allowance),
+            float(s.bonus_amount),
+            float(s.gross_salary),
+            float(s.tax_deduction),
+            float(s.provident_fund),
+            float(s.security_deduction),
+            float(s.van_child_deduction),
+            float(s.leave_deduction),
+            float(s.late_coming_deduction),
+            float(s.advance_deduction),
+            float(s.other_deduction),
+            float(s.total_deductions),
+            float(s.net_salary),
+            s.get_pay_status_display(),
+            s.get_transaction_type_display() if hasattr(s, 'get_transaction_type_display') else '',
+        ]
+
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_num, column=col_num, value=value)
+            cell.border = thin_border
+            if col_num >= 7 and col_num <= 24:
+                cell.font = amount_font
+                cell.alignment = amount_alignment
+                cell.number_format = '#,##0'
+            else:
+                cell.font = data_font
+
+        net_cell = ws.cell(row=row_num, column=24)
+        net_cell.font = green_font
+        ded_cell = ws.cell(row=row_num, column=23)
+        ded_cell.font = red_font
+
+    if salaries:
+        total_row = len(salaries) + 2
+        ws.cell(row=total_row, column=1, value='TOTAL').font = Font(name='Calibri', bold=True, size=11)
+        ws.cell(row=total_row, column=1).border = thin_border
+
+        total_fields = {
+            7: 'basic_salary', 8: 'housing_allowance', 9: 'medical_allowance',
+            10: 'transport_allowance', 11: 'fuel_allowance', 12: 'other_allowance',
+            13: 'bonus_amount', 14: 'gross_salary', 15: 'tax_deduction',
+            16: 'provident_fund', 17: 'security_deduction', 18: 'van_child_deduction',
+            19: 'leave_deduction', 20: 'late_coming_deduction', 21: 'advance_deduction',
+            22: 'other_deduction', 23: 'total_deductions', 24: 'net_salary',
+        }
+        for col_num, field in total_fields.items():
+            total_val = sum(getattr(s, field) for s in salaries)
+            cell = ws.cell(row=total_row, column=col_num, value=float(total_val))
+            cell.font = Font(name='Calibri', bold=True, size=10)
+            cell.alignment = amount_alignment
+            cell.number_format = '#,##0'
+            cell.border = thin_border
+
+    col_widths = [5, 22, 14, 18, 16, 18, 14, 14, 14, 14, 12, 12, 12, 14, 12, 12, 14, 14, 12, 12, 12, 12, 14, 14, 12, 16]
+    for i, width in enumerate(col_widths, 1):
+        ws.column_dimensions[chr(64 + i) if i <= 26 else 'A' + chr(64 + i - 26)].width = width
+
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="Salary_{month_name}_{year}.xlsx"'
+    wb.save(response)
+    return response
+
+
+# ─────────────────────────────────────────────
 # SALARY SLIP (with dynamic school name)
 # ─────────────────────────────────────────────
 
