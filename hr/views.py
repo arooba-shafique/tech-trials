@@ -1219,56 +1219,31 @@ def download_employee_document(request, doc_id):
     return response
 
 
+@login_required(login_url='admin_login')
 def employee_documents_json(request, employee_id):
     """Return employee documents as JSON for modal."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Login required'}, status=401)
     role = getattr(request.user, 'role', None)
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
-    try:
-        docs = EmployeeDocument.objects.filter(employee_id=employee_id)
-        doc_list = []
-        for doc in docs:
-            doc_list.append({
-                'id': doc.id,
-                'type': doc.document_type,
-                'type_display': doc.get_document_type_display(),
-                'title': doc.title or '-',
-                'file_url': doc.file.url if doc.file else '',
-                'file_name': doc.file.name.split('/')[-1] if doc.file else '',
-                'uploaded_at': doc.uploaded_at.strftime('%d %b %Y') if doc.uploaded_at else '',
-            })
-        return JsonResponse({'documents': doc_list})
-    except Exception as e:
-        err_str = str(e).lower()
-        if 'relation' in err_str or 'does not exist' in err_str or 'table' in err_str:
-            try:
-                from django.core.management import call_command
-                call_command('migrate', verbosity=0)
-                docs = EmployeeDocument.objects.filter(employee_id=employee_id)
-                doc_list = []
-                for doc in docs:
-                    doc_list.append({
-                        'id': doc.id,
-                        'type': doc.document_type,
-                        'type_display': doc.get_document_type_display(),
-                        'title': doc.title or '-',
-                        'file_url': doc.file.url if doc.file else '',
-                        'file_name': doc.file.name.split('/')[-1] if doc.file else '',
-                        'uploaded_at': doc.uploaded_at.strftime('%d %b %Y') if doc.uploaded_at else '',
-                    })
-                return JsonResponse({'documents': doc_list})
-            except Exception:
-                return JsonResponse({'documents': []})
-        return JsonResponse({'documents': []})
+    docs = EmployeeDocument.objects.filter(employee_id=employee_id)
+    doc_list = []
+    for doc in docs:
+        doc_list.append({
+            'id': doc.id,
+            'type': doc.document_type,
+            'type_display': doc.get_document_type_display(),
+            'title': doc.title or '-',
+            'file_url': doc.file.url if doc.file else '',
+            'file_name': doc.file.name.split('/')[-1] if doc.file else '',
+            'uploaded_at': doc.uploaded_at.strftime('%d %b %Y') if doc.uploaded_at else '',
+        })
+    return JsonResponse({'documents': doc_list})
 
 
+@login_required(login_url='admin_login')
 def upload_employee_document_ajax(request, employee_id):
     """Upload a document via AJAX."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Login required'}, status=401)
     role = getattr(request.user, 'role', None)
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
@@ -1279,69 +1254,34 @@ def upload_employee_document_ajax(request, employee_id):
     if not request.FILES.get('file'):
         return JsonResponse({'error': 'No file provided'}, status=400)
 
-    try:
-        employee = get_object_or_404(TeacherProfile, pk=employee_id)
-        doc_type = request.POST.get('document_type', 'other')
-        title = request.POST.get('title', '')
-        file = request.FILES['file']
+    employee = get_object_or_404(TeacherProfile, pk=employee_id)
+    doc_type = request.POST.get('document_type', 'other')
+    title = request.POST.get('title', '')
+    file = request.FILES['file']
 
-        doc = EmployeeDocument.objects.create(
-            employee=employee,
-            document_type=doc_type,
-            title=title,
-            file=file,
-        )
-        return JsonResponse({
-            'success': True,
-            'document': {
-                'id': doc.id,
-                'type': doc.document_type,
-                'type_display': doc.get_document_type_display(),
-                'title': doc.title or '-',
-                'file_url': doc.file.url,
-                'file_name': doc.file.name.split('/')[-1],
-                'uploaded_at': doc.uploaded_at.strftime('%d %b %Y'),
-            }
-        })
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        # If table doesn't exist, try running migrations and retry
-        err_str = str(e).lower()
-        if 'relation' in err_str or 'does not exist' in err_str or 'table' in err_str:
-            try:
-                from django.core.management import call_command
-                call_command('migrate', verbosity=0)
-                # Retry
-                employee = get_object_or_404(TeacherProfile, pk=employee_id)
-                doc = EmployeeDocument.objects.create(
-                    employee=employee,
-                    document_type=request.POST.get('document_type', 'other'),
-                    title=request.POST.get('title', ''),
-                    file=request.FILES['file'],
-                )
-                return JsonResponse({
-                    'success': True,
-                    'document': {
-                        'id': doc.id,
-                        'type': doc.document_type,
-                        'type_display': doc.get_document_type_display(),
-                        'title': doc.title or '-',
-                        'file_url': doc.file.url,
-                        'file_name': doc.file.name.split('/')[-1],
-                        'uploaded_at': doc.uploaded_at.strftime('%d %b %Y'),
-                    }
-                })
-            except Exception as e2:
-                traceback.print_exc()
-                return JsonResponse({'error': str(e2)}, status=500)
-        return JsonResponse({'error': str(e)}, status=500)
+    doc = EmployeeDocument.objects.create(
+        employee=employee,
+        document_type=doc_type,
+        title=title,
+        file=file,
+    )
+    return JsonResponse({
+        'success': True,
+        'document': {
+            'id': doc.id,
+            'type': doc.document_type,
+            'type_display': doc.get_document_type_display(),
+            'title': doc.title or '-',
+            'file_url': doc.file.url,
+            'file_name': doc.file.name.split('/')[-1],
+            'uploaded_at': doc.uploaded_at.strftime('%d %b %Y'),
+        }
+    })
 
 
+@login_required(login_url='admin_login')
 def delete_employee_document_ajax(request, doc_id):
     """Delete a document via AJAX."""
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Login required'}, status=401)
     role = getattr(request.user, 'role', None)
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
