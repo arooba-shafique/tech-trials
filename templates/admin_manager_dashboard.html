@@ -930,6 +930,14 @@
             <div id="employee-overrides-section" class="table-card">
                 <div class="table-card-header"><h2>Per-Employee Salary Overrides</h2></div>
                 <div style="padding:22px;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teachers</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('coordinator',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Coordinators</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('vp',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">VP</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('manager',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Managers</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('group_head',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Group Heads</button>
+                    </div>
                     <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:18px;">
                         <label style="display:flex;flex-direction:column;gap:5px;">
                             <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
@@ -970,7 +978,7 @@
                                 </thead>
                                 <tbody>
                                     {% for teacher in teachers %}
-                                    <tr>
+                                    <tr data-designation="{{ teacher.designation|default:'teacher' }}">
                                         <td style="font-weight:600;white-space:nowrap;">{{ teacher.full_name }}</td>
                                         <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ teacher.ov_housing }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ teacher.ov_medical }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
@@ -1005,6 +1013,20 @@
             document.getElementById('hidden-month').value = m;
             document.getElementById('hidden-year').value = y;
             window.location.href = '{% url "admin_console" %}?section=salary-config&month=' + m + '&year=' + y;
+        }
+        function filterSalaryConfig(designation, btn) {
+            document.querySelectorAll('.cfg-filter-btn').forEach(function(b) {
+                b.style.background = '#fff';
+                b.style.color = '#374151';
+            });
+            if (btn) {
+                btn.style.background = '#0d9488';
+                btn.style.color = '#fff';
+            }
+            document.querySelectorAll('#employee-overrides-section tbody tr').forEach(function(row) {
+                var desig = row.dataset.designation || 'teacher';
+                row.style.display = (designation === 'all' || desig === designation) ? '' : 'none';
+            });
         }
         </script>
 
