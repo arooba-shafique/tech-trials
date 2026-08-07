@@ -389,24 +389,3 @@ class EmployeeAttendance(models.Model):
 
     def __str__(self):
         return f"{self.employee.full_name} - {self.date} ({self.get_status_display()})"
-
-
-class EmployeeDocument(models.Model):
-    DOCUMENT_TYPE_CHOICES = (
-        ('degree', 'Degree'),
-        ('certificate', 'Certificate'),
-        ('experience', 'Experience Letter'),
-        ('cnic', 'CNIC'),
-        ('other', 'Other'),
-    )
-    employee = models.ForeignKey('academics.TeacherProfile', on_delete=models.CASCADE, related_name='documents')
-    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES)
-    title = models.CharField(max_length=200, blank=True, default='')
-    file = models.FileField(upload_to='employee_docs/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-uploaded_at']
-
-    def __str__(self):
-        return f"{self.employee.full_name} - {self.get_document_type_display()}: {self.title or self.file.name}"

@@ -3,14 +3,14 @@ import csv
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse, FileResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.db.models import Q, Sum
 import json
 
 from academics.models import TeacherProfile
-from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance, EmployeeDocument
+from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance
 from .forms import (
     EmployeeSalaryForm, MonthlySalaryForm, SalaryConfigForm,
     EmployeeAttendanceForm, GenerateSalaryForm
@@ -95,13 +95,11 @@ def employee_detail(request, employee_id):
     employee = get_object_or_404(TeacherProfile, pk=employee_id)
     emp_salary = EmployeeSalary.objects.filter(employee=employee).first()
     salary_history = MonthlySalary.objects.filter(employee=employee).order_by('-year', '-month')[:12]
-    documents = EmployeeDocument.objects.filter(employee=employee)
 
     context = {
         'employee': employee,
         'emp_salary': emp_salary,
         'salary_history': salary_history,
-        'documents': documents,
         'section': 'employees',
     }
     return render(request, 'hr/employee_detail.html', context)
@@ -1159,61 +1157,3 @@ def monthly_attendance_summary(request):
         'section': 'attendance',
     }
     return render(request, 'hr/monthly_attendance_summary.html', context)
-
-
-# ─────────────────────────────────────────────
-# EMPLOYEE DOCUMENTS
-# ─────────────────────────────────────────────
-
-@login_required(login_url='admin_login')
-def upload_employee_document(request, employee_id):
-    """Upload a document (degree, certificate, etc.) for an employee."""
-    role = getattr(request.user, 'role', None)
-    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
-        return HttpResponse("Unauthorized", status=403)
-
-    employee = get_object_or_404(TeacherProfile, pk=employee_id)
-
-    if request.method == 'POST' and request.FILES.get('file'):
-        doc_type = request.POST.get('document_type', 'other')
-        title = request.POST.get('title', '')
-        file = request.FILES['file']
-
-        EmployeeDocument.objects.create(
-            employee=employee,
-            document_type=doc_type,
-            title=title,
-            file=file,
-        )
-        messages.success(request, f'Document uploaded successfully.')
-
-    return redirect('hr_employee_detail', employee_id=employee_id)
-
-
-@login_required(login_url='admin_login')
-def delete_employee_document(request, doc_id):
-    """Delete an employee document."""
-    role = getattr(request.user, 'role', None)
-    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
-        return HttpResponse("Unauthorized", status=403)
-
-    doc = get_object_or_404(EmployeeDocument, pk=doc_id)
-    employee_id = doc.employee.id
-    doc.file.delete(save=False)
-    doc.delete()
-    messages.success(request, 'Document deleted.')
-
-    return redirect('hr_employee_detail', employee_id=employee_id)
-
-
-@login_required(login_url='admin_login')
-def download_employee_document(request, doc_id):
-    """Download/view an employee document."""
-    role = getattr(request.user, 'role', None)
-    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
-        return HttpResponse("Unauthorized", status=403)
-
-    doc = get_object_or_404(EmployeeDocument, pk=doc_id)
-    response = FileResponse(doc.file.open('rb'), content_type='application/octet-stream')
-    response['Content-Disposition'] = f'attachment; filename="{doc.title or doc.file.name}"'
-    return response

@@ -143,53 +143,9 @@
                 <div class="form-group"></div>
             </div>
 
-            <!-- Documents -->
-            <div class="section-title">Documents & Credentials</div>
-            <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">Upload scanned copies of degrees, certificates, CNIC, etc.</p>
-            <div id="doc-rows">
-                <div class="form-row doc-row" style="margin-bottom:10px;">
-                    <div class="form-group">
-                        <label>Document Type</label>
-                        <select name="doc_type[]" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;">
-                            <option value="degree">Degree</option>
-                            <option value="certificate">Certificate</option>
-                            <option value="experience">Experience Letter</option>
-                            <option value="cnic">CNIC</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Title (optional)</label>
-                        <input type="text" name="doc_title[]" placeholder="e.g. Bachelors in CS" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;">
-                    </div>
-                </div>
-                <div class="form-group" style="margin-bottom:14px;">
-                    <label>File</label>
-                    <input type="file" name="doc_file[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;">
-                </div>
-            </div>
-            <button type="button" onclick="addDocRow()" style="width:auto;margin-top:0;margin-bottom:18px;padding:8px 18px;background:#fff;color:#0d9488;border:1.5px solid #0d9488;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">+ Add Another Document</button>
-
             <button type="submit">{% if edit %}Update{% else %}Save{% endif %} {{ model_name }}</button>
         </form>
         <a href="javascript:history.back()" class="back-link">← Back</a>
     </div>
-    <script>
-    function addDocRow() {
-        var container = document.getElementById('doc-rows');
-        var html = '<div style="border-top:1px solid #e5e7eb;padding-top:10px;margin-top:10px;">' +
-            '<div class="form-row" style="margin-bottom:10px;">' +
-            '<div class="form-group"><label>Document Type</label>' +
-            '<select name="doc_type[]" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;">' +
-            '<option value="degree">Degree</option><option value="certificate">Certificate</option>' +
-            '<option value="experience">Experience Letter</option><option value="cnic">CNIC</option>' +
-            '<option value="other">Other</option></select></div>' +
-            '<div class="form-group"><label>Title (optional)</label>' +
-            '<input type="text" name="doc_title[]" placeholder="e.g. Bachelors in CS" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;"></div></div>' +
-            '<div class="form-group" style="margin-bottom:14px;"><label>File</label>' +
-            '<input type="file" name="doc_file[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="width:100%;padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;"></div></div>';
-        container.insertAdjacentHTML('beforeend', html);
-    }
-    </script>
 </body>
 </html>
