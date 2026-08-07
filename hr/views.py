@@ -907,7 +907,7 @@ def import_salary_excel(request):
         errors = []
 
         for row_num in range(2, ws.max_row + 1):
-            row = list(ws[row_num])
+            row = [cell.value for cell in ws[row_num]]
             name_val = get_str(row, 'employee_name')
             id_val = get_str(row, 'employee_id')
 
