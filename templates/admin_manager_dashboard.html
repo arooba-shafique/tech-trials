@@ -926,96 +926,11 @@
 
         <!-- ═══════════ HR: SALARY CONFIG ═══════════ -->
         <div id="section-salary-config" class="section">
-            <div class="table-card">
-                <div class="table-card-header"><h2>Salary Configuration</h2></div>
-                <div style="padding:22px;">
-                    <form method="post" action="{% url 'hr_salary_config' %}" style="display:flex;flex-direction:column;gap:18px;">
-                        {% csrf_token %}
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
-                                <select name="month" id="cfg-month" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                                    {% for m_num, m_name in hr_months %}
-                                    <option value="{{ m_num }}" {% if m_num == hr_config.month %}selected{% endif %}>{{ m_name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Year</span>
-                                <input type="number" name="year" id="cfg-year" value="{{ hr_config.year }}" min="2020" max="2030" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Working Days/Month</span>
-                                <input type="number" name="default_working_days" id="cfg-working-days" value="{{ hr_config.default_working_days }}" min="1" max="31" required style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Max Allowed Leaves</span>
-                                <input type="number" name="max_allowed_leaves" value="{{ hr_config.max_allowed_leaves }}" min="0" required style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Lates = Half Day (every N)</span>
-                                <input type="number" name="late_deduction_per" value="{{ hr_config.late_deduction_per }}" min="1" required style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                        </div>
-                        <h3 style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px;">Allowances (% of Basic)</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;">
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Housing %</span>
-                                <input type="number" name="housing_allowance_pct" value="{{ hr_config.housing_allowance_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Medical %</span>
-                                <input type="number" name="medical_allowance_pct" value="{{ hr_config.medical_allowance_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Transport %</span>
-                                <input type="number" name="transport_allowance_pct" value="{{ hr_config.transport_allowance_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Fuel %</span>
-                                <input type="number" name="fuel_allowance_pct" value="{{ hr_config.fuel_allowance_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                        </div>
-                        <h3 style="font-size:13px;font-weight:700;color:var(--text-primary);margin-top:8px;">Deductions & Bonus</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;">
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Tax %</span>
-                                <input type="number" name="tax_percentage" value="{{ hr_config.tax_percentage }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">PF %</span>
-                                <input type="number" name="provident_fund_pct" value="{{ hr_config.provident_fund_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Security %</span>
-                                <input type="number" name="security_pct" value="{{ hr_config.security_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Van / Child %</span>
-                                <input type="number" name="van_child_pct" value="{{ hr_config.van_child_pct }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Bonus (PKR /day)</span>
-                                <input type="number" name="bonus_per_day" value="{{ hr_config.bonus_per_day }}" min="0" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Bonus % (alt)</span>
-                                <input type="number" name="bonus_percentage" value="{{ hr_config.bonus_percentage }}" min="0" max="100" step="0.01" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                        </div>
-                        <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
-                            <button type="submit" class="btn btn-primary" style="padding:10px 28px;">Save Configuration</button>
-                            <button type="button" class="btn btn-warning" style="padding:10px 28px;" onclick="document.getElementById('employee-overrides-section').style.display=document.getElementById('employee-overrides-section').style.display==='none'?'block':'none'">Customize for Employees</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Per-Employee Overrides Section -->
-            <div id="employee-overrides-section" class="table-card" style="display:none;margin-top:16px;">
+            <!-- Per-Employee Salary Overrides -->
+            <div id="employee-overrides-section" class="table-card">
                 <div class="table-card-header"><h2>Per-Employee Salary Overrides</h2></div>
                 <div style="padding:22px;">
-                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Employees listed below will use custom percentages instead of the global config above. Leave all fields at 0 to use global config.</p>
+                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set salary configuration for each employee individually. Leave all fields at 0 to use default values.</p>
                     <form method="post" action="{% url 'hr_save_employee_overrides' %}">
                         {% csrf_token %}
                         <input type="hidden" name="month" value="{{ hr_config.month }}">
@@ -1067,27 +982,6 @@
                 </div>
             </div>
         </div>
-
-        <script>
-        (function() {
-            var monthSelect = document.getElementById('cfg-month');
-            var yearInput = document.getElementById('cfg-year');
-            var workingDaysInput = document.getElementById('cfg-working-days');
-            if (!monthSelect || !yearInput || !workingDaysInput) return;
-
-            function getDaysInMonth(month, year) {
-                return new Date(year, month, 0).getDate();
-            }
-            function updateWorkingDays() {
-                var m = parseInt(monthSelect.value);
-                var y = parseInt(yearInput.value);
-                if (m && y) workingDaysInput.value = getDaysInMonth(m, y);
-            }
-            monthSelect.addEventListener('change', updateWorkingDays);
-            yearInput.addEventListener('change', updateWorkingDays);
-            updateWorkingDays();
-        })();
-        </script>
 
         <!-- ═══════════ HR: GENERATE SALARY ═══════════ -->
         <div id="section-generate-salary" class="section">
