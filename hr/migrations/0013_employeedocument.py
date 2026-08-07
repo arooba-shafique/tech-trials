@@ -6,7 +6,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('academics', '0001_initial'),
-        ('hr', '0011_monthlysalary_has_custom_config'),
+        ('hr', '0012_salaryconfig_probation_security_pct'),
     ]
 
     operations = [
