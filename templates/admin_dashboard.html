@@ -314,7 +314,7 @@
                         {% empty %}<div style="font-size:12px;color:var(--text-muted);padding:4px 0;">No subjects assigned.</div>{% endfor %}
                     </div>
                     <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;">
-                        <button type="button" onclick="openDocsModal({{ teacher.id }}, '{{ teacher.full_name|escapejs }}')" class="btn" style="padding:5px 12px;font-size:11.5px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;cursor:pointer;">Docs</button>
+                        <a href="{% url 'hr_employee_detail' teacher.id %}#documents" class="btn" style="padding:5px 12px;font-size:11.5px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">Docs</a>
                         <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
                         <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-red" style="padding:5px 12px;font-size:11.5px;" onclick="return confirm('Delete this teacher?');">Delete</a>
                     </div>
@@ -323,129 +323,6 @@
             </div>
             <div id="staff-no-results" style="display:none;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff match the selected filter.</div>
         </div>
-
-        <!-- Documents Modal -->
-        <div id="docs-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;justify-content:center;align-items:center;">
-            <div style="background:#fff;border-radius:12px;width:90%;max-width:600px;max-height:80vh;overflow:hidden;display:flex;flex-direction:column;">
-                <div style="padding:16px 20px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
-                    <h3 id="docs-modal-title" style="margin:0;font-size:16px;font-weight:700;">Documents</h3>
-                    <button onclick="closeDocsModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6b7280;">&times;</button>
-                </div>
-                <div id="docs-modal-body" style="padding:20px;overflow-y:auto;flex:1;">
-                    <div style="text-align:center;color:#9ca3af;">Loading...</div>
-                </div>
-            </div>
-        </div>
-
-        <script>
-        var docsModalEmployeeId = null;
-
-        function openDocsModal(employeeId, employeeName) {
-            docsModalEmployeeId = employeeId;
-            document.getElementById('docs-modal-title').textContent = 'Documents - ' + employeeName;
-            document.getElementById('docs-modal').style.display = 'flex';
-            loadDocuments(employeeId);
-        }
-
-        function closeDocsModal() {
-            document.getElementById('docs-modal').style.display = 'none';
-            docsModalEmployeeId = null;
-        }
-
-        function loadDocuments(employeeId) {
-            var body = document.getElementById('docs-modal-body');
-            body.innerHTML = '<div style="text-align:center;color:#9ca3af;">Loading...</div>';
-
-            fetch('/hr/employee/' + employeeId + '/documents/json/')
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    var html = '';
-
-                    // Upload form
-                    html += '<div style="margin-bottom:20px;padding:16px;background:#f9fafb;border-radius:8px;">';
-                    html += '<div style="font-size:13px;font-weight:700;margin-bottom:10px;">Upload New Document</div>';
-                    html += '<form id="doc-upload-form" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px;">';
-                    html += '<div style="display:flex;gap:10px;flex-wrap:wrap;">';
-                    html += '<select name="document_type" style="padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;flex:1;min-width:120px;">';
-                    html += '<option value="degree">Degree</option><option value="certificate">Certificate</option>';
-                    html += '<option value="experience">Experience Letter</option><option value="cnic">CNIC</option><option value="other">Other</option></select>';
-                    html += '<input type="text" name="title" placeholder="Title (optional)" style="padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;flex:1;min-width:120px;">';
-                    html += '</div>';
-                    html += '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">';
-                    html += '<input type="file" name="file" required accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;flex:1;">';
-                    html += '<button type="submit" style="padding:8px 16px;background:#0d9488;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Upload</button>';
-                    html += '</div></form></div>';
-
-                    // Documents list
-                    if (data.documents && data.documents.length > 0) {
-                        html += '<div style="font-size:13px;font-weight:700;margin-bottom:10px;">Uploaded Documents</div>';
-                        html += '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
-                        html += '<thead><tr style="background:#f8fafc;"><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;">Type</th><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;">Title</th><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;">File</th><th style="padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;">Date</th><th style="padding:8px;text-align:center;border-bottom:2px solid #e5e7eb;">Actions</th></tr></thead>';
-                        html += '<tbody>';
-                        data.documents.forEach(function(doc) {
-                            html += '<tr style="border-bottom:1px solid #f1f5f9;">';
-                            html += '<td style="padding:8px;"><span style="background:#eff6ff;color:#2563eb;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;">' + doc.type_display + '</span></td>';
-                            html += '<td style="padding:8px;">' + doc.title + '</td>';
-                            html += '<td style="padding:8px;font-size:11px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + doc.file_name + '</td>';
-                            html += '<td style="padding:8px;font-size:11px;">' + doc.uploaded_at + '</td>';
-                            html += '<td style="padding:8px;text-align:center;">';
-                            html += '<a href="' + doc.file_url + '" target="_blank" style="color:#2563eb;margin-right:8px;text-decoration:none;font-size:11px;">View</a>';
-                            html += '<button onclick="deleteDoc(' + doc.id + ')" style="color:#dc2626;background:none;border:none;cursor:pointer;font-size:11px;">Delete</button>';
-                            html += '</td></tr>';
-                        });
-                        html += '</tbody></table>';
-                    } else {
-                        html += '<div style="text-align:center;color:#9ca3af;padding:20px;">No documents uploaded yet.</div>';
-                    }
-
-                    body.innerHTML = html;
-
-                    // Attach upload handler
-                    document.getElementById('doc-upload-form').addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        uploadDoc(employeeId);
-                    });
-                });
-        }
-
-        function uploadDoc(employeeId) {
-            var form = document.getElementById('doc-upload-form');
-            var formData = new FormData(form);
-
-            fetch('/hr/employee/' + employeeId + '/upload-doc/ajax/', {
-                method: 'POST',
-                body: formData,
-                headers: {'X-CSRFToken': getCsrfToken()}
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success) {
-                    loadDocuments(employeeId);
-                } else {
-                    alert('Upload failed: ' + (data.error || 'Unknown error'));
-                }
-            });
-        }
-
-        function deleteDoc(docId) {
-            if (!confirm('Delete this document?')) return;
-            fetch('/hr/document/' + docId + '/delete/ajax/', {
-                method: 'POST',
-                headers: {'X-CSRFToken': getCsrfToken()}
-            })
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                if (data.success && docsModalEmployeeId) {
-                    loadDocuments(docsModalEmployeeId);
-                }
-            });
-        }
-
-        function getCsrfToken() {
-            var cookie = document.cookie.split(';').find(function(c) { return c.trim().startsWith('csrftoken='); });
-            return cookie ? cookie.split('=')[1] : '';
-        }
-        </script>
 
         <!-- ═══════════ PARENTS ═══════════ -->
         <div id="section-parents" class="section">

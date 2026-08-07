@@ -25,7 +25,4 @@ urlpatterns = [
     path('employee/<int:employee_id>/upload-doc/', views.upload_employee_document, name='hr_upload_employee_document'),
     path('document/<int:doc_id>/delete/', views.delete_employee_document, name='hr_delete_employee_document'),
     path('document/<int:doc_id>/download/', views.download_employee_document, name='hr_download_employee_document'),
-    path('employee/<int:employee_id>/documents/json/', views.employee_documents_json, name='hr_employee_documents_json'),
-    path('employee/<int:employee_id>/upload-doc/ajax/', views.upload_employee_document_ajax, name='hr_upload_employee_document_ajax'),
-    path('document/<int:doc_id>/delete/ajax/', views.delete_employee_document_ajax, name='hr_delete_employee_document_ajax'),
 ]
