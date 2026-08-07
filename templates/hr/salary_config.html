@@ -63,6 +63,20 @@
                 <label>Provident Fund % (of Basic)</label>
                 <input type="number" name="provident_fund_pct" value="{{ config.provident_fund_pct }}" step="0.01" min="0" max="100" class="form-control">
             </div>
+            <div class="form-group">
+                <label>Security % (of Basic)</label>
+                <input type="number" name="security_pct" value="{{ config.security_pct }}" step="0.01" min="0" max="100" class="form-control">
+                <small style="color:var(--text-muted);font-size:11px;">Applied from month 3 onwards (after probation)</small>
+            </div>
+            <div class="form-group">
+                <label>Van/Child % (of Basic)</label>
+                <input type="number" name="van_child_pct" value="{{ config.van_child_pct }}" step="0.01" min="0" max="100" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Probation Security % (First 2 Months)</label>
+                <input type="number" name="probation_security_pct" value="{{ config.probation_security_pct }}" step="0.01" min="0" max="100" class="form-control">
+                <small style="color:var(--text-muted);font-size:11px;">Applied instead of PF/Tax/Van-Child for new employees in their first 2 months</small>
+            </div>
         </div>
 
         <h3 style="font-size:14px;font-weight:700;margin:16px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border);color:var(--primary);">Bonus</h3>
@@ -90,6 +104,7 @@
                 <li><strong>Bonus</strong> = 0 absent & 0 leaves → {{ config.bonus_per_day }} per day OR {{ config.bonus_percentage }}% of basic</li>
                 <li><strong>Gross</strong> = Basic + Increment + Allowances + Bonus - Leave Ded - Late Ded</li>
                 <li><strong>Tax</strong> = Gross x {{ config.tax_percentage }}%</li>
+                <li><strong>Probation (Month 1-2)</strong> = Security {{ config.probation_security_pct }}% of basic only (no PF/Tax/Van-Child)</li>
                 <li><strong>Net</strong> = Gross - (All Deductions)</li>
             </ul>
         </div>
