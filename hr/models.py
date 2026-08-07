@@ -156,6 +156,14 @@ class MonthlySalary(models.Model):
     cfg_bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
+    TRANSACTION_TYPE_CHOICES = (
+        ('bank_islami', 'Bank Islami'),
+        ('ubl', 'UBL'),
+        ('cash', 'Cash in Hand'),
+        ('personal', 'Personal Account'),
+    )
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES, default='bank_islami')
+
     # Overtime
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Overtime hours this month")
     overtime_rate = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Overtime rate per hour")

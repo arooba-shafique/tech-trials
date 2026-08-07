@@ -973,13 +973,13 @@
                                         <th>Van/Child %</th>
                                         <th>Bonus/Day</th>
                                         <th>Bonus %</th>
-                                        <th>Action</th>
+                                        <th>Transaction Type</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for teacher in teachers %}
                                     <tr data-designation="{{ teacher.designation|default:'teacher' }}">
-                                        <td style="font-weight:600;white-space:nowrap;">{{ teacher.full_name }}</td>
+                                        <td style="white-space:nowrap;"><div style="font-weight:600;">{{ teacher.full_name }}</div><div style="font-size:11px;color:var(--text-muted);">{{ teacher.employee_id|default:"-" }}</div></td>
                                         <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ teacher.ov_housing }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ teacher.ov_medical }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ teacher.ov_transport }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
@@ -990,11 +990,7 @@
                                         <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{{ teacher.ov_van_child }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><input type="number" name="custom_bonus_per_day_{{ teacher.id }}" value="{{ teacher.ov_bonus_per_day }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><input type="number" name="custom_bonus_pct_{{ teacher.id }}" value="{{ teacher.ov_bonus_pct }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td>
-                                            {% if teacher.ov_active %}
-                                            <span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:12px;background:#dbeafe;color:#1d4ed8;">Custom</span>
-                                            {% endif %}
-                                        </td>
+                                        <td><select name="custom_transaction_type_{{ teacher.id }}" style="width:120px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="bank_islami" {% if teacher.ov_transaction_type == 'bank_islami' %}selected{% endif %}>Bank Islami</option><option value="ubl" {% if teacher.ov_transaction_type == 'ubl' %}selected{% endif %}>UBL</option><option value="cash" {% if teacher.ov_transaction_type == 'cash' %}selected{% endif %}>Cash in Hand</option><option value="personal" {% if teacher.ov_transaction_type == 'personal' %}selected{% endif %}>Personal Account</option></select></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

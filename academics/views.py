@@ -191,6 +191,7 @@ def admin_dashboard(request):
                         teacher.ov_van_child = float(ms.cfg_van_child_pct)
                         teacher.ov_bonus_per_day = float(ms.cfg_bonus_per_day)
                         teacher.ov_bonus_pct = float(ms.cfg_bonus_pct)
+                        teacher.ov_transaction_type = ms.transaction_type or 'bank_islami'
                         teacher.ov_active = True
                     except Exception:
                         teacher.ov_housing = 0
@@ -204,6 +205,7 @@ def admin_dashboard(request):
                         teacher.ov_bonus_per_day = 0
                         teacher.ov_bonus_pct = 0
                         teacher.ov_active = False
+                        teacher.ov_transaction_type = 'bank_islami'
                 else:
                     teacher.ov_housing = 0
                     teacher.ov_medical = 0
@@ -216,6 +218,7 @@ def admin_dashboard(request):
                     teacher.ov_bonus_per_day = 0
                     teacher.ov_bonus_pct = 0
                     teacher.ov_active = False
+                    teacher.ov_transaction_type = 'bank_islami'
 
             context.update({
                 'hr_config': hr_config,
