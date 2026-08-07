@@ -365,7 +365,6 @@
                     html += '<div style="margin-bottom:20px;padding:16px;background:#f9fafb;border-radius:8px;">';
                     html += '<div style="font-size:13px;font-weight:700;margin-bottom:10px;">Upload New Document</div>';
                     html += '<form id="doc-upload-form" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px;">';
-                    html += '<input type="hidden" name="csrfmiddlewaretoken" value="' + getCsrfToken() + '">';
                     html += '<div style="display:flex;gap:10px;flex-wrap:wrap;">';
                     html += '<select name="document_type" style="padding:8px;border:1px solid #e5e7eb;border-radius:6px;font-size:13px;flex:1;min-width:120px;">';
                     html += '<option value="degree">Degree</option><option value="certificate">Certificate</option>';
@@ -443,18 +442,8 @@
         }
 
         function getCsrfToken() {
-            // Try cookie first
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var c = cookies[i].trim();
-                if (c.startsWith('csrftoken=')) {
-                    return c.split('=')[1];
-                }
-            }
-            // Fallback: get from form
-            var input = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (input) return input.value;
-            return '';
+            var cookie = document.cookie.split(';').find(function(c) { return c.trim().startsWith('csrftoken='); });
+            return cookie ? cookie.split('=')[1] : '';
         }
         </script>
 

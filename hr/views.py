@@ -1226,17 +1226,17 @@ def employee_documents_json(request, employee_id):
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
-    docs = EmployeeDocument.objects.filter(employee_id=employee_id)
+    docs = EmployeeDocument.objects.filter(employee_id=employee_id).values('id', 'document_type', 'title', 'file', 'uploaded_at')
     doc_list = []
-    for doc in docs:
+    for d in docs:
         doc_list.append({
-            'id': doc.id,
-            'type': doc.document_type,
-            'type_display': doc.get_document_type_display(),
-            'title': doc.title or '-',
-            'file_url': doc.file.url if doc.file else '',
-            'file_name': doc.file.name.split('/')[-1] if doc.file else '',
-            'uploaded_at': doc.uploaded_at.strftime('%d %b %Y') if doc.uploaded_at else '',
+            'id': d['id'],
+            'type': d['document_type'],
+            'type_display': dict(EmployeeDocument.DOCUMENT_TYPE_CHOICES).get(d['document_type'], d['document_type']),
+            'title': d['title'] or '-',
+            'file_url': d['file'],
+            'file_name': d['file'].split('/')[-1] if d['file'] else '',
+            'uploaded_at': d['uploaded_at'].strftime('%d %b %Y') if d['uploaded_at'] else '',
         })
     return JsonResponse({'documents': doc_list})
 
@@ -1248,35 +1248,31 @@ def upload_employee_document_ajax(request, employee_id):
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    if request.method == 'POST' and request.FILES.get('file'):
+        employee = get_object_or_404(TeacherProfile, pk=employee_id)
+        doc_type = request.POST.get('document_type', 'other')
+        title = request.POST.get('title', '')
+        file = request.FILES['file']
 
-    if not request.FILES.get('file'):
-        return JsonResponse({'error': 'No file provided'}, status=400)
-
-    employee = get_object_or_404(TeacherProfile, pk=employee_id)
-    doc_type = request.POST.get('document_type', 'other')
-    title = request.POST.get('title', '')
-    file = request.FILES['file']
-
-    doc = EmployeeDocument.objects.create(
-        employee=employee,
-        document_type=doc_type,
-        title=title,
-        file=file,
-    )
-    return JsonResponse({
-        'success': True,
-        'document': {
-            'id': doc.id,
-            'type': doc.document_type,
-            'type_display': doc.get_document_type_display(),
-            'title': doc.title or '-',
-            'file_url': doc.file.url,
-            'file_name': doc.file.name.split('/')[-1],
-            'uploaded_at': doc.uploaded_at.strftime('%d %b %Y'),
-        }
-    })
+        doc = EmployeeDocument.objects.create(
+            employee=employee,
+            document_type=doc_type,
+            title=title,
+            file=file,
+        )
+        return JsonResponse({
+            'success': True,
+            'document': {
+                'id': doc.id,
+                'type': doc.document_type,
+                'type_display': doc.get_document_type_display(),
+                'title': doc.title or '-',
+                'file_url': doc.file.url,
+                'file_name': doc.file.name.split('/')[-1],
+                'uploaded_at': doc.uploaded_at.strftime('%d %b %Y'),
+            }
+        })
+    return JsonResponse({'error': 'No file provided'}, status=400)
 
 
 @login_required(login_url='admin_login')
