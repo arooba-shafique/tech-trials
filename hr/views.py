@@ -793,6 +793,192 @@ def export_salary_excel(request):
 
 
 # ─────────────────────────────────────────────
+# EXCEL IMPORT
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def import_salary_excel(request):
+    """Import salary data from an uploaded Excel file for the selected month/year."""
+    from openpyxl import load_workbook
+
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    if request.method != 'POST':
+        return redirect('admin_console')
+
+    month = int(request.POST.get('month', timezone.now().month))
+    year = int(request.POST.get('year', timezone.now().year))
+    excel_file = request.FILES.get('excel_file')
+
+    if not excel_file:
+        messages.error(request, 'Please select an Excel file to import.')
+        return redirect(f'/admin-console/?section=salary-sheet&month={month}&year={year}')
+
+    if not excel_file.name.endswith(('.xlsx', '.xls')):
+        messages.error(request, 'Invalid file format. Please upload an .xlsx or .xls file.')
+        return redirect(f'/admin-console/?section=salary-sheet&month={month}&year={year}')
+
+    try:
+        wb = load_workbook(excel_file)
+        ws = wb.active
+
+        header_row = [str(cell.value or '').strip().lower() for cell in ws[1]]
+
+        col_map = {}
+        for idx, h in enumerate(header_row):
+            if 'employee name' in h or h == 'teacher':
+                col_map['employee_name'] = idx
+            elif 'employee id' in h:
+                col_map['employee_id'] = idx
+            elif 'basic' in h and 'salary' in h:
+                col_map['basic_salary'] = idx
+            elif 'housing' in h:
+                col_map['housing_allowance'] = idx
+            elif 'medical' in h:
+                col_map['medical_allowance'] = idx
+            elif 'transport' in h:
+                col_map['transport_allowance'] = idx
+            elif 'fuel' in h:
+                col_map['fuel_allowance'] = idx
+            elif 'other allowance' in h:
+                col_map['other_allowance'] = idx
+            elif 'bonus' in h:
+                col_map['bonus_amount'] = idx
+            elif 'gross' in h:
+                col_map['gross_salary'] = idx
+            elif 'tax' in h:
+                col_map['tax_deduction'] = idx
+            elif 'provident' in h or h == 'pf':
+                col_map['provident_fund'] = idx
+            elif 'security' in h and 'deduction' in h:
+                col_map['security_deduction'] = idx
+            elif 'van' in h or 'child' in h:
+                col_map['van_child_deduction'] = idx
+            elif 'leave ded' in h:
+                col_map['leave_deduction'] = idx
+            elif 'late ded' in h:
+                col_map['late_coming_deduction'] = idx
+            elif 'advance' in h:
+                col_map['advance_deduction'] = idx
+            elif 'other ded' in h:
+                col_map['other_deduction'] = idx
+            elif 'total ded' in h:
+                col_map['total_deductions'] = idx
+            elif 'net' in h:
+                col_map['net_salary'] = idx
+            elif 'pay status' in h:
+                col_map['pay_status'] = idx
+            elif 'transaction' in h:
+                col_map['transaction_type'] = idx
+
+        if 'employee_name' not in col_map and 'employee_id' not in col_map:
+            messages.error(request, 'Could not find Employee Name or Employee ID column in the Excel file.')
+            return redirect(f'/admin-console/?section=salary-sheet&month={month}&year={year}')
+
+        def get_val(row, key, default=0):
+            idx = col_map.get(key)
+            if idx is None or idx >= len(row):
+                return default
+            val = row[idx]
+            if val is None:
+                return default
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return default
+
+        def get_str(row, key, default=''):
+            idx = col_map.get(key)
+            if idx is None or idx >= len(row):
+                return default
+            val = row[idx]
+            return str(val).strip() if val else default
+
+        imported = 0
+        updated = 0
+        skipped = 0
+        errors = []
+
+        for row_num in range(2, ws.max_row + 1):
+            row = list(ws[row_num])
+            name_val = get_str(row, 'employee_name')
+            id_val = get_str(row, 'employee_id')
+
+            if not name_val and not id_val:
+                continue
+
+            emp = None
+            if id_val:
+                emp = TeacherProfile.objects.filter(employee_id=id_val).first()
+            if not emp and name_val:
+                emp = TeacherProfile.objects.filter(full_name__iexact=name_val).first()
+            if not emp:
+                skipped += 1
+                continue
+
+            basic = get_val(row, 'basic_salary')
+            if basic <= 0:
+                basic = float(emp.salary) if emp.salary else 0
+
+            pay_status = get_str(row, 'pay_status', 'unpaid').lower()
+            if pay_status not in ('paid', 'unpaid', 'partial'):
+                pay_status = 'unpaid'
+
+            transaction_type = get_str(row, 'transaction_type', 'bank_islami')
+            valid_transactions = ['bank_islami', 'ubl', 'cash', 'personal']
+            if transaction_type.lower() not in valid_transactions:
+                transaction_type = 'bank_islami'
+            else:
+                transaction_type = transaction_type.lower()
+
+            ms, created = MonthlySalary.objects.get_or_create(
+                employee=emp, month=month, year=year,
+                defaults={
+                    'total_working_days': 26,
+                    'basic_salary': basic,
+                }
+            )
+
+            ms.basic_salary = basic
+            ms.housing_allowance = get_val(row, 'housing_allowance')
+            ms.medical_allowance = get_val(row, 'medical_allowance')
+            ms.transport_allowance = get_val(row, 'transport_allowance')
+            ms.fuel_allowance = get_val(row, 'fuel_allowance')
+            ms.other_allowance = get_val(row, 'other_allowance')
+            ms.bonus_amount = get_val(row, 'bonus_amount')
+            ms.tax_deduction = get_val(row, 'tax_deduction')
+            ms.provident_fund = get_val(row, 'provident_fund')
+            ms.security_deduction = get_val(row, 'security_deduction')
+            ms.van_child_deduction = get_val(row, 'van_child_deduction')
+            ms.leave_deduction = get_val(row, 'leave_deduction')
+            ms.late_coming_deduction = get_val(row, 'late_coming_deduction')
+            ms.advance_deduction = get_val(row, 'advance_deduction')
+            ms.other_deduction = get_val(row, 'other_deduction')
+            ms.pay_status = pay_status
+            ms.transaction_type = transaction_type
+            ms.save()
+
+            if created:
+                imported += 1
+            else:
+                updated += 1
+
+        month_name = calendar.month_name[month]
+        messages.success(
+            request,
+            f'Import complete for {month_name} {year}: {imported} new, {updated} updated, {skipped} skipped (employee not found).'
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        messages.error(request, f'Error importing Excel file: {str(e)}')
+
+    return redirect(f'/admin-console/?section=salary-sheet&month={month}&year={year}')
+
+
+# ─────────────────────────────────────────────
 # SALARY SLIP (with dynamic school name)
 # ─────────────────────────────────────────────
 

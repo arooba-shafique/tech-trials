@@ -20,5 +20,6 @@ urlpatterns = [
     path('salary/slip/all/', views.salary_slip_all, name='hr_salary_slip_all'),
     path('salary/export/csv/', views.export_salary_csv, name='hr_export_salary_csv'),
     path('salary/export/excel/', views.export_salary_excel, name='hr_export_salary_excel'),
+    path('salary/import/excel/', views.import_salary_excel, name='hr_import_salary_excel'),
     path('attendance/monthly/', views.monthly_attendance_summary, name='hr_monthly_attendance'),
 ]
