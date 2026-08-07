@@ -280,8 +280,7 @@ def save_employee_overrides(request):
     year = int(request.POST.get('year', timezone.now().year))
     config = SalaryConfig.objects.filter(month=month, year=year).first()
     if not config:
-        messages.error(request, 'No salary config found for this month/year.')
-        return redirect('admin_console')
+        config = SalaryConfig.objects.create(month=month, year=year)
 
     for key, val in request.POST.items():
         if key.startswith('custom_housing_'):
