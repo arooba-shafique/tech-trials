@@ -874,7 +874,7 @@ def import_salary_excel(request):
                 col_map['transaction_type'] = idx
 
         if 'employee_name' not in col_map and 'employee_id' not in col_map:
-            messages.error(request, 'Could not find Employee Name or Employee ID column in the Excel file.')
+            messages.error(request, f'Could not find Employee Name or Employee ID column. Detected columns: {", ".join(header_row)}')
             return redirect(f'/admin-console/?section=salary-sheet&month={month}&year={year}')
 
         def get_val(row, key, default=0):
@@ -903,6 +903,7 @@ def import_salary_excel(request):
         imported = 0
         updated = 0
         skipped = 0
+        skipped_names = []
         errors = []
 
         for row_num in range(2, ws.max_row + 1):
@@ -930,6 +931,8 @@ def import_salary_excel(request):
                 emp = TeacherProfile.objects.filter(cnic__iexact=clean_name).first()
             if not emp:
                 skipped += 1
+                if name_val and name_val not in skipped_names:
+                    skipped_names.append(name_val)
                 continue
 
             basic = get_val(row, 'basic_salary')
@@ -980,10 +983,13 @@ def import_salary_excel(request):
                 updated += 1
 
         month_name = calendar.month_name[month]
-        messages.success(
-            request,
-            f'Import complete for {month_name} {year}: {imported} new, {updated} updated, {skipped} skipped (employee not found).'
-        )
+        skipped_preview = ', '.join(skipped_names[:5])
+        if len(skipped_names) > 5:
+            skipped_preview += f'... and {len(skipped_names) - 5} more'
+        msg = f'Import complete for {month_name} {year}: {imported} new, {updated} updated, {skipped} skipped.'
+        if skipped_names:
+            msg += f' Not found: {skipped_preview}'
+        messages.success(request, msg)
     except Exception as e:
         import traceback
         traceback.print_exc()
