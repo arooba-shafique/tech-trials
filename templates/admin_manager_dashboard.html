@@ -1089,7 +1089,8 @@
             <div class="table-card">
 
                 <div style="padding:22px;">
-                    <form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:18px;">
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:18px;">
+                    <form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;">
                         <input type="hidden" name="section" value="salary-sheet">
                         <label style="display:flex;flex-direction:column;gap:5px;">
                             <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
@@ -1111,17 +1112,18 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Export Excel
                         </a>
-                        <form action="{% url 'hr_import_salary_excel' %}" method="post" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:0;" onsubmit="return confirm('Import salary data for {{ hr_month_name }} {{ hr_year }}? Existing data will be updated.');">
-                            {% csrf_token %}
-                            <input type="hidden" name="month" value="{{ hr_month }}">
-                            <input type="hidden" name="year" value="{{ hr_year }}">
-                            <label for="import-excel-input" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;font-family:inherit;white-space:nowrap;height:35px;cursor:pointer;">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                Import Excel
-                            </label>
-                            <input type="file" name="excel_file" id="import-excel-input" accept=".xlsx,.xls" style="display:none;" onchange="if(this.files.length){this.form.submit();}">
-                        </form>
                     </form>
+                    <form action="{% url 'hr_import_salary_excel' %}" method="post" enctype="multipart/form-data" style="display:inline-flex;align-items:center;gap:0;" onsubmit="return confirm('Import salary data for {{ hr_month_name }} {{ hr_year }}? Existing data will be updated.');">
+                        {% csrf_token %}
+                        <input type="hidden" name="month" value="{{ hr_month }}">
+                        <input type="hidden" name="year" value="{{ hr_year }}">
+                        <label for="import-excel-input" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;text-decoration:none;font-family:inherit;white-space:nowrap;height:35px;cursor:pointer;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import Excel
+                        </label>
+                        <input type="file" name="excel_file" id="import-excel-input" accept=".xlsx,.xls" style="display:none;" onchange="if(this.files.length){this.form.submit();}">
+                    </form>
+                    </div>
                     <script>
                     (function() {
                         var form = document.querySelector('#section-salary-sheet form[method="get"]');
