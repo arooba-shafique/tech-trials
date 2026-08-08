@@ -1220,7 +1220,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 if (typeof showToast === 'function') showToast('Document deleted.');
             })
             .catch(function () {
-                window.location.href = href;
+                if (typeof showToast === 'function') showToast('Failed to delete.', 'error');
             });
     }, true);
 
