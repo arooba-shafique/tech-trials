@@ -32,7 +32,8 @@ var titles = {
     'salary-config':    'Salary Configuration',
     'salary-sheet':     'Salary Sheet',
     'salary-slips':     'Salary Slips',
-    'hr-attendance':    'Monthly Attendance'
+    'hr-attendance':    'Monthly Attendance',
+    'left-employees':   'Left Employees'
 };
 
 function showSection(name, el) {
@@ -64,7 +65,7 @@ window.addEventListener('load', function () {
     var section = '';
     var urlParams = new URLSearchParams(window.location.search);
     var urlSection = urlParams.get('section');
-    var valid   = ['students','staff','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials'];
+    var valid   = ['students','staff','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials','left-employees'];
 
     if (urlSection && valid.indexOf(urlSection) !== -1) {
         section = urlSection;

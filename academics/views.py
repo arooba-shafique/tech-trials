@@ -85,6 +85,47 @@ def admin_dashboard(request):
     ) if not request.user.is_superuser else TeacherSubjectAssignment.objects.all()
 
     User = get_user_model()
+
+    from django.db.models import Q as Q2
+    from hr.models import MonthlySalary
+    left_employees = teachers_qs.filter(is_employee_separated=True)
+    left_search = request.GET.get('search', '').strip() if request.GET.get('section') == 'left-employees' else ''
+    if left_search:
+        left_employees = left_employees.filter(
+            Q2(full_name__icontains=left_search) |
+            Q2(employee_id__icontains=left_search) |
+            Q2(cnic__icontains=left_search)
+        )
+    left_employees = left_employees.select_related('separation_record').order_by('-separation_record__last_working_date')
+
+    left_data = []
+    left_pending_count = 0
+    left_completed_count = 0
+    for emp in left_employees:
+        sep = getattr(emp, 'separation_record', None)
+        if sep:
+            if sep.clearance_status == 'completed':
+                left_completed_count += 1
+            else:
+                left_pending_count += 1
+        else:
+            left_pending_count += 1
+
+        last_salary = None
+        if sep and sep.last_working_date:
+            last_salary = MonthlySalary.objects.filter(
+                employee=emp
+            ).filter(
+                Q2(year__lt=sep.last_working_date.year) |
+                Q2(year=sep.last_working_date.year, month__lte=sep.last_working_date.month)
+            ).order_by('-year', '-month').first()
+
+        left_data.append({
+            'employee': emp,
+            'separation': sep,
+            'last_salary': last_salary,
+        })
+
     context = {
         'students':      students_qs,
         'teachers':      teachers_qs,
@@ -100,6 +141,10 @@ def admin_dashboard(request):
         'leave_today':   Attendance.objects.filter(student__in=students_qs, date=today, status='leave').values('student').distinct().count() if not request.user.is_superuser else Attendance.objects.filter(date=today, status='leave').values('student').distinct().count(),
         'user_role':     role,
         'admin_users':   User.objects.filter(role__in=['admin', 'admin_manager'], school=school).order_by('role', 'username') if not request.user.is_superuser else User.objects.filter(role__in=['admin', 'admin_manager']).order_by('role', 'username'),
+        'left_data': left_data,
+        'left_pending_count': left_pending_count,
+        'left_completed_count': left_completed_count,
+        'left_search': left_search,
     }
 
     # Add HR data for admin_manager
