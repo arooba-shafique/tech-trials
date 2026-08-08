@@ -236,7 +236,7 @@ def left_employees(request):
         )
 
     clearance_filter = request.GET.get('clearance', '')
-    employees = employees.select_related('separation_record').order_by('-separation_record__separation_date')
+    employees = employees.select_related('separation_record').order_by('-separation_record__last_working_date')
 
     left_data = []
     pending_count = 0
@@ -250,9 +250,20 @@ def left_employees(request):
                 pending_count += 1
         else:
             pending_count += 1
+
+        last_salary = None
+        if sep:
+            last_salary = MonthlySalary.objects.filter(
+                employee=emp,
+            ).filter(
+                Q(year__lt=sep.last_working_date.year) |
+                Q(year=sep.last_working_date.year, month__lte=sep.last_working_date.month)
+            ).order_by('-year', '-month').first()
+
         left_data.append({
             'employee': emp,
             'separation': sep,
+            'last_salary': last_salary,
         })
 
     return render(request, 'hr/left_employees.html', {
@@ -300,6 +311,14 @@ def clearance_form(request, employee_id):
 
     salary_count = MonthlySalary.objects.filter(employee=employee).count()
 
+    # Get last salary before leaving
+    last_salary = MonthlySalary.objects.filter(
+        employee=employee,
+    ).filter(
+        Q(year__lt=separation.last_working_date.year) |
+        Q(year=separation.last_working_date.year, month__lte=separation.last_working_date.month)
+    ).order_by('-year', '-month').first()
+
     if request.method == 'POST':
         form = ClearanceForm(request.POST, instance=separation)
         if form.is_valid():
@@ -318,6 +337,7 @@ def clearance_form(request, employee_id):
         'separation': separation,
         'salary_totals': salary_totals,
         'salary_count': salary_count,
+        'last_salary': last_salary,
         'section': 'left_employees',
     })
 

@@ -448,7 +448,6 @@ class SeparationRecord(models.Model):
     )
 
     employee = models.OneToOneField(TeacherProfile, on_delete=models.CASCADE, related_name='separation_record')
-    separation_date = models.DateField()
     last_working_date = models.DateField()
     separation_reason = models.CharField(max_length=20, choices=SEPARATION_REASON_CHOICES, default='resignation')
     separation_reason_detail = models.TextField(blank=True, default='')
@@ -476,4 +475,4 @@ class SeparationRecord(models.Model):
         return total
 
     def __str__(self):
-        return f"Separation - {self.employee.full_name} ({self.separation_date})"
+        return f"Separation - {self.employee.full_name} ({self.last_working_date})"

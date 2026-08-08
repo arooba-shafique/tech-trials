@@ -3,12 +3,12 @@
 {% block content %}
 <div class="hr-topbar">
     <div>
-        <h1>Mark Employee as Left — {{ employee.full_name }}</h1>
-        <div class="breadcrumb">HR Module / Left Employees / Separation Form</div>
+        <h1>Mark as Left — {{ employee.full_name }}</h1>
+        <div class="breadcrumb">HR Module / Staff / Mark as Left</div>
     </div>
 </div>
 
-<div class="card" style="max-width:700px;margin:0 auto;">
+<div class="card" style="max-width:600px;margin:0 auto;">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">
         <div style="width:50px;height:50px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">
             {{ employee.full_name|first|upper }}
@@ -22,42 +22,30 @@
     <form method="post">
         {% csrf_token %}
 
-        <div class="form-row">
-            <div class="form-group">
-                <label>Separation Date *</label>
-                <input type="date" name="separation_date" class="form-control" required value="{{ form.separation_date.value|default:'' }}">
-                {% if form.separation_date.errors %}
-                <span style="color:var(--red);font-size:11px;">{{ form.separation_date.errors.0 }}</span>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label>Last Working Date *</label>
-                <input type="date" name="last_working_date" class="form-control" required value="{{ form.last_working_date.value|default:'' }}">
-                {% if form.last_working_date.errors %}
-                <span style="color:var(--red);font-size:11px;">{{ form.last_working_date.errors.0 }}</span>
-                {% endif %}
-            </div>
+        <div class="form-group">
+            <label>Last Working Date *</label>
+            <input type="date" name="last_working_date" class="form-control" required>
         </div>
 
         <div class="form-group">
             <label>Reason for Leaving *</label>
             <select name="separation_reason" class="form-control" required>
-                <option value="resignation" {% if form.separation_reason.value == 'resignation' %}selected{% endif %}>Resignation</option>
-                <option value="termination" {% if form.separation_reason.value == 'termination' %}selected{% endif %}>Termination</option>
-                <option value="contract_end" {% if form.separation_reason.value == 'contract_end' %}selected{% endif %}>End of Contract</option>
-                <option value="retirement" {% if form.separation_reason.value == 'retirement' %}selected{% endif %}>Retirement</option>
-                <option value="other" {% if form.separation_reason.value == 'other' %}selected{% endif %}>Other</option>
+                <option value="resignation">Resignation</option>
+                <option value="termination">Termination</option>
+                <option value="contract_end">End of Contract</option>
+                <option value="retirement">Retirement</option>
+                <option value="other">Other</option>
             </select>
         </div>
 
         <div class="form-group">
             <label>Additional Details (if other)</label>
-            <textarea name="separation_reason_detail" class="form-control" rows="3" placeholder="Provide details if reason is 'Other'...">{{ form.separation_reason_detail.value|default:'' }}</textarea>
+            <textarea name="separation_reason_detail" class="form-control" rows="3" placeholder="Provide details if reason is 'Other'..."></textarea>
         </div>
 
         <div class="form-group">
             <label>Notes</label>
-            <textarea name="notes" class="form-control" rows="3" placeholder="Any additional notes about the separation...">{{ form.notes.value|default:'' }}</textarea>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
         </div>
 
         <div style="display:flex;gap:10px;margin-top:20px;">
@@ -65,7 +53,7 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
                 Mark as Left
             </button>
-            <a href="{% url 'admin_console' %}" class="btn btn-ghost" style="padding:10px 24px;">Cancel</a>
+            <a href="/admin-console/" class="btn btn-ghost" style="padding:10px 24px;">Cancel</a>
         </div>
     </form>
 </div>

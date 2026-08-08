@@ -58,8 +58,8 @@
                     <th>Joining Date</th>
                     <th>Left Date</th>
                     <th>Reason</th>
+                    <th>Salary</th>
                     <th>Clearance</th>
-                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -80,19 +80,22 @@
                     <td>{{ item.employee.employee_id|default:"-" }}</td>
                     <td>{{ item.employee.get_designation_display|default:item.employee.designation|default:"-" }}</td>
                     <td>{{ item.employee.joining_date|default:"-" }}</td>
-                    <td>{{ item.separation.separation_date|default:"-" }}</td>
+                    <td>{{ item.separation.last_working_date|default:"-" }}</td>
                     <td>{{ item.separation.get_separation_reason_display|default:"-" }}</td>
                     <td>
-                        {% if item.separation.clearance_status == 'completed' %}
-                            <span class="badge badge-green">Completed</span>
+                        {% if item.last_salary %}
+                        <a href="{% url 'hr_salary_slip' item.last_salary.pk %}" class="btn btn-sm" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;text-decoration:none;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            PKR {{ item.last_salary.net_salary|floatformat:0 }}
+                        </a>
                         {% else %}
-                            <span class="badge badge-red">Pending</span>
+                        <span style="color:var(--text-muted);font-size:12px;">No salary record</span>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'hr_clearance_form' item.employee.id %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'hr_clearance_form' item.employee.id %}" class="btn btn-primary btn-sm" style="text-decoration:none;">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            Clearance Form
+                            Clearance
                         </a>
                     </td>
                 </tr>

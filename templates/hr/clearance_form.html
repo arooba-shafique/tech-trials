@@ -3,11 +3,12 @@
 {% block content %}
 <div class="hr-topbar">
     <div>
-        <h1>Clearance Form — {{ employee.full_name }}</h1>
+        <h1>Clearance — {{ employee.full_name }}</h1>
         <div class="breadcrumb">HR Module / Left Employees / Clearance</div>
     </div>
 </div>
 
+<!-- Employee Info -->
 <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
     <div style="width:50px;height:50px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">
         {{ employee.full_name|first|upper }}
@@ -16,16 +17,43 @@
         <div style="font-size:16px;font-weight:700;">{{ employee.full_name }}</div>
         <div style="font-size:12px;color:var(--text-muted);">ID: {{ employee.employee_id|default:"Not assigned" }} | {{ employee.get_designation_display|default:employee.designation|default:"-" }}</div>
     </div>
-    <div style="text-align:right;">
-        <div style="font-size:11px;color:var(--text-muted);">Left On</div>
-        <div style="font-size:14px;font-weight:600;">{{ separation.separation_date }}</div>
+</div>
+
+<!-- Employee Details -->
+<div class="card">
+    <div class="card-header">
+        <h2>Employee Details</h2>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Joining Date</label>
+            <input type="text" class="form-control" value="{{ employee.joining_date|default:'-' }}" readonly style="background:#f9fafb;">
+        </div>
+        <div class="form-group">
+            <label>Last Working Date</label>
+            <input type="text" class="form-control" value="{{ separation.last_working_date }}" readonly style="background:#f9fafb;">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label>Reason for Leaving</label>
+            <input type="text" class="form-control" value="{{ separation.get_separation_reason_display }}" readonly style="background:#f9fafb;">
+        </div>
+        <div class="form-group">
+            <label>Salary (Last Month Before Leaving)</label>
+            {% if last_salary %}
+            <input type="text" class="form-control" value="PKR {{ last_salary.net_salary|floatformat:0 }} ({{ last_salary.get_month_display }} {{ last_salary.year }})" readonly style="background:#f9fafb;">
+            {% else %}
+            <input type="text" class="form-control" value="No salary record found" readonly style="background:#f9fafb;">
+            {% endif %}
+        </div>
     </div>
 </div>
 
-<!-- Accumulated Deductions from Salary History -->
+<!-- Accumulated Deductions -->
 <div class="card">
     <div class="card-header">
-        <h2>Accumulated Deductions (From Joining Date)</h2>
+        <h2>Total Deductions (From Joining Date)</h2>
         <span class="badge badge-blue">{{ salary_count }} salary record{{ salary_count|pluralize }}</span>
     </div>
 
@@ -35,7 +63,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
             <div class="stat-info">
-                <p>Total PF Deductions</p>
+                <p>Total Provident Fund</p>
                 <h3 class="amount">PKR {{ salary_totals.total_pf|floatformat:0 }}</h3>
             </div>
         </div>
@@ -44,7 +72,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </div>
             <div class="stat-info">
-                <p>Total Security Deductions</p>
+                <p>Total Security</p>
                 <h3 class="amount">PKR {{ salary_totals.total_security|floatformat:0 }}</h3>
             </div>
         </div>
@@ -53,16 +81,16 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
             </div>
             <div class="stat-info">
-                <p>Total Tax Deductions</p>
+                <p>Total Tax</p>
                 <h3 class="amount">PKR {{ salary_totals.total_tax|floatformat:0 }}</h3>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon" style="background:#fffbeb;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
             </div>
             <div class="stat-info">
-                <p>Total Van/Child Deductions</p>
+                <p>Total Van/Child</p>
                 <h3 class="amount">PKR {{ salary_totals.total_van_child|floatformat:0 }}</h3>
             </div>
         </div>
@@ -71,7 +99,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
             </div>
             <div class="stat-info">
-                <p>Total Other Deductions</p>
+                <p>Total Other</p>
                 <h3 class="amount">PKR {{ salary_totals.total_other|floatformat:0 }}</h3>
             </div>
         </div>
@@ -90,11 +118,11 @@
 <!-- Exit Clearance Form -->
 <div class="card">
     <div class="card-header">
-        <h2>Exit Clearance Details</h2>
+        <h2>Exit Clearance</h2>
         {% if separation.clearance_status == 'completed' %}
             <span class="badge badge-green">Cleared on {{ separation.clearance_date }}</span>
         {% else %}
-            <span class="badge badge-red">Pending Clearance</span>
+            <span class="badge badge-red">Pending</span>
         {% endif %}
     </div>
 

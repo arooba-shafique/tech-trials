@@ -54,9 +54,8 @@ class GenerateSalaryForm(forms.Form):
 class SeparationForm(forms.ModelForm):
     class Meta:
         model = SeparationRecord
-        fields = ['separation_date', 'last_working_date', 'separation_reason', 'separation_reason_detail', 'notes']
+        fields = ['last_working_date', 'separation_reason', 'separation_reason_detail', 'notes']
         widgets = {
-            'separation_date': forms.DateInput(attrs={'type': 'date'}),
             'last_working_date': forms.DateInput(attrs={'type': 'date'}),
             'separation_reason_detail': forms.Textarea(attrs={'rows': 3}),
             'notes': forms.Textarea(attrs={'rows': 3}),
