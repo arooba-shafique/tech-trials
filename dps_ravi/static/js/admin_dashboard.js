@@ -1059,8 +1059,11 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                                     showToast('Uploaded successfully!');
                                 } else {
                                     closeDrawer();
-                                    showToast('Uploaded successfully!');
-                                    setTimeout(function () { window.location.reload(); }, 800);
+                                    showToast('Saved successfully!');
+                                    var targetReload = (submitUrl.indexOf('clearance') !== -1 || submitUrl.indexOf('separation') !== -1 || submitUrl.indexOf('move-back') !== -1)
+                                        ? (window.location.pathname + '?section=left-employees')
+                                        : window.location.href;
+                                    setTimeout(function () { window.location.href = targetReload; }, 800);
                                 }
                             })
                             .catch(function () {
@@ -1083,7 +1086,10 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                     } else {
                         closeDrawer();
                         showToast('Saved successfully!');
-                        setTimeout(function () { window.location.reload(); }, 800);
+                        var targetReload = (submitUrl.indexOf('clearance') !== -1 || submitUrl.indexOf('separation') !== -1 || submitUrl.indexOf('move-back') !== -1)
+                            ? (window.location.pathname + '?section=left-employees')
+                            : window.location.href;
+                        setTimeout(function () { window.location.href = targetReload; }, 800);
                     }
                 };
 
