@@ -486,7 +486,6 @@
 
                     </div>
                     <div style="padding:10px 18px;">
-                        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:6px;">Assigned Subjects</div>
                         {% for ts in teacher.assignments.all %}
                         <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f9fafb;gap:8px;">
                             <div style="font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ts.subject.name }}</div>
