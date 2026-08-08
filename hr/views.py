@@ -231,10 +231,7 @@ def employee_move_back(request, employee_id):
         messages.success(request, f'{employee.full_name} has been moved back to active staff.')
         return redirect('hr_left_employees')
 
-    return render(request, 'hr/employee_move_back_confirm.html', {
-        'employee': employee,
-        'section': 'left_employees',
-    })
+    return redirect('hr_left_employees')
 
 
 # ─────────────────────────────────────────────
