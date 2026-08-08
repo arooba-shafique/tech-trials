@@ -1,0 +1,108 @@
+{% extends "hr/base_hr.html" %}
+
+{% block content %}
+<div class="hr-topbar">
+    <div>
+        <h1>Left Employees</h1>
+        <div class="breadcrumb">HR Module / Left Employees</div>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fef2f2;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
+        </div>
+        <div class="stat-info">
+            <p>Total Left</p>
+            <h3>{{ left_data|length }}</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#fffbeb;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="stat-info">
+            <p>Pending Clearance</p>
+            <h3>{{ pending_count }}</h3>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#f0fdf4;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div class="stat-info">
+            <p>Cleared</p>
+            <h3>{{ completed_count }}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>All Left Employees</h2>
+        <form method="get" style="display:flex;gap:8px;">
+            <input type="text" name="search" placeholder="Search name, ID..." class="form-control" style="width:220px;" value="{{ search }}">
+            <button type="submit" class="btn btn-primary btn-sm">Search</button>
+        </form>
+    </div>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Employee</th>
+                    <th>ID</th>
+                    <th>Designation</th>
+                    <th>Joining Date</th>
+                    <th>Left Date</th>
+                    <th>Reason</th>
+                    <th>Clearance</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in left_data %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <div style="width:32px;height:32px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:700;flex-shrink:0;">
+                                {{ item.employee.full_name|first|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:13px;">{{ item.employee.full_name }}</div>
+                                <div style="font-size:11px;color:var(--text-muted);">{{ item.employee.phone|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ item.employee.employee_id|default:"-" }}</td>
+                    <td>{{ item.employee.get_designation_display|default:item.employee.designation|default:"-" }}</td>
+                    <td>{{ item.employee.joining_date|default:"-" }}</td>
+                    <td>{{ item.separation.separation_date|default:"-" }}</td>
+                    <td>{{ item.separation.get_separation_reason_display|default:"-" }}</td>
+                    <td>
+                        {% if item.separation.clearance_status == 'completed' %}
+                            <span class="badge badge-green">Completed</span>
+                        {% else %}
+                            <span class="badge badge-red">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'hr_clearance_form' item.employee.id %}" class="btn btn-primary btn-sm">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            Clearance Form
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">No left employees found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

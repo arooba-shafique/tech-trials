@@ -1,0 +1,161 @@
+{% extends "hr/base_hr.html" %}
+
+{% block content %}
+<div class="hr-topbar">
+    <div>
+        <h1>Clearance Form — {{ employee.full_name }}</h1>
+        <div class="breadcrumb">HR Module / Left Employees / Clearance</div>
+    </div>
+</div>
+
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="width:50px;height:50px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">
+        {{ employee.full_name|first|upper }}
+    </div>
+    <div style="flex:1;">
+        <div style="font-size:16px;font-weight:700;">{{ employee.full_name }}</div>
+        <div style="font-size:12px;color:var(--text-muted);">ID: {{ employee.employee_id|default:"Not assigned" }} | {{ employee.get_designation_display|default:employee.designation|default:"-" }}</div>
+    </div>
+    <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--text-muted);">Left On</div>
+        <div style="font-size:14px;font-weight:600;">{{ separation.separation_date }}</div>
+    </div>
+</div>
+
+<!-- Accumulated Deductions from Salary History -->
+<div class="card">
+    <div class="card-header">
+        <h2>Accumulated Deductions (From Joining Date)</h2>
+        <span class="badge badge-blue">{{ salary_count }} salary record{{ salary_count|pluralize }}</span>
+    </div>
+
+    <div class="stat-grid" style="margin-bottom:0;">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#eff6ff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Total PF Deductions</p>
+                <h3 class="amount">PKR {{ salary_totals.total_pf|floatformat:0 }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fef2f2;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Total Security Deductions</p>
+                <h3 class="amount">PKR {{ salary_totals.total_security|floatformat:0 }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fdf4ff;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Total Tax Deductions</p>
+                <h3 class="amount">PKR {{ salary_totals.total_tax|floatformat:0 }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#fffbeb;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Total Van/Child Deductions</p>
+                <h3 class="amount">PKR {{ salary_totals.total_van_child|floatformat:0 }}</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background:#f0fdf4;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Total Other Deductions</p>
+                <h3 class="amount">PKR {{ salary_totals.total_other|floatformat:0 }}</h3>
+            </div>
+        </div>
+        <div class="stat-card" style="border:2px solid var(--red);">
+            <div class="stat-icon" style="background:#fef2f2;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+                <p>Grand Total Deductions</p>
+                <h3 class="amount" style="color:var(--red);">PKR {{ salary_totals.total_deductions|floatformat:0 }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exit Clearance Form -->
+<div class="card">
+    <div class="card-header">
+        <h2>Exit Clearance Details</h2>
+        {% if separation.clearance_status == 'completed' %}
+            <span class="badge badge-green">Cleared on {{ separation.clearance_date }}</span>
+        {% else %}
+            <span class="badge badge-red">Pending Clearance</span>
+        {% endif %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Security Deposit Deduction (PKR)</label>
+                <input type="number" name="security_deduction" class="form-control" step="0.01" value="{{ form.security_deduction.value|default:'0' }}">
+            </div>
+            <div class="form-group">
+                <label>Last Salary Withheld</label>
+                <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                        <input type="checkbox" name="last_salary_withheld" value="true" {% if form.last_salary_withheld.value %}checked{% endif %} onchange="document.getElementById('lastSalaryAmt').style.display=this.checked?'block':'none';">
+                        Yes, last salary is withheld
+                    </label>
+                </div>
+                <div id="lastSalaryAmt" style="margin-top:8px;{% if not form.last_salary_withheld.value %}display:none;{% endif %}">
+                    <input type="number" name="last_salary_amount" class="form-control" step="0.01" value="{{ form.last_salary_amount.value|default:'0' }}" placeholder="Enter withheld amount">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Additional Deductions (PKR)</label>
+                <input type="number" name="additional_deductions" class="form-control" step="0.01" value="{{ form.additional_deductions.value|default:'0' }}">
+            </div>
+            <div class="form-group">
+                <label>Clearance Status</label>
+                <select name="clearance_status" class="form-control">
+                    <option value="pending" {% if form.clearance_status.value == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="completed" {% if form.clearance_status.value == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Reason for Additional Deductions</label>
+            <textarea name="deduction_reason" class="form-control" rows="3" placeholder="Explain any additional deductions...">{{ form.deduction_reason.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Clearance Date</label>
+            <input type="date" name="clearance_date" class="form-control" value="{{ form.clearance_date.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Notes</label>
+            <textarea name="notes" class="form-control" rows="3" placeholder="Any additional clearance notes...">{{ form.notes.value|default:'' }}</textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button type="submit" class="btn btn-primary" style="padding:10px 24px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Clearance
+            </button>
+            <a href="{% url 'hr_left_employees' %}" class="btn btn-ghost" style="padding:10px 24px;">Back to Left Employees</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

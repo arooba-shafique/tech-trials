@@ -1,6 +1,6 @@
 import calendar
 from django import forms
-from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance
+from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance, SeparationRecord
 
 
 class EmployeeSalaryForm(forms.ModelForm):
@@ -49,3 +49,30 @@ class GenerateSalaryForm(forms.Form):
     year = forms.IntegerField(min_value=2020, max_value=2030, initial=2026, label='Year')
     total_working_days = forms.IntegerField(min_value=1, max_value=31, initial=26, label='Total Working Days')
     bonus_per_day = forms.DecimalField(max_digits=12, decimal_places=2, initial=0, label='Bonus Per Day (if 0 leaves)', required=False)
+
+
+class SeparationForm(forms.ModelForm):
+    class Meta:
+        model = SeparationRecord
+        fields = ['separation_date', 'last_working_date', 'separation_reason', 'separation_reason_detail', 'notes']
+        widgets = {
+            'separation_date': forms.DateInput(attrs={'type': 'date'}),
+            'last_working_date': forms.DateInput(attrs={'type': 'date'}),
+            'separation_reason_detail': forms.Textarea(attrs={'rows': 3}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }
+
+
+class ClearanceForm(forms.ModelForm):
+    class Meta:
+        model = SeparationRecord
+        fields = [
+            'security_deduction', 'last_salary_withheld', 'last_salary_amount',
+            'additional_deductions', 'deduction_reason',
+            'clearance_status', 'clearance_date', 'notes',
+        ]
+        widgets = {
+            'clearance_date': forms.DateInput(attrs={'type': 'date'}),
+            'deduction_reason': forms.Textarea(attrs={'rows': 3}),
+            'notes': forms.Textarea(attrs={'rows': 3}),
+        }

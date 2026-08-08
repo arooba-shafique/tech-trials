@@ -10,10 +10,10 @@ from django.db.models import Q, Sum
 import json
 
 from academics.models import TeacherProfile
-from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance
+from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance, SeparationRecord
 from .forms import (
     EmployeeSalaryForm, MonthlySalaryForm, SalaryConfigForm,
-    EmployeeAttendanceForm, GenerateSalaryForm
+    EmployeeAttendanceForm, GenerateSalaryForm, SeparationForm, ClearanceForm
 )
 
 
@@ -171,6 +171,154 @@ def employee_delete(request, employee_id):
     return render(request, 'hr/employee_delete_confirm.html', {
         'employee': employee,
         'section': 'employees',
+    })
+
+
+# ─────────────────────────────────────────────
+# EMPLOYEE SEPARATION (Left Button)
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def employee_separation(request, employee_id):
+    """Formal separation flow — collect separation details and mark employee as left."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    employee = get_object_or_404(TeacherProfile, pk=employee_id)
+
+    if SeparationRecord.objects.filter(employee=employee).exists():
+        messages.warning(request, f'{employee.full_name} already has a separation record.')
+        return redirect('hr:left_employees')
+
+    if request.method == 'POST':
+        form = SeparationForm(request.POST)
+        if form.is_valid():
+            record = form.save(commit=False)
+            record.employee = employee
+            record.save()
+            employee.is_employee_separated = True
+            employee.save()
+            messages.success(request, f'{employee.full_name} has been marked as left. Separation record created.')
+            return redirect('hr:left_employees')
+    else:
+        form = SeparationForm()
+
+    return render(request, 'hr/employee_separation_form.html', {
+        'form': form,
+        'employee': employee,
+        'section': 'left_employees',
+    })
+
+
+# ─────────────────────────────────────────────
+# LEFT EMPLOYEES LIST
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def left_employees(request):
+    """List all separated/left employees with clearance status."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    school = get_user_school(request.user)
+    employees = TeacherProfile.objects.filter(is_employee_separated=True)
+    if school and not request.user.is_superuser:
+        employees = employees.filter(school=school)
+
+    search = request.GET.get('search', '').strip()
+    if search:
+        employees = employees.filter(
+            Q(full_name__icontains=search) |
+            Q(employee_id__icontains=search) |
+            Q(cnic__icontains=search)
+        )
+
+    clearance_filter = request.GET.get('clearance', '')
+    employees = employees.select_related('separation_record').order_by('-separation_record__separation_date')
+
+    left_data = []
+    pending_count = 0
+    completed_count = 0
+    for emp in employees:
+        sep = getattr(emp, 'separation_record', None)
+        if sep:
+            if sep.clearance_status == 'completed':
+                completed_count += 1
+            else:
+                pending_count += 1
+        else:
+            pending_count += 1
+        left_data.append({
+            'employee': emp,
+            'separation': sep,
+        })
+
+    return render(request, 'hr/left_employees.html', {
+        'left_data': left_data,
+        'pending_count': pending_count,
+        'completed_count': completed_count,
+        'search': search,
+        'clearance_filter': clearance_filter,
+        'section': 'left_employees',
+    })
+
+
+# ─────────────────────────────────────────────
+# CLEARANCE FORM
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def clearance_form(request, employee_id):
+    """Clearance form — shows accumulated deductions from salary history + exit deductions."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    employee = get_object_or_404(TeacherProfile, pk=employee_id)
+    separation = get_object_or_404(SeparationRecord, employee=employee)
+
+    # Calculate accumulated deductions from all MonthlySalary records
+    salary_totals = MonthlySalary.objects.filter(employee=employee).aggregate(
+        total_pf=Sum('provident_fund'),
+        total_security=Sum('security_deduction'),
+        total_van_child=Sum('van_child_deduction'),
+        total_tax=Sum('tax_deduction'),
+        total_leave=Sum('leave_deduction'),
+        total_late=Sum('late_coming_deduction'),
+        total_advance=Sum('advance_deduction'),
+        total_other=Sum('other_deduction'),
+        total_deductions=Sum('total_deductions'),
+        total_months=Sum('total_working_days'),
+    )
+
+    # Fill None values with 0
+    for key in salary_totals:
+        if salary_totals[key] is None:
+            salary_totals[key] = 0
+
+    salary_count = MonthlySalary.objects.filter(employee=employee).count()
+
+    if request.method == 'POST':
+        form = ClearanceForm(request.POST, instance=separation)
+        if form.is_valid():
+            record = form.save(commit=False)
+            if record.clearance_status == 'completed' and not record.clearance_date:
+                record.clearance_date = timezone.now().date()
+            record.save()
+            messages.success(request, f'Clearance form saved for {employee.full_name}.')
+            return redirect('hr:left_employees')
+    else:
+        form = ClearanceForm(instance=separation)
+
+    return render(request, 'hr/clearance_form.html', {
+        'form': form,
+        'employee': employee,
+        'separation': separation,
+        'salary_totals': salary_totals,
+        'salary_count': salary_count,
+        'section': 'left_employees',
     })
 
 @login_required(login_url='admin_login')

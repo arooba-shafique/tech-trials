@@ -22,4 +22,7 @@ urlpatterns = [
     path('salary/export/excel/', views.export_salary_excel, name='hr_export_salary_excel'),
     path('salary/import/excel/', views.import_salary_excel, name='hr_import_salary_excel'),
     path('attendance/monthly/', views.monthly_attendance_summary, name='hr_monthly_attendance'),
+    path('left-employees/', views.left_employees, name='hr_left_employees'),
+    path('separation/<int:employee_id>/', views.employee_separation, name='hr_employee_separation'),
+    path('clearance/<int:employee_id>/', views.clearance_form, name='hr_clearance_form'),
 ]

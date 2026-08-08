@@ -431,3 +431,49 @@ class EmployeeAttendance(models.Model):
 
     def __str__(self):
         return f"{self.employee.full_name} - {self.date} ({self.get_status_display()})"
+
+
+class SeparationRecord(models.Model):
+    """Records when an employee leaves — stores separation details and clearance info."""
+    SEPARATION_REASON_CHOICES = (
+        ('resignation', 'Resignation'),
+        ('termination', 'Termination'),
+        ('contract_end', 'End of Contract'),
+        ('retirement', 'Retirement'),
+        ('other', 'Other'),
+    )
+    CLEARANCE_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+    )
+
+    employee = models.OneToOneField(TeacherProfile, on_delete=models.CASCADE, related_name='separation_record')
+    separation_date = models.DateField()
+    last_working_date = models.DateField()
+    separation_reason = models.CharField(max_length=20, choices=SEPARATION_REASON_CHOICES, default='resignation')
+    separation_reason_detail = models.TextField(blank=True, default='')
+
+    # Clearance deductions (exit-specific)
+    security_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Security deposit deduction on exit")
+    last_salary_withheld = models.BooleanField(default=False, help_text="Was last salary withheld?")
+    last_salary_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Amount of withheld last salary")
+    additional_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Any other deductions on exit")
+    deduction_reason = models.TextField(blank=True, default='', help_text="Reason for additional deductions")
+
+    # Clearance status
+    clearance_status = models.CharField(max_length=10, choices=CLEARANCE_STATUS_CHOICES, default='pending')
+    clearance_date = models.DateField(null=True, blank=True)
+    notes = models.TextField(blank=True, default='')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def total_exit_deductions(self):
+        total = float(self.security_deduction) + float(self.additional_deductions)
+        if self.last_salary_withheld:
+            total += float(self.last_salary_amount)
+        return total
+
+    def __str__(self):
+        return f"Separation - {self.employee.full_name} ({self.separation_date})"
