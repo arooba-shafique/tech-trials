@@ -87,7 +87,7 @@ def admin_dashboard(request):
     User = get_user_model()
 
     from django.db.models import Q as Q2
-    from hr.models import MonthlySalary
+    from hr.models import MonthlySalary, SeparationRecord
     left_employees = teachers_qs.filter(is_employee_separated=True)
     left_search = request.GET.get('search', '').strip() if request.GET.get('section') == 'left-employees' else ''
     if left_search:
@@ -96,13 +96,13 @@ def admin_dashboard(request):
             Q2(employee_id__icontains=left_search) |
             Q2(cnic__icontains=left_search)
         )
-    left_employees = left_employees.select_related('separation_record').order_by('-separation_record__last_working_date')
+    left_employees = left_employees.order_by('-id')
 
     left_data = []
     left_pending_count = 0
     left_completed_count = 0
     for emp in left_employees:
-        sep = getattr(emp, 'separation_record', None)
+        sep = SeparationRecord.objects.filter(employee=emp).first()
         if sep:
             if sep.clearance_status == 'completed':
                 left_completed_count += 1
