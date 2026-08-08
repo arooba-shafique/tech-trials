@@ -1439,8 +1439,13 @@ function clearAttendanceDate(classId) {
 
 <style>
 @keyframes spin { to { transform: rotate(360deg); } }
-#drawer-body form { display:flex;flex-direction:column;gap:0; }
-#drawer-body .form-group, #drawer-body p { margin-bottom:16px; }
+#drawer-body form{display:flex;flex-direction:column;gap:0;}
+#drawer-body .form-group,#drawer-body p{margin-bottom:16px;}
+#drawer-body .upload-form{display:flex !important;flex-direction:row !important;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+#drawer-body .upload-form .form-group{flex:1 1 180px;min-width:0;max-width:50%;margin-bottom:0;}
+#drawer-body .upload-form .form-group label{text-align:left;}
+#drawer-body .upload-form .form-group:last-child{flex:0 0 auto;max-width:none;}
+#drawer-body .upload-form button[type=submit]{width:auto;flex:0 0 auto;}
 #drawer-body label { display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#6b7280;margin-bottom:6px; }
 #drawer-body input[type=text],#drawer-body input[type=email],#drawer-body input[type=password],#drawer-body input[type=number],#drawer-body input[type=date],#drawer-body input[type=tel],#drawer-body select,#drawer-body textarea { width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13.5px;font-family:inherit;color:#1a1d23;outline:none;background:#fff;transition:border-color 0.15s;box-sizing:border-box; }
 #drawer-body input:focus,#drawer-body select:focus,#drawer-body textarea:focus { border-color:#0d9488;box-shadow:0 0 0 3px rgba(13,148,136,0.1); }
