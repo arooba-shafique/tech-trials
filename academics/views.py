@@ -457,17 +457,23 @@ def delete_teacher(request, pk):
 # ─────────────────────────────────────────────
 
 import base64
-from .models import StaffDocument
+import json
+import uuid
+
+def _get_docs(teacher):
+    try:
+        return json.loads(teacher.documents_json or '[]')
+    except Exception:
+        return []
+
+def _save_docs(teacher, docs):
+    teacher.documents_json = json.dumps(docs)
+    teacher.save(update_fields=['documents_json'])
 
 @login_required(login_url='admin_login')
 def staff_documents(request, pk):
     teacher = get_object_or_404(TeacherProfile, pk=pk)
-    try:
-        documents = teacher.staff_documents.all()
-    except Exception:
-        from django.core.management import call_command
-        call_command('migrate', 'academics', verbosity=0)
-        documents = teacher.staff_documents.all()
+    documents = _get_docs(teacher)
     return render(request, 'staff_documents.html', {'teacher': teacher, 'documents': documents})
 
 @login_required(login_url='admin_login')
@@ -477,34 +483,42 @@ def add_staff_document(request, pk):
         title = request.POST.get('title', '')
         file = request.FILES.get('file')
         if title and file:
-            file_content = base64.b64encode(file.read()).decode('utf-8')
-            StaffDocument.objects.create(
-                staff=teacher,
-                title=title,
-                file_name=file.name,
-                file_content=file_content,
-                file_type=file.content_type or 'application/octet-stream'
-            )
+            docs = _get_docs(teacher)
+            doc = {
+                'id': str(uuid.uuid4())[:8],
+                'title': title,
+                'file_name': file.name,
+                'file_content': base64.b64encode(file.read()).decode('utf-8'),
+                'file_type': file.content_type or 'application/octet-stream',
+                'uploaded_at': timezone.now().strftime('%d %b %Y')
+            }
+            docs.append(doc)
+            _save_docs(teacher, docs)
             messages.success(request, f'Document "{title}" uploaded successfully.')
         else:
             messages.error(request, 'Please provide both title and file.')
     return redirect('staff_documents', pk=pk)
 
 @login_required(login_url='admin_login')
-def download_staff_document(request, pk):
-    doc = get_object_or_404(StaffDocument, pk=pk)
-    file_bytes = base64.b64decode(doc.file_content)
-    response = HttpResponse(file_bytes, content_type=doc.file_type)
-    response['Content-Disposition'] = f'inline; filename="{doc.file_name}"'
+def download_staff_document(request, pk, doc_id):
+    teacher = get_object_or_404(TeacherProfile, pk=pk)
+    docs = _get_docs(teacher)
+    doc = next((d for d in docs if d['id'] == doc_id), None)
+    if not doc:
+        return HttpResponse('Document not found', status=404)
+    file_bytes = base64.b64decode(doc['file_content'])
+    response = HttpResponse(file_bytes, content_type=doc['file_type'])
+    response['Content-Disposition'] = f'inline; filename="{doc["file_name"]}"'
     return response
 
 @login_required(login_url='admin_login')
-def delete_staff_document(request, pk):
-    doc = get_object_or_404(StaffDocument, pk=pk)
-    teacher_pk = doc.staff.pk
-    doc.delete()
+def delete_staff_document(request, pk, doc_id):
+    teacher = get_object_or_404(TeacherProfile, pk=pk)
+    docs = _get_docs(teacher)
+    docs = [d for d in docs if d['id'] != doc_id]
+    _save_docs(teacher, docs)
     messages.success(request, 'Document deleted successfully.')
-    return redirect('staff_documents', pk=teacher_pk)
+    return redirect('staff_documents', pk=pk)
 
 
 # ─────────────────────────────────────────────

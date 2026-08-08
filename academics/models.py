@@ -139,6 +139,7 @@ class TeacherProfile(models.Model):
     is_employee_separated = models.BooleanField(default=False, help_text="Has the employee left?")
     bank_account = models.CharField(max_length=50, blank=True, default='')
     bank_name = models.CharField(max_length=100, blank=True, default='')
+    documents_json = models.TextField(blank=True, default='[]', help_text="JSON array of staff documents")
 
     def __str__(self):
         base = f"{self.full_name} ({self.employee_id})"
@@ -150,22 +151,6 @@ class TeacherProfile(models.Model):
     class Meta:
         verbose_name = "Teacher"
         verbose_name_plural = "Teachers"
-
-class StaffDocument(models.Model):
-    staff = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='staff_documents')
-    title = models.CharField(max_length=100)
-    file_name = models.CharField(max_length=255, blank=True, default='')
-    file_content = models.TextField(help_text="Base64 encoded file content")
-    file_type = models.CharField(max_length=100, blank=True, default='')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.title} - {self.staff.full_name}"
-
-    class Meta:
-        verbose_name = "Staff Document"
-        verbose_name_plural = "Staff Documents"
-        ordering = ['-uploaded_at']
 
 class ParentProfile(models.Model):
     email = models.EmailField(blank=True, null=True)
