@@ -966,18 +966,23 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
             .then(function (html) {
                 var parser = new DOMParser();
                 var doc    = parser.parseFromString(html, 'text/html');
-                var form   = doc.querySelector('form');
 
-                if (form) {
-                    body.innerHTML = form.outerHTML;
+                var container = doc.querySelector('.container');
+                if (container) {
+                    body.innerHTML = container.innerHTML;
                 } else {
-                    var containers = ['.content', 'main', '.container', 'body'];
-                    var content = '';
-                    for (var i = 0; i < containers.length; i++) {
-                        var el = doc.querySelector(containers[i]);
-                        if (el) { content = el.innerHTML; break; }
+                    var form = doc.querySelector('form');
+                    if (form) {
+                        body.innerHTML = form.outerHTML;
+                    } else {
+                        var fallback = ['.content', 'main', 'body'];
+                        var content = '';
+                        for (var i = 0; i < fallback.length; i++) {
+                            var el = doc.querySelector(fallback[i]);
+                            if (el) { content = el.innerHTML; break; }
+                        }
+                        body.innerHTML = content || '<p style="color:#dc2626;padding:20px;">Could not load content. <a href="' + url + '">Open in full page</a></p>';
                     }
-                    body.innerHTML = content || '<p style="color:#dc2626;padding:20px;">Could not load form. <a href="' + url + '">Open in full page</a></p>';
                 }
                 attachFormHandler(body, url);
             })
@@ -1010,7 +1015,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
 
                 var btn = f.querySelector('[type=submit], button[type=submit]');
                 var originalText = btn ? (btn.value || btn.textContent) : 'Save';
-                if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+                if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
 
                 var formData  = new FormData(f);
                 var submitUrl = f.getAttribute('action') || originalUrl;
@@ -1028,9 +1033,29 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                     var isRedirect    = responsePath && responsePath !== submittedPath;
 
                     if (isRedirect) {
-                        closeDrawer();
-                        showToast('Saved successfully!');
-                        setTimeout(function () { window.location.reload(); }, 800);
+                        var reloadUrl = finalUrl || originalUrl;
+                        fetch(reloadUrl, { credentials: 'same-origin' })
+                            .then(function (r) { return r.text(); })
+                            .then(function (html) {
+                                var parser = new DOMParser();
+                                var doc = parser.parseFromString(html, 'text/html');
+                                var container = doc.querySelector('.container');
+                                var drawerBody = document.getElementById('drawer-body');
+                                if (container && drawerBody) {
+                                    drawerBody.innerHTML = container.innerHTML;
+                                    attachFormHandler(drawerBody, originalUrl);
+                                    drawerBody.scrollTop = 0;
+                                    showToast('Uploaded successfully!');
+                                } else {
+                                    closeDrawer();
+                                    showToast('Uploaded successfully!');
+                                    setTimeout(function () { window.location.reload(); }, 800);
+                                }
+                            })
+                            .catch(function () {
+                                closeDrawer();
+                                window.location.reload();
+                            });
                         return;
                     }
 
