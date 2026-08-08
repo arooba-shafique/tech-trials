@@ -269,7 +269,7 @@ def admin_dashboard(request):
 
 SECTION_TAGS = {
     'Student':            'students',
-    'Teacher':            'staff',
+    'Teacher':            'teachers',
     'Parent':             'parents',
     'Class':              'classes',
     'Subject':            'subjects',
@@ -290,7 +290,7 @@ def add_model_entry(request, form_class, model_name, template_name):
             form.save()
             tag = SECTION_TAGS.get(model_name, 'dashboard')
             messages.success(request, f'{model_name} added successfully.', extra_tags=tag)
-            return redirect(f'admin_console?section={tag}')
+            return redirect('admin_console')
     else:
         form = form_class()
     return render(request, template_name, {'form': form, 'model_name': model_name})
@@ -304,7 +304,7 @@ def edit_model_entry(request, instance, form_class, model_name, template_name):
             form.save()
             tag = SECTION_TAGS.get(model_name, 'dashboard')
             messages.success(request, f'{model_name} updated successfully.', extra_tags=tag)
-            return redirect(f'admin_console?section={tag}')
+            return redirect('admin_console')
     else:
         form = form_class(instance=instance)
     return render(request, template_name, {'form': form, 'model_name': model_name, 'edit': True})
@@ -316,7 +316,7 @@ def delete_model_entry(request, instance, model_name):
         instance.delete()
         tag = SECTION_TAGS.get(model_name, 'dashboard')
         messages.success(request, f'{model_name} deleted successfully.', extra_tags=tag)
-    return redirect(f'admin_console?section={tag}')
+    return redirect('admin_console')
 
 
 from django.contrib.auth import get_user_model
@@ -354,7 +354,7 @@ def edit_student(request, pk):
                 student.user.email = form.cleaned_data['email']
                 student.user.save(update_fields=['email'])
             messages.success(request, 'Student updated successfully.', extra_tags='students')
-            return redirect('admin_console?section=students')
+            return redirect('admin_console')
     else:
         # Pre-fill email from model field first, fallback to linked user
         initial_email = student.email or (student.user.email if student.user else '')
@@ -427,7 +427,7 @@ def add_teacher(request):
             form.save_m2m()  # save ManyToMany fields like subjects
 
             messages.success(request, 'Teacher added successfully.', extra_tags='teachers')
-            return redirect('admin_console?section=staff')
+            return redirect('admin_console')
     else:
         form = TeacherProfileForm(school=school)
     return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher'})
@@ -470,7 +470,7 @@ def edit_teacher(request, pk):
                 teacher.user.email = form.cleaned_data['email']
                 teacher.user.save()
             messages.success(request, 'Teacher updated successfully.', extra_tags='teachers')
-            return redirect('admin_console?section=staff')
+            return redirect('admin_console')
     else:
         form = TeacherProfileForm(
             instance=teacher,
@@ -606,7 +606,7 @@ def add_student(request):
             form.save_m2m()
 
             messages.success(request, 'Student added successfully.', extra_tags='students')
-            return redirect('admin_console?section=students')
+            return redirect('admin_console')
     else:
         form = StudentProfileForm(school=school)
     return render(request, 'add_entry.html', {'form': form, 'model_name': 'Student'})
@@ -652,7 +652,7 @@ def add_parent(request):
 
             messages.success(request, 'Parent added successfully.', extra_tags='parents')
 
-            return redirect('admin_console?section=parents')
+            return redirect('admin_console')
 
     else:
         form = ParentProfileForm(school=school)
@@ -678,7 +678,7 @@ def edit_parent(request, pk):
                 parent.user.email = form.cleaned_data['email']
                 parent.user.save(update_fields=['email'])
             messages.success(request, 'Parent updated successfully.', extra_tags='parents')
-            return redirect('admin_console?section=parents')
+            return redirect('admin_console')
     else:
         # Pre-fill email from model field first, fallback to linked user
         initial_email = parent.email or (parent.user.email if parent.user else '')
@@ -789,7 +789,7 @@ def add_class(request):
             cls.school = get_user_school(request.user)
             cls.save()
             messages.success(request, 'Class added successfully.', extra_tags='classes')
-            return redirect('admin_console?section=classes')
+            return redirect('admin_console')
     else:
         form = ClassForm()
     return render(request, 'add_entry.html', {'form': form, 'model_name': 'Class'})
@@ -826,7 +826,7 @@ def add_subject(request):
             subject.school = get_user_school(request.user)
             subject.save()
             messages.success(request, 'Subject added successfully.', extra_tags='subjects')
-            return redirect('admin_console?section=subjects')
+            return redirect('admin_console')
     else:
         form = SubjectForm()
     return render(request, 'add_entry.html', {'form': form, 'model_name': 'Subject'})
@@ -861,7 +861,7 @@ def add_assignment(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Assignment added successfully.', extra_tags='assignments')
-            return redirect('admin_console?section=assignments')
+            return redirect('admin_console')
     else:
         qs = Class.objects.all()
         school = get_user_school(request.user)
