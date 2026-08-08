@@ -483,8 +483,7 @@
                         <div><span style="color:var(--text-muted);">Type:</span> {{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</div>
                         <div><span style="color:var(--text-muted);">Phone:</span> {{ teacher.phone|default:"-" }}</div>
                         <div><span style="color:var(--text-muted);">Joined:</span> {{ teacher.joining_date|default:"-" }}</div>
-                        <div><span style="color:var(--text-muted);">Salary:</span> <strong style="color:#16a34a;">PKR {{ teacher.salary|floatformat:0 }}</strong></div>
-                        <div><span style="color:var(--text-muted);">Pay:</span> {{ teacher.get_salary_type_display|default:teacher.salary_type|default:"-" }}</div>
+
                     </div>
                     <div style="padding:10px 18px;">
                         <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:6px;">Assigned Subjects</div>
@@ -496,7 +495,6 @@
                         {% empty %}<div style="font-size:11px;color:var(--text-muted);padding:2px 0;">No subjects assigned.</div>{% endfor %}
                     </div>
                     <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
-                        <a href="{% url 'hr_employee_detail' teacher.id %}" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Salary</a>
                         <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
                         <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-danger" style="padding:5px 12px;font-size:11.5px;" onclick="return confirm('Delete?')">Delete</a>
                     </div>
