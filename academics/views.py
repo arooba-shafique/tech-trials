@@ -462,7 +462,12 @@ from .models import StaffDocument
 @login_required(login_url='admin_login')
 def staff_documents(request, pk):
     teacher = get_object_or_404(TeacherProfile, pk=pk)
-    documents = teacher.staff_documents.all()
+    try:
+        documents = teacher.staff_documents.all()
+    except Exception:
+        from django.core.management import call_command
+        call_command('migrate', 'academics', verbosity=0)
+        documents = teacher.staff_documents.all()
     return render(request, 'staff_documents.html', {'teacher': teacher, 'documents': documents})
 
 @login_required(login_url='admin_login')
