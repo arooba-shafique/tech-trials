@@ -100,7 +100,7 @@
                     </div>
                 </div>
                 <div class="doc-actions">
-                    <a href="{{ doc.file.url }}" class="btn btn-primary btn-sm">View</a>
+                    <a href="{% url 'download_staff_document' doc.pk %}" class="btn btn-primary btn-sm">View</a>
                     <a href="{% url 'delete_staff_document' doc.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this document?')">Delete</a>
                 </div>
             </div>

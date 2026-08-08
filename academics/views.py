@@ -456,6 +456,7 @@ def delete_teacher(request, pk):
 # STAFF DOCUMENTS
 # ─────────────────────────────────────────────
 
+import base64
 from .models import StaffDocument
 
 @login_required(login_url='admin_login')
@@ -471,11 +472,26 @@ def add_staff_document(request, pk):
         title = request.POST.get('title', '')
         file = request.FILES.get('file')
         if title and file:
-            StaffDocument.objects.create(staff=teacher, title=title, file=file)
+            file_content = base64.b64encode(file.read()).decode('utf-8')
+            StaffDocument.objects.create(
+                staff=teacher,
+                title=title,
+                file_name=file.name,
+                file_content=file_content,
+                file_type=file.content_type or 'application/octet-stream'
+            )
             messages.success(request, f'Document "{title}" uploaded successfully.')
         else:
             messages.error(request, 'Please provide both title and file.')
     return redirect('staff_documents', pk=pk)
+
+@login_required(login_url='admin_login')
+def download_staff_document(request, pk):
+    doc = get_object_or_404(StaffDocument, pk=pk)
+    file_bytes = base64.b64decode(doc.file_content)
+    response = HttpResponse(file_bytes, content_type=doc.file_type)
+    response['Content-Disposition'] = f'inline; filename="{doc.file_name}"'
+    return response
 
 @login_required(login_url='admin_login')
 def delete_staff_document(request, pk):

@@ -19,6 +19,7 @@ path('teacher/logout/', views.teacher_logout, name='teacher_logout'),
     path('staff/<int:pk>/documents/', views.staff_documents, name='staff_documents'),
     path('staff/<int:pk>/documents/add/', views.add_staff_document, name='add_staff_document'),
     path('staff/document/<int:pk>/delete/', views.delete_staff_document, name='delete_staff_document'),
+    path('staff/document/<int:pk>/download/', views.download_staff_document, name='download_staff_document'),
     path('teacher/password-reset/', views.teacher_password_reset, name='teacher_password_reset'),
     path('teacher/password-change/', views.teacher_password_reset, name='teacher_password_change'),
     path('accounts/teacher/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(

@@ -155,7 +155,9 @@ class TeacherProfile(models.Model):
 class StaffDocument(models.Model):
     staff = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='staff_documents')
     title = models.CharField(max_length=100)
-    file = models.FileField(upload_to='staff/documents/')
+    file_name = models.CharField(max_length=255, blank=True, default='')
+    file_content = models.TextField(help_text="Base64 encoded file content")
+    file_type = models.CharField(max_length=100, blank=True, default='')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
