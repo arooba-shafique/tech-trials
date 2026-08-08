@@ -74,17 +74,57 @@
             <h2>Upload New Document</h2>
             <form class="upload-form" method="POST" action="{% url 'add_staff_document' teacher.pk %}" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label>Document Title</label>
-                    <input type="text" name="title" placeholder="e.g. CNIC, Degree, Certificate" required>
+                <div id="doc-rows">
+                    <div class="doc-row" style="display:flex;gap:12px;align-items:flex-end;margin-bottom:12px;">
+                        <div class="form-group" style="flex:1;min-width:0;">
+                            <label>Document Title</label>
+                            <input type="text" name="titles[]" placeholder="e.g. CNIC, Degree, Certificate" required>
+                        </div>
+                        <div class="form-group" style="flex:1;min-width:0;">
+                            <label>Choose File</label>
+                            <input type="file" name="files[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                        </div>
+                        <button type="button" class="btn btn-danger btn-sm remove-row" style="margin-bottom:4px;display:none;" title="Remove">✕</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Choose File</label>
-                    <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:8px;">
+                    <button type="button" id="add-row-btn" class="btn btn-sm" style="background:#e5e7eb;color:#374151;padding:6px 14px;font-size:12px;border:none;border-radius:6px;cursor:pointer;font-weight:600;">+ Add More</button>
+                    <button type="submit" class="btn btn-primary" style="margin-left:auto;">Upload</button>
                 </div>
-                <button type="submit" class="btn btn-primary">Upload</button>
             </form>
         </div>
+
+        <script>
+        (function(){
+            var container = document.getElementById('doc-rows');
+            var addBtn = document.getElementById('add-row-btn');
+            if(!addBtn) return;
+            addBtn.addEventListener('click', function(){
+                var row = container.querySelector('.doc-row').cloneNode(true);
+                row.querySelector('[name="titles[]"]').value = '';
+                row.querySelector('[name="files[]"]').value = '';
+                row.querySelector('[name="titles[]"]').removeAttribute('required');
+                row.querySelector('[name="files[]"]').removeAttribute('required');
+                var rm = row.querySelector('.remove-row');
+                if(rm) rm.style.display = 'inline-flex';
+                container.appendChild(row);
+                updateRemoveBtns();
+            });
+            container.addEventListener('click', function(e){
+                if(e.target.closest('.remove-row')){
+                    e.target.closest('.doc-row').remove();
+                    updateRemoveBtns();
+                }
+            });
+            function updateRemoveBtns(){
+                var rows = container.querySelectorAll('.doc-row');
+                rows.forEach(function(r,i){
+                    var btn = r.querySelector('.remove-row');
+                    if(btn) btn.style.display = rows.length > 1 ? 'inline-flex' : 'none';
+                });
+            }
+        })();
+        </script>
 
         <div class="docs-list">
             <div class="docs-header">Uploaded Documents ({{ documents|length }})</div>

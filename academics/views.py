@@ -514,21 +514,29 @@ def staff_documents(request, pk):
 def add_staff_document(request, pk):
     teacher = get_object_or_404(TeacherProfile, pk=pk)
     if request.method == 'POST':
-        title = request.POST.get('title', '')
-        file = request.FILES.get('file')
-        if title and file:
-            docs = _get_docs(teacher)
-            doc = {
-                'id': str(uuid.uuid4())[:8],
-                'title': title,
-                'file_name': file.name,
-                'file_content': base64.b64encode(file.read()).decode('utf-8'),
-                'file_type': file.content_type or 'application/octet-stream',
-                'uploaded_at': timezone.now().strftime('%d %b %Y')
-            }
-            docs.append(doc)
+        titles = request.POST.getlist('titles[]')
+        files = request.FILES.getlist('files[]')
+        if not titles:
+            titles = [request.POST.get('title', '')]
+            files = [request.FILES.get('file')]
+        docs = _get_docs(teacher)
+        count = 0
+        for title, f in zip(titles, files):
+            title = (title or '').strip()
+            if title and f:
+                doc = {
+                    'id': str(uuid.uuid4())[:8],
+                    'title': title,
+                    'file_name': f.name,
+                    'file_content': base64.b64encode(f.read()).decode('utf-8'),
+                    'file_type': f.content_type or 'application/octet-stream',
+                    'uploaded_at': timezone.now().strftime('%d %b %Y')
+                }
+                docs.append(doc)
+                count += 1
+        if count:
             _save_docs(teacher, docs)
-            messages.success(request, f'Document "{title}" uploaded successfully.')
+            messages.success(request, f'{count} document(s) uploaded successfully.')
         else:
             messages.error(request, 'Please provide both title and file.')
     return redirect('staff_documents', pk=pk)
