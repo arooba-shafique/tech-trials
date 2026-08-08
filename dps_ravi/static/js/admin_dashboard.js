@@ -1199,29 +1199,30 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         e.preventDefault();
         e.stopPropagation();
         var href = link.getAttribute('href');
-        if (!confirm('Delete this document?')) return;
         var row = link.closest('.doc-item');
-        fetch(href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-            .then(function (r) { return r.json(); })
-            .then(function () {
-                if (row) {
-                    row.style.transition = 'opacity 0.2s';
-                    row.style.opacity = '0';
-                    setTimeout(function () {
-                        row.remove();
-                        var docsList = document.querySelector('#drawer-body .docs-list') || document.querySelector('.docs-list');
-                        if (docsList) {
-                            var remaining = docsList.querySelectorAll('.doc-item').length;
-                            var header = docsList.querySelector('.docs-header');
-                            if (header) header.textContent = 'Uploaded Documents (' + remaining + ')';
-                        }
-                    }, 200);
-                }
-                if (typeof showToast === 'function') showToast('Document deleted.');
-            })
-            .catch(function () {
-                if (typeof showToast === 'function') showToast('Failed to delete.', 'error');
-            });
+        customConfirm('Are you sure you want to delete this?', function () {
+            fetch(href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function () {
+                    if (row) {
+                        row.style.transition = 'opacity 0.2s';
+                        row.style.opacity = '0';
+                        setTimeout(function () {
+                            row.remove();
+                            var docsList = document.querySelector('#drawer-body .docs-list') || document.querySelector('.docs-list');
+                            if (docsList) {
+                                var remaining = docsList.querySelectorAll('.doc-item').length;
+                                var header = docsList.querySelector('.docs-header');
+                                if (header) header.textContent = 'Uploaded Documents (' + remaining + ')';
+                            }
+                        }, 200);
+                    }
+                    if (typeof showToast === 'function') showToast('Document deleted.');
+                })
+                .catch(function () {
+                    if (typeof showToast === 'function') showToast('Failed to delete.', 'error');
+                });
+        });
     }, true);
 
     var nativeConfirm = window.confirm;
