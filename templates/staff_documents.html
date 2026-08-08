@@ -158,16 +158,25 @@
             e.preventDefault();
             var href = link.getAttribute('href');
             if(!confirm('Delete this document?')) return;
+            var row = link.closest('.doc-item');
             var xhr = new XMLHttpRequest();
             xhr.open('GET', href, true);
             xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
             xhr.onreadystatechange = function(){
                 if(xhr.readyState !== 4) return;
-                var inDrawer = !!document.getElementById('drawer-body');
-                if(inDrawer && typeof window.openDrawer === 'function'){
-                    window.openDrawer('{{ request.path }}', 'Staff Documents — {{ teacher.full_name|escapejs }}');
-                } else {
-                    window.location.reload();
+                if(xhr.status === 200 && row){
+                    row.style.transition = 'opacity 0.2s';
+                    row.style.opacity = '0';
+                    setTimeout(function(){
+                        row.remove();
+                        var list = document.querySelector('.docs-list');
+                        if(list){
+                            var remaining = list.querySelectorAll('.doc-item').length;
+                            var header = list.querySelector('.docs-header');
+                            if(header) header.textContent = 'Uploaded Documents (' + remaining + ')';
+                        }
+                    }, 200);
+                    if(typeof showToast === 'function') showToast('Document deleted.');
                 }
             };
             xhr.send();
