@@ -182,12 +182,6 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Salary Slips
         </a>
-
-        <div class="nav-label">Documents</div>
-        <a class="nav-item" href="#" onclick="showSection('staff-docs',this);return false;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Staff Documents
-        </a>
     </nav>
 
     <div class="sidebar-user">
@@ -501,7 +495,7 @@
                         {% empty %}<div style="font-size:11px;color:var(--text-muted);padding:2px 0;">No subjects assigned.</div>{% endfor %}
                     </div>
                     <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
-                        <a href="#" onclick="showSection('staff-docs',document.querySelector('.nav-item[onclick*=\'staff-docs\']'));return false;" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Docs</a>
+                        <a href="{% url 'staff_documents' teacher.id %}" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Docs</a>
                         <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
                         <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-danger" style="padding:5px 12px;font-size:11.5px;" onclick="return confirm('Delete?')">Delete</a>
                     </div>
@@ -1321,65 +1315,6 @@
             </div>
         </div>
 
-        <!-- ═══════════ STAFF DOCUMENTS ═══════════ -->
-        <div id="section-staff-docs" class="section">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-                <h2 style="font-size:15px;font-weight:700;">Staff Documents</h2>
-            </div>
-
-            <!-- Staff Selector -->
-            <div id="staff-docs-selector" style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:20px;">
-                <div style="padding:14px 20px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:700;color:var(--text-primary);">Select Staff Member</div>
-                <div style="max-height:300px;overflow-y:auto;">
-                    {% for teacher in teachers %}
-                    <div class="staff-doc-row" onclick="loadStaffDocs({{ teacher.id }}, '{{ teacher.full_name|escapejs }}', '{{ teacher.employee_id|default:"-" }}')" style="display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid #f9fafb;cursor:pointer;transition:background 0.1s;">
-                        <div style="width:36px;height:36px;border-radius:50%;background:#0d9488;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;">{{ teacher.full_name|first|upper }}</div>
-                        <div>
-                            <div style="font-size:13px;font-weight:600;color:#1a1d23;">{{ teacher.full_name }}</div>
-                            <div style="font-size:11px;color:#9ca3af;">{{ teacher.employee_id|default:"-" }}</div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Documents Panel (hidden until staff selected) -->
-            <div id="staff-docs-panel" style="display:none;">
-                <div style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
-                    <div style="padding:14px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:#fafafa;">
-                        <div>
-                            <div style="font-size:14px;font-weight:700;color:var(--text-primary);" id="staff-docs-title">Documents</div>
-                            <div style="font-size:11px;color:#9ca3af;" id="staff-docs-subtitle"></div>
-                        </div>
-                        <button onclick="showUploadForm()" style="padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">+ Add Document</button>
-                    </div>
-
-                    <!-- Upload Form (hidden by default) -->
-                    <div id="staff-upload-form" style="display:none;padding:16px 20px;border-bottom:1px solid #f3f4f6;background:#f0fdfa;">
-                        <form id="doc-upload-form" enctype="multipart/form-data" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
-                            {% csrf_token %}
-                            <input type="hidden" name="staff_id" id="upload-staff-id">
-                            <div style="display:flex;flex-direction:column;gap:4px;">
-                                <label style="font-size:11px;font-weight:600;color:#374151;">Document Title</label>
-                                <input type="text" name="title" placeholder="e.g. CNIC, Degree" required style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
-                            </div>
-                            <div style="display:flex;flex-direction:column;gap:4px;">
-                                <label style="font-size:11px;font-weight:600;color:#374151;">Choose File</label>
-                                <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;">
-                            </div>
-                            <button type="submit" style="padding:9px 18px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Upload</button>
-                            <button type="button" onclick="hideUploadForm()" style="padding:9px 18px;background:#f3f4f6;color:#374151;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
-                        </form>
-                    </div>
-
-                    <!-- Documents List -->
-                    <div id="staff-docs-list" style="max-height:400px;overflow-y:auto;">
-                        <div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">Select a staff member to view documents.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div><!-- end .content -->
 </main>
 
@@ -1474,79 +1409,12 @@ function filterAttendanceByDate(classId) {
     });
 }
 function clearAttendanceDate(classId) {
-    var input = document.getElementById('att-date-' + classId);
+    const input = document.getElementById('att-date-' + classId);
     if (input) input.value = '';
     document.querySelectorAll('.att-row-' + classId).forEach(function(row) { row.style.display = ''; });
-    var empty = document.getElementById('att-empty-' + classId);
+    const empty = document.getElementById('att-empty-' + classId);
     if (empty) empty.style.display = 'none';
 }
-
-// Staff Documents functions
-function loadStaffDocs(staffId, staffName, employeeId) {
-    document.querySelectorAll('.staff-doc-row').forEach(function(r){ r.style.background=''; });
-    event.currentTarget.style.background='#f0fdfa';
-    document.getElementById('staff-docs-panel').style.display='block';
-    document.getElementById('staff-docs-title').textContent='Documents — '+staffName;
-    document.getElementById('staff-docs-subtitle').textContent=employeeId;
-    document.getElementById('upload-staff-id').value=staffId;
-    document.getElementById('staff-upload-form').style.display='none';
-    var list=document.getElementById('staff-docs-list');
-    list.innerHTML='<div style="text-align:center;padding:30px;color:#9ca3af;"><div style="width:24px;height:24px;border:3px solid #e5e7eb;border-top-color:#0d9488;border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 10px;"></div>Loading…</div>';
-    fetch('/staff/'+staffId+'/documents/api/')
-        .then(function(r){ return r.json(); })
-        .then(function(data){
-            if(data.documents.length===0){
-                list.innerHTML='<div style="text-align:center;color:#9ca3af;padding:40px;font-size:13px;">No documents uploaded yet.</div>';
-                return;
-            }
-            var html='';
-            data.documents.forEach(function(doc){
-                html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid #f9fafb;">';
-                html+='<div style="display:flex;align-items:center;gap:12px;">';
-                html+='<div style="width:40px;height:40px;border-radius:8px;background:#f0fdfa;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>';
-                html+='<div><div style="font-size:13px;font-weight:600;color:#1a1d23;">'+doc.title+'</div>';
-                html+='<div style="font-size:11px;color:#9ca3af;">'+doc.file_name+' · '+doc.uploaded_at+'</div></div></div>';
-                html+='<div style="display:flex;gap:8px;">';
-                html+='<a href="/staff/document/'+doc.id+'/download/" style="padding:5px 12px;background:#0d9488;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-decoration:none;">View</a>';
-                html+='<a href="/staff/document/'+doc.id+'/delete/?staff='+staffId+'" onclick="return confirm(\'Delete this document?\')" style="padding:5px 12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;text-decoration:none;">Delete</a>';
-                html+='</div></div>';
-            });
-            list.innerHTML=html;
-        })
-        .catch(function(){
-            list.innerHTML='<div style="text-align:center;color:#dc2626;padding:40px;font-size:13px;">Error loading documents.</div>';
-        });
-}
-
-function showUploadForm(){
-    document.getElementById('staff-upload-form').style.display='block';
-}
-function hideUploadForm(){
-    document.getElementById('staff-upload-form').style.display='none';
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-    var form=document.getElementById('doc-upload-form');
-    if(form){
-        form.addEventListener('submit', function(e){
-            e.preventDefault();
-            var formData=new FormData(form);
-            var staffId=document.getElementById('upload-staff-id').value;
-            fetch('/staff/'+staffId+'/documents/add/',{
-                method:'POST',
-                body:formData
-            }).then(function(r){
-                if(r.ok){
-                    var name=document.getElementById('staff-docs-title').textContent.replace('Documents — ','');
-                    var sub=document.getElementById('staff-docs-subtitle').textContent;
-                    loadStaffDocs(staffId, name, sub);
-                    form.reset();
-                    hideUploadForm();
-                }
-            });
-        });
-    }
-});
 </script>
 
 <!-- Drawer -->
