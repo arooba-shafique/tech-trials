@@ -31,6 +31,9 @@ class StudentProfileForm(forms.ModelForm):
 
 
 class TeacherProfileForm(forms.ModelForm):
+    doc_file = forms.FileField(required=False, label="Upload Document")
+    doc_title = forms.CharField(required=False, max_length=100, label="Document Title")
+
     class Meta:
         model = TeacherProfile
         fields = [

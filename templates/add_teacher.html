@@ -143,6 +143,29 @@
                 <div class="form-group"></div>
             </div>
 
+            <!-- Documents -->
+            <div class="section-title">Documents</div>
+            {% if edit and documents %}
+            <div style="margin-bottom:14px;">
+                {% for doc in documents %}
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f9fafb;border-radius:8px;margin-bottom:6px;font-size:13px;">
+                    <span>{{ doc.title }} <span style="color:#9ca3af;font-size:11px;">({{ doc.file_name }})</span></span>
+                    <a href="{% url 'delete_staff_document' teacher.pk doc.id %}" style="color:#dc2626;font-size:11px;text-decoration:none;" onclick="return confirm('Delete this document?')">Delete</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <div class="form-group">
+                <label>Upload Document</label>
+                {{ form.doc_file }}
+                <small>Upload staff documents (PDF, JPG, PNG, DOC)</small>
+            </div>
+            <div class="form-group">
+                <label>Document Title</label>
+                {{ form.doc_title }}
+                <small>e.g. CNIC, Degree, Certificate</small>
+            </div>
+
             <button type="submit">{% if edit %}Update{% else %}Save{% endif %} Staff</button>
         </form>
         <a href="javascript:history.back()" class="back-link">← Back</a>

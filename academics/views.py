@@ -385,6 +385,22 @@ def add_teacher(request):
             teacher = form.save(commit=False)
             teacher.school = get_user_school(request.user)
             
+            # Handle document upload
+            doc_file = form.cleaned_data.get('doc_file')
+            doc_title = form.cleaned_data.get('doc_title', '')
+            if doc_file and doc_title:
+                import base64, json, uuid
+                docs = json.loads(teacher.documents_json or '[]')
+                docs.append({
+                    'id': str(uuid.uuid4())[:8],
+                    'title': doc_title,
+                    'file_name': doc_file.name,
+                    'file_content': base64.b64encode(doc_file.read()).decode('utf-8'),
+                    'file_type': doc_file.content_type or 'application/octet-stream',
+                    'uploaded_at': timezone.now().strftime('%d %b %Y')
+                })
+                teacher.documents_json = json.dumps(docs)
+            
             # Create a User account for this teacher
             User = get_user_model()
             email = form.cleaned_data.get('email', '')
@@ -427,6 +443,22 @@ def edit_teacher(request, pk):
         form = TeacherProfileForm(request.POST, request.FILES, instance=teacher, school=school)
         if form.is_valid():
             form.save()
+            # Handle document upload
+            doc_file = form.cleaned_data.get('doc_file')
+            doc_title = form.cleaned_data.get('doc_title', '')
+            if doc_file and doc_title:
+                import base64, json, uuid
+                docs = json.loads(teacher.documents_json or '[]')
+                docs.append({
+                    'id': str(uuid.uuid4())[:8],
+                    'title': doc_title,
+                    'file_name': doc_file.name,
+                    'file_content': base64.b64encode(doc_file.read()).decode('utf-8'),
+                    'file_type': doc_file.content_type or 'application/octet-stream',
+                    'uploaded_at': timezone.now().strftime('%d %b %Y')
+                })
+                teacher.documents_json = json.dumps(docs)
+                teacher.save(update_fields=['documents_json'])
             # Update email on the linked user
             if teacher.user and form.cleaned_data.get('email'):
                 teacher.user.email = form.cleaned_data['email']
@@ -439,7 +471,9 @@ def edit_teacher(request, pk):
             initial={'email': teacher.user.email if teacher.user else ''},
             school=get_user_school(request.user)
         )
-    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher', 'edit': True})
+    import json
+    documents = json.loads(teacher.documents_json or '[]')
+    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher', 'edit': True, 'teacher': teacher, 'documents': documents})
 
 
 @login_required(login_url='admin_login')
