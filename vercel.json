@@ -13,6 +13,10 @@
   ],
   "routes": [
     {
+      "src": "/media/(.*)",
+      "dest": "/dps_ravi/media/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/api/index.py"
     }
