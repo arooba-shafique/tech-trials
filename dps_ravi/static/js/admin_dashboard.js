@@ -1096,23 +1096,27 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 e.preventDefault();
                 var href = a.getAttribute('href');
                 customConfirm('Delete this document?', function () {
-                    fetch(href, { credentials: 'same-origin' })
+                    fetch(href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(function (r) { return r.json(); })
                         .then(function () {
-                            fetch(originalUrl, { credentials: 'same-origin' })
-                                .then(function (r) { return r.text(); })
-                                .then(function (html) {
-                                    var parser = new DOMParser();
-                                    var doc = parser.parseFromString(html, 'text/html');
-                                    var ctr = doc.querySelector('.container');
-                                    var drawerBody = document.getElementById('drawer-body');
-                                    if (ctr && drawerBody) {
-                                        drawerBody.innerHTML = ctr.innerHTML;
-                                        attachFormHandler(drawerBody, originalUrl);
-                                        attachDeleteHandlers(drawerBody, originalUrl);
-                                        drawerBody.scrollTop = 0;
-                                        showToast('Document deleted.');
+                            var row = a.closest('.doc-item');
+                            if (row) {
+                                row.style.transition = 'opacity 0.2s';
+                                row.style.opacity = '0';
+                                setTimeout(function () {
+                                    row.remove();
+                                    var list = container.querySelector('.docs-list') || container.closest('.docs-list');
+                                    if (list) {
+                                        var remaining = list.querySelectorAll('.doc-item').length;
+                                        var header = list.querySelector('.docs-header');
+                                        if (header) header.textContent = 'Uploaded Documents (' + remaining + ')';
                                     }
-                                });
+                                }, 200);
+                            }
+                            showToast('Document deleted.');
+                        })
+                        .catch(function () {
+                            window.location.href = href;
                         });
                 });
             });
