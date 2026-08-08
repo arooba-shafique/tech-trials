@@ -457,12 +457,16 @@ def delete_teacher(request, pk):
 # ─────────────────────────────────────────────
 
 import base64
+from django.http import JsonResponse
 from .models import StaffDocument
 
 @login_required(login_url='admin_login')
 def staff_documents(request, pk):
     teacher = get_object_or_404(TeacherProfile, pk=pk)
     documents = teacher.staff_documents.all()
+    if request.headers.get('Accept') == 'application/json':
+        doc_list = [{'id': d.id, 'title': d.title, 'file_name': d.file_name, 'uploaded_at': d.uploaded_at.strftime('%d %b %Y')} for d in documents]
+        return JsonResponse({'documents': doc_list})
     return render(request, 'staff_documents.html', {'teacher': teacher, 'documents': documents})
 
 @login_required(login_url='admin_login')
@@ -498,6 +502,8 @@ def delete_staff_document(request, pk):
     doc = get_object_or_404(StaffDocument, pk=pk)
     teacher_pk = doc.staff.pk
     doc.delete()
+    if request.headers.get('Accept') == 'application/json':
+        return JsonResponse({'status': 'ok', 'staff_pk': teacher_pk})
     messages.success(request, 'Document deleted successfully.')
     return redirect('staff_documents', pk=teacher_pk)
 
