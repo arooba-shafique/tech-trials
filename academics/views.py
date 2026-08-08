@@ -559,6 +559,8 @@ def delete_staff_document(request, pk, doc_id):
     docs = _get_docs(teacher)
     docs = [d for d in docs if d['id'] != doc_id]
     _save_docs(teacher, docs)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True})
     messages.success(request, 'Document deleted successfully.')
     return redirect('staff_documents', pk=pk)
 
