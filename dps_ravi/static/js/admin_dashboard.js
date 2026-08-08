@@ -1192,6 +1192,38 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         if (e.key === 'Escape') closeDrawer();
     });
 
+    /* ── AJAX delete for staff documents ── */
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest('a[href*="/documents/"][href*="/delete/"]');
+        if (!link) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var href = link.getAttribute('href');
+        if (!confirm('Delete this document?')) return;
+        var row = link.closest('.doc-item');
+        fetch(href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json(); })
+            .then(function () {
+                if (row) {
+                    row.style.transition = 'opacity 0.2s';
+                    row.style.opacity = '0';
+                    setTimeout(function () {
+                        row.remove();
+                        var docsList = document.querySelector('#drawer-body .docs-list') || document.querySelector('.docs-list');
+                        if (docsList) {
+                            var remaining = docsList.querySelectorAll('.doc-item').length;
+                            var header = docsList.querySelector('.docs-header');
+                            if (header) header.textContent = 'Uploaded Documents (' + remaining + ')';
+                        }
+                    }, 200);
+                }
+                if (typeof showToast === 'function') showToast('Document deleted.');
+            })
+            .catch(function () {
+                window.location.href = href;
+            });
+    }, true);
+
     var nativeConfirm = window.confirm;
     window.confirm = function (msg) { return nativeConfirm(msg); };
 
