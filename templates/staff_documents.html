@@ -75,12 +75,12 @@
             <form class="upload-form" method="POST" action="{% url 'add_staff_document' teacher.pk %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div id="doc-rows">
-                    <div class="doc-row" style="display:flex;flex-direction:column;gap:12px;margin-bottom:12px;">
+                    <div class="doc-row" style="display:flex;gap:12px;align-items:flex-end;margin-bottom:12px;">
                         <div class="form-group" style="flex:1;min-width:0;">
                             <label>Document Title</label>
                             <input type="text" name="titles[]" placeholder="e.g. CNIC, Degree, Certificate" required>
                         </div>
-                        <div class="form-group" style="flex:1;min-width:0;">
+                        <div class="form-group" style="flex:0 0 180px;min-width:0;">
                             <label>Choose File</label>
                             <input type="file" name="files[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
                         </div>
