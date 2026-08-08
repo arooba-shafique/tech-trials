@@ -152,6 +152,20 @@ class TeacherProfile(models.Model):
         verbose_name = "Teacher"
         verbose_name_plural = "Teachers"
 
+class StaffDocument(models.Model):
+    staff = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, related_name='staff_documents')
+    title = models.CharField(max_length=100)
+    file = models.FileField(upload_to='staff/documents/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.staff.full_name}"
+
+    class Meta:
+        verbose_name = "Staff Document"
+        verbose_name_plural = "Staff Documents"
+        ordering = ['-uploaded_at']
+
 class ParentProfile(models.Model):
     email = models.EmailField(blank=True, null=True)
     RELATION_CHOICES = [

@@ -453,6 +453,40 @@ def delete_teacher(request, pk):
 
 
 # ─────────────────────────────────────────────
+# STAFF DOCUMENTS
+# ─────────────────────────────────────────────
+
+from .models import StaffDocument
+
+@login_required(login_url='admin_login')
+def staff_documents(request, pk):
+    teacher = get_object_or_404(TeacherProfile, pk=pk)
+    documents = teacher.staff_documents.all()
+    return render(request, 'staff_documents.html', {'teacher': teacher, 'documents': documents})
+
+@login_required(login_url='admin_login')
+def add_staff_document(request, pk):
+    teacher = get_object_or_404(TeacherProfile, pk=pk)
+    if request.method == 'POST':
+        title = request.POST.get('title', '')
+        file = request.FILES.get('file')
+        if title and file:
+            StaffDocument.objects.create(staff=teacher, title=title, file=file)
+            messages.success(request, f'Document "{title}" uploaded successfully.')
+        else:
+            messages.error(request, 'Please provide both title and file.')
+    return redirect('staff_documents', pk=pk)
+
+@login_required(login_url='admin_login')
+def delete_staff_document(request, pk):
+    doc = get_object_or_404(StaffDocument, pk=pk)
+    teacher_pk = doc.staff.pk
+    doc.delete()
+    messages.success(request, 'Document deleted successfully.')
+    return redirect('staff_documents', pk=teacher_pk)
+
+
+# ─────────────────────────────────────────────
 # PARENT
 # ─────────────────────────────────────────────
 

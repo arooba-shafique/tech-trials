@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Documents - {{ teacher.full_name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f0f2f5; min-height: 100vh; }
+        .header { background: #1e293b; color: #fff; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+        .header h1 { font-size: 18px; font-weight: 700; }
+        .header .back-btn { color: #94a3b8; text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .header .back-btn:hover { color: #fff; }
+        .container { max-width: 900px; margin: 24px auto; padding: 0 20px; }
+        .staff-info { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07); display: flex; align-items: center; gap: 16px; }
+        .staff-avatar { width: 56px; height: 56px; border-radius: 50%; background: #0d9488; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; flex-shrink: 0; }
+        .staff-name { font-size: 18px; font-weight: 700; color: #1e293b; }
+        .staff-id { font-size: 13px; color: #6b7280; margin-top: 2px; }
+        .upload-section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+        .upload-section h2 { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 16px; }
+        .upload-form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: #374151; }
+        .form-group input { padding: 10px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; }
+        .form-group input:focus { border-color: #0d9488; }
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+        .btn-primary { background: #0d9488; color: #fff; }
+        .btn-primary:hover { background: #0f766e; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 6px 12px; font-size: 11px; }
+        .docs-list { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow: hidden; }
+        .docs-header { padding: 16px 20px; border-bottom: 1px solid #f3f4f6; font-size: 15px; font-weight: 700; color: #1e293b; }
+        .doc-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #f3f4f6; }
+        .doc-item:last-child { border-bottom: none; }
+        .doc-info { display: flex; align-items: center; gap: 12px; }
+        .doc-icon { width: 40px; height: 40px; border-radius: 8px; background: #f0fdfa; display: flex; align-items: center; justify-content: center; }
+        .doc-icon svg { width: 20px; height: 20px; color: #0d9488; }
+        .doc-title { font-size: 14px; font-weight: 600; color: #1e293b; }
+        .doc-date { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+        .doc-actions { display: flex; gap: 8px; }
+        .empty-state { padding: 48px; text-align: center; color: #9ca3af; font-size: 14px; }
+        .msg { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; }
+        .msg-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+        .msg-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Staff Documents</h1>
+        <a href="javascript:history.back()" class="back-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+        </a>
+    </div>
+
+    <div class="container">
+        <div class="staff-info">
+            <div class="staff-avatar">{{ teacher.full_name|first|upper }}</div>
+            <div>
+                <div class="staff-name">{{ teacher.full_name }}</div>
+                <div class="staff-id">{{ teacher.employee_id }}</div>
+            </div>
+        </div>
+
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="msg msg-{{ msg.tags }}">{{ msg }}</div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="upload-section">
+            <h2>Upload New Document</h2>
+            <form class="upload-form" method="POST" action="{% url 'add_staff_document' teacher.pk %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Document Title</label>
+                    <input type="text" name="title" placeholder="e.g. CNIC, Degree, Certificate" required>
+                </div>
+                <div class="form-group">
+                    <label>Choose File</label>
+                    <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+        </div>
+
+        <div class="docs-list">
+            <div class="docs-header">Uploaded Documents ({{ documents.count }})</div>
+            {% for doc in documents %}
+            <div class="doc-item">
+                <div class="doc-info">
+                    <div class="doc-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div>
+                        <div class="doc-title">{{ doc.title }}</div>
+                        <div class="doc-date">Uploaded {{ doc.uploaded_at|date:"d M Y" }}</div>
+                    </div>
+                </div>
+                <div class="doc-actions">
+                    <a href="{{ doc.file.url }}" class="btn btn-primary btn-sm">View</a>
+                    <a href="{% url 'delete_staff_document' doc.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this document?')">Delete</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">No documents uploaded yet.</div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
