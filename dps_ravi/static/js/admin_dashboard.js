@@ -896,6 +896,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         { key: '/edit/subject',    label: 'Edit Subject'    },
         { key: '/add/assignment',  label: 'Assign Teacher'  },
         { key: '/edit/assignment', label: 'Edit Assignment' },
+        { key: '/separation',      label: 'Mark as Left'    },
         { key: 'add_student',      label: 'Add Student'     },
         { key: 'edit_student',     label: 'Edit Student'    },
         { key: 'add_teacher',      label: 'Add Staff'        },
@@ -908,6 +909,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         { key: 'edit_subject',     label: 'Edit Subject'    },
         { key: 'add_assignment',   label: 'Assign Teacher'  },
         { key: 'edit_assignment',  label: 'Edit Assignment' },
+        { key: 'separation',       label: 'Mark as Left'    },
     ];
 
     var OPEN_IN_DRAWER = [
@@ -916,13 +918,13 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         '/add/parent',  '/edit/parent',
         '/add/class',   '/edit/class',
         '/add/subject', '/edit/subject',
-        '/add/assignment', '/edit/assignment',
+        '/add/assignment', '/edit/assignment', '/separation',
         'add_student',  'edit_student',
         'add_teacher',  'edit_teacher',
         'add_parent',   'edit_parent',
         'add_class',    'edit_class',
         'add_subject',  'edit_subject',
-        'add_assignment', 'edit_assignment',
+        'add_assignment', 'edit_assignment', 'separation',
     ];
 
     function getTitle(url) {
