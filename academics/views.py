@@ -385,23 +385,25 @@ def add_teacher(request):
             teacher = form.save(commit=False)
             teacher.school = get_user_school(request.user)
             
-            # Handle document upload
-            doc_file = form.cleaned_data.get('doc_file')
-            doc_title = form.cleaned_data.get('doc_title', '')
-            if doc_file and doc_title:
-                import base64, json, uuid
+            # Handle multiple document uploads
+            import base64, json, uuid
+            doc_files = request.FILES.getlist('doc_files[]')
+            doc_titles = request.POST.getlist('doc_titles[]')
+            if doc_files and doc_titles:
                 docs = json.loads(teacher.documents_json or '[]')
-                docs.append({
-                    'id': str(uuid.uuid4())[:8],
-                    'title': doc_title,
-                    'file_name': doc_file.name,
-                    'file_content': base64.b64encode(doc_file.read()).decode('utf-8'),
-                    'file_type': doc_file.content_type or 'application/octet-stream',
-                    'uploaded_at': timezone.now().strftime('%d %b %Y')
-                })
+                for i in range(len(doc_files)):
+                    f = doc_files[i]
+                    t = doc_titles[i] if i < len(doc_titles) else ''
+                    if f and t:
+                        docs.append({
+                            'id': str(uuid.uuid4())[:8],
+                            'title': t,
+                            'file_name': f.name,
+                            'file_content': base64.b64encode(f.read()).decode('utf-8'),
+                            'file_type': f.content_type or 'application/octet-stream',
+                            'uploaded_at': timezone.now().strftime('%d %b %Y')
+                        })
                 teacher.documents_json = json.dumps(docs)
-            
-            # Create a User account for this teacher
             User = get_user_model()
             email = form.cleaned_data.get('email', '')
             # Generate username from full name
@@ -443,20 +445,24 @@ def edit_teacher(request, pk):
         form = TeacherProfileForm(request.POST, request.FILES, instance=teacher, school=school)
         if form.is_valid():
             form.save()
-            # Handle document upload
-            doc_file = form.cleaned_data.get('doc_file')
-            doc_title = form.cleaned_data.get('doc_title', '')
-            if doc_file and doc_title:
-                import base64, json, uuid
+            # Handle multiple document uploads
+            import base64, json, uuid
+            doc_files = request.FILES.getlist('doc_files[]')
+            doc_titles = request.POST.getlist('doc_titles[]')
+            if doc_files and doc_titles:
                 docs = json.loads(teacher.documents_json or '[]')
-                docs.append({
-                    'id': str(uuid.uuid4())[:8],
-                    'title': doc_title,
-                    'file_name': doc_file.name,
-                    'file_content': base64.b64encode(doc_file.read()).decode('utf-8'),
-                    'file_type': doc_file.content_type or 'application/octet-stream',
-                    'uploaded_at': timezone.now().strftime('%d %b %Y')
-                })
+                for i in range(len(doc_files)):
+                    f = doc_files[i]
+                    t = doc_titles[i] if i < len(doc_titles) else ''
+                    if f and t:
+                        docs.append({
+                            'id': str(uuid.uuid4())[:8],
+                            'title': t,
+                            'file_name': f.name,
+                            'file_content': base64.b64encode(f.read()).decode('utf-8'),
+                            'file_type': f.content_type or 'application/octet-stream',
+                            'uploaded_at': timezone.now().strftime('%d %b %Y')
+                        })
                 teacher.documents_json = json.dumps(docs)
                 teacher.save(update_fields=['documents_json'])
             # Update email on the linked user

@@ -155,20 +155,33 @@
                 {% endfor %}
             </div>
             {% endif %}
-            <div class="form-group">
-                <label>Upload Document</label>
-                {{ form.doc_file }}
-                <small>Upload staff documents (PDF, JPG, PNG, DOC)</small>
+            <div id="doc-rows">
+                <div class="form-row" style="align-items:flex-end;">
+                    <div class="form-group">
+                        <label>Document Title</label>
+                        <input type="text" name="doc_titles[]" placeholder="e.g. CNIC, Degree, Certificate">
+                    </div>
+                    <div class="form-group">
+                        <label>Upload Document</label>
+                        <input type="file" name="doc_files[]" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                        <small>PDF, JPG, PNG, DOC</small>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Document Title</label>
-                {{ form.doc_title }}
-                <small>e.g. CNIC, Degree, Certificate</small>
-            </div>
+            <button type="button" id="add-doc-row" style="width:auto;margin-top:8px;padding:8px 16px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">+ Add More</button>
 
             <button type="submit">{% if edit %}Update{% else %}Save{% endif %} Staff</button>
         </form>
         <a href="javascript:history.back()" class="back-link">← Back</a>
     </div>
+    <script>
+    document.getElementById('add-doc-row').addEventListener('click', function() {
+        var container = document.getElementById('doc-rows');
+        var row = container.querySelector('.form-row').cloneNode(true);
+        row.querySelector('[name="doc_titles[]"]').value = '';
+        row.querySelector('[name="doc_files[]"]').value = '';
+        container.appendChild(row);
+    });
+    </script>
 </body>
 </html>
