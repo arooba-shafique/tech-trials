@@ -54,6 +54,7 @@ class TeacherProfileForm(forms.ModelForm):
             'working_days_per_week',
             'bank_name',
             'bank_account',
+            'documents',
         ]
 
     def __init__(self, *args, **kwargs):
