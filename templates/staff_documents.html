@@ -149,5 +149,30 @@
             {% endfor %}
         </div>
     </div>
+
+    <script>
+    (function(){
+        document.addEventListener('click', function(e){
+            var link = e.target.closest('.js-delete-doc');
+            if(!link) return;
+            e.preventDefault();
+            var href = link.getAttribute('href');
+            if(!confirm('Delete this document?')) return;
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', href, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState !== 4) return;
+                var inDrawer = !!document.getElementById('drawer-body');
+                if(inDrawer && typeof window.openDrawer === 'function'){
+                    window.openDrawer('{{ request.path }}', 'Staff Documents — {{ teacher.full_name|escapejs }}');
+                } else {
+                    window.location.reload();
+                }
+            };
+            xhr.send();
+        });
+    })();
+    </script>
 </body>
 </html>
