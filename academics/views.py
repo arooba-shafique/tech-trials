@@ -169,6 +169,15 @@ def admin_dashboard(request):
                 pass
 
             for teacher in teachers_qs:
+                # Determine if employee is in first 2 months
+                from datetime import date
+                teacher.is_new_employee = False
+                if teacher.joining_date:
+                    salary_date = date(sheet_year, sheet_month, 1)
+                    months_since = (salary_date.year - teacher.joining_date.year) * 12 + (salary_date.month - teacher.joining_date.month)
+                    if months_since < 2:
+                        teacher.is_new_employee = True
+
                 ms = ms_lookup.get(teacher.id)
                 has_cfg = False
                 if ms:
