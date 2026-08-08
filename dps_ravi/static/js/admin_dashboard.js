@@ -980,7 +980,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                     if (form) {
                         body.innerHTML = form.outerHTML;
                     } else {
-                        var fallback = ['.content', 'main', 'body'];
+                        var fallback = ['.hr-main', '.content', 'main', 'body'];
                         var content = '';
                         for (var i = 0; i < fallback.length; i++) {
                             var el = doc.querySelector(fallback[i]);
