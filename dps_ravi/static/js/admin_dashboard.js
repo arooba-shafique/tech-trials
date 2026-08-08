@@ -1088,16 +1088,15 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
     }
 
     function attachDeleteHandlers(container, originalUrl) {
-        container.querySelectorAll('a').forEach(function (a) {
-            var href = a.getAttribute('href') || '';
-            if (href.indexOf('/delete/') === -1) return;
+        container.querySelectorAll('a[href*="/delete/"]').forEach(function (a) {
             if (a.dataset.ajaxBound) return;
             a.dataset.ajaxBound = '1';
+            a.removeAttribute('onclick');
             a.addEventListener('click', function (e) {
                 e.preventDefault();
+                var href = a.getAttribute('href');
                 customConfirm('Delete this document?', function () {
                     fetch(href, { credentials: 'same-origin' })
-                        .then(function (r) { return r.text(); })
                         .then(function () {
                             fetch(originalUrl, { credentials: 'same-origin' })
                                 .then(function (r) { return r.text(); })

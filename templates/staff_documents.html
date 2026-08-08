@@ -141,7 +141,7 @@
                 </div>
                 <div class="doc-actions">
                     <a href="{% url 'download_staff_document' teacher.pk doc.id %}" class="btn btn-primary btn-sm">View</a>
-                    <a href="{% url 'delete_staff_document' teacher.pk doc.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this document?')">Delete</a>
+                    <a href="{% url 'delete_staff_document' teacher.pk doc.id %}" class="btn btn-danger btn-sm js-delete-doc">Delete</a>
                 </div>
             </div>
             {% empty %}

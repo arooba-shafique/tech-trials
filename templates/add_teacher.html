@@ -150,7 +150,7 @@
                 {% for doc in documents %}
                 <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f9fafb;border-radius:8px;margin-bottom:6px;font-size:13px;">
                     <span>{{ doc.title }} <span style="color:#9ca3af;font-size:11px;">({{ doc.file_name }})</span></span>
-                    <a href="{% url 'delete_staff_document' teacher.pk doc.id %}" style="color:#dc2626;font-size:11px;text-decoration:none;" onclick="return confirm('Delete this document?')">Delete</a>
+                    <a href="{% url 'delete_staff_document' teacher.pk doc.id %}" style="color:#dc2626;font-size:11px;text-decoration:none;" class="js-delete-doc">Delete</a>
                 </div>
                 {% endfor %}
             </div>
