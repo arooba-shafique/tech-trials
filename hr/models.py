@@ -269,7 +269,7 @@ class MonthlySalary(models.Model):
         self.allowed_leaves = config.max_allowed_leaves
 
         if is_new_employee:
-            # FIRST 2 MONTHS: Leave, Late, and Security apply. PF/Tax/Van/Child/Advance/Other are dead.
+            # FIRST 2 MONTHS: Leave, Late, Tax, and Security apply. PF/Van/Child/Advance/Other are dead.
             # Leave deduction
             self.leave_deduction = self.unpaid_leaves * self.per_day_salary
 
@@ -284,7 +284,6 @@ class MonthlySalary(models.Model):
             self.bonus_amount = 0
             self.provident_fund = 0
             self.van_child_deduction = 0
-            self.tax_deduction = 0
             self.advance_deduction = 0
             self.other_deduction = 0
 
@@ -296,9 +295,15 @@ class MonthlySalary(models.Model):
             self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
                                - float(self.leave_deduction) - float(self.late_coming_deduction))
 
-            # Total deductions = leave + late + security only
+            # Tax deduction
+            if has_cfg:
+                self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
+            else:
+                self.tax_deduction = config.get_tax(self.gross_salary)
+
+            # Total deductions = leave + late + security + tax
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.security_deduction))
+                                   float(self.security_deduction) + float(self.tax_deduction))
 
             # Net salary
             self.net_salary = self.gross_salary - self.total_deductions
