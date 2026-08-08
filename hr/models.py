@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from academics.models import TeacherProfile
+from datetime import date
 import calendar
 
 
@@ -30,8 +31,9 @@ class SalaryConfig(models.Model):
     
     # Deductions
     provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
-    security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic")
+    security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic (normal, from 3rd month)")
     van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
+    new_employee_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=50, help_text="Security deduction % of basic for first 2 months after joining")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
     
     # Late deduction
@@ -233,6 +235,15 @@ class MonthlySalary(models.Model):
         # Check if this record has month-specific config percentages
         has_cfg = self.has_custom_config
 
+        # Determine if employee is in first 2 months after joining
+        is_new_employee = False
+        joining_date = getattr(emp, 'joining_date', None)
+        if joining_date:
+            salary_date = date(self.year, self.month, 1)
+            months_since_joining = (salary_date.year - joining_date.year) * 12 + (salary_date.month - joining_date.month)
+            if months_since_joining < 2:
+                is_new_employee = True
+
         # Allowances — use stored percentages if set, else global config
         if has_cfg:
             self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
@@ -257,64 +268,101 @@ class MonthlySalary(models.Model):
         # Set allowed leaves from config
         self.allowed_leaves = config.max_allowed_leaves
 
-        # Leave deduction = unpaid_leaves * per_day_salary
-        self.leave_deduction = self.unpaid_leaves * self.per_day_salary
+        if is_new_employee:
+            # FIRST 2 MONTHS: Leave, Late, and Security apply. PF/Tax/Van/Child/Advance/Other are dead.
+            # Leave deduction
+            self.leave_deduction = self.unpaid_leaves * self.per_day_salary
 
-        # Late coming deduction (every N lates = 1 half-day deduction)
-        lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
-        self.late_coming_deduction = lates_for_deduct * (self.per_day_salary / 2)
+            # Late coming deduction
+            lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
+            self.late_coming_deduction = lates_for_deduct * (self.per_day_salary / 2)
 
-        # Bonus: only if 0 absent days AND 0 unpaid leaves
-        if self.days_absent == 0 and self.unpaid_leaves == 0:
-            if has_cfg:
-                if float(self.cfg_bonus_per_day) > 0:
-                    self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
-                else:
-                    self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
-            else:
-                if config.bonus_per_day > 0:
-                    self.bonus_amount = config.bonus_per_day * self.total_working_days
-                else:
-                    self.bonus_amount = config.get_bonus(basic)
-        else:
+            # Security deduction (new employee percentage)
+            self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
+
+            # Dead deductions for new employees
             self.bonus_amount = 0
+            self.provident_fund = 0
+            self.van_child_deduction = 0
+            self.tax_deduction = 0
+            self.advance_deduction = 0
+            self.other_deduction = 0
 
-        # Provident fund
-        if has_cfg:
-            self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
+            # Overtime still applies
+            overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
+
+            # Gross salary (with leave/late deductions)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
+            self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
+                               - float(self.leave_deduction) - float(self.late_coming_deduction))
+
+            # Total deductions = leave + late + security only
+            self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
+                                   float(self.security_deduction))
+
+            # Net salary
+            self.net_salary = self.gross_salary - self.total_deductions
         else:
-            self.provident_fund = config.get_pf(basic)
+            # NORMAL: 3rd month onwards — all deductions apply
 
-        # Security & Van/Child
-        if has_cfg:
-            self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
-            self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
-        else:
-            self.security_deduction = config.get_security(basic)
-            self.van_child_deduction = config.get_van_child(basic)
+            # Leave deduction = unpaid_leaves * per_day_salary
+            self.leave_deduction = self.unpaid_leaves * self.per_day_salary
 
-        # Overtime
-        overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
+            # Late coming deduction (every N lates = 1 half-day deduction)
+            lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
+            self.late_coming_deduction = lates_for_deduct * (self.per_day_salary / 2)
 
-        # Gross salary
-        total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
-        self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
-                           - float(self.leave_deduction) - float(self.late_coming_deduction))
+            # Bonus: only if 0 absent days AND 0 unpaid leaves
+            if self.days_absent == 0 and self.unpaid_leaves == 0:
+                if has_cfg:
+                    if float(self.cfg_bonus_per_day) > 0:
+                        self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
+                    else:
+                        self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
+                else:
+                    if config.bonus_per_day > 0:
+                        self.bonus_amount = config.bonus_per_day * self.total_working_days
+                    else:
+                        self.bonus_amount = config.get_bonus(basic)
+            else:
+                self.bonus_amount = 0
 
-        # Tax
-        if has_cfg:
-            self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
-        else:
-            self.tax_deduction = config.get_tax(self.gross_salary)
+            # Provident fund
+            if has_cfg:
+                self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
+            else:
+                self.provident_fund = config.get_pf(basic)
 
-        # Total deductions
-        self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                               float(self.advance_deduction) + float(self.provident_fund) +
-                               float(self.security_deduction) + float(self.van_child_deduction) +
-                               float(self.tax_deduction) + float(self.other_deduction))
+            # Security & Van/Child
+            if has_cfg:
+                self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
+                self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
+            else:
+                self.security_deduction = config.get_security(basic)
+                self.van_child_deduction = config.get_van_child(basic)
 
-        # Net salary
-        self.net_salary = self.gross_salary - self.total_deductions
+            # Overtime
+            overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
+
+            # Gross salary
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
+            self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
+                               - float(self.leave_deduction) - float(self.late_coming_deduction))
+
+            # Tax
+            if has_cfg:
+                self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
+            else:
+                self.tax_deduction = config.get_tax(self.gross_salary)
+
+            # Total deductions
+            self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
+                                   float(self.advance_deduction) + float(self.provident_fund) +
+                                   float(self.security_deduction) + float(self.van_child_deduction) +
+                                   float(self.tax_deduction) + float(self.other_deduction))
+
+            # Net salary
+            self.net_salary = self.gross_salary - self.total_deductions
 
     def save(self, *args, **kwargs):
         try:
