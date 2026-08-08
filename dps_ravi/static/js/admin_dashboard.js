@@ -972,21 +972,19 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 var parser = new DOMParser();
                 var doc    = parser.parseFromString(html, 'text/html');
 
-                var container = doc.querySelector('.container');
+                var container = doc.querySelector('.container') || doc.querySelector('.hr-main') || doc.querySelector('.content') || doc.querySelector('main');
                 if (container) {
+                    var backLink = container.querySelector('a[href*="admin_console"], a[href*="left-employees"]');
+                    if (backLink && backLink.parentElement) {
+                        backLink.parentElement.remove();
+                    }
                     body.innerHTML = container.innerHTML;
                 } else {
                     var form = doc.querySelector('form');
                     if (form) {
                         body.innerHTML = form.outerHTML;
                     } else {
-                        var fallback = ['.hr-main', '.content', 'main', 'body'];
-                        var content = '';
-                        for (var i = 0; i < fallback.length; i++) {
-                            var el = doc.querySelector(fallback[i]);
-                            if (el) { content = el.innerHTML; break; }
-                        }
-                        body.innerHTML = content || '<p style="color:#dc2626;padding:20px;">Could not load content. <a href="' + url + '">Open in full page</a></p>';
+                        body.innerHTML = '<p style="color:#dc2626;padding:20px;">Could not load content.</p>';
                     }
                 }
                 attachFormHandler(body, url);
