@@ -212,6 +212,32 @@ def employee_separation(request, employee_id):
 
 
 # ─────────────────────────────────────────────
+# MOVE BACK (undo separation)
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def employee_move_back(request, employee_id):
+    """Move an employee back to active staff from left employees."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    employee = get_object_or_404(TeacherProfile, pk=employee_id)
+
+    if request.method == 'POST':
+        SeparationRecord.objects.filter(employee=employee).delete()
+        employee.is_employee_separated = False
+        employee.save()
+        messages.success(request, f'{employee.full_name} has been moved back to active staff.')
+        return redirect('hr_left_employees')
+
+    return render(request, 'hr/employee_move_back_confirm.html', {
+        'employee': employee,
+        'section': 'left_employees',
+    })
+
+
+# ─────────────────────────────────────────────
 # LEFT EMPLOYEES LIST
 # ─────────────────────────────────────────────
 

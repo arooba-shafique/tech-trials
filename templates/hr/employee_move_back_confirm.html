@@ -1,0 +1,30 @@
+{% extends "hr/base_hr.html" %}
+
+{% block content %}
+<div class="hr-topbar">
+    <div>
+        <h1>Move Back — {{ employee.full_name }}</h1>
+        <div class="breadcrumb">HR Module / Left Employees / Move Back</div>
+    </div>
+</div>
+
+<div class="card" style="max-width:600px;margin:0 auto;text-align:center;padding:40px;">
+    <div style="width:60px;height:60px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17 11 19 13 23 9"/></svg>
+    </div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:8px;">Move {{ employee.full_name }} back to active staff?</h2>
+    <p style="color:var(--text-muted);margin-bottom:8px;">This will remove their separation record and restore them to the staff list.</p>
+    <p style="color:var(--text-muted);margin-bottom:24px;font-size:12px;">Their salary history and clearance data will be permanently deleted.</p>
+
+    <div style="display:flex;gap:10px;justify-content:center;">
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" style="padding:10px 24px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+                Yes, Move Back
+            </button>
+        </form>
+        <a href="{% url 'hr_left_employees' %}" class="btn btn-ghost" style="padding:10px 24px;">Cancel</a>
+    </div>
+</div>
+{% endblock %}
