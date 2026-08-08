@@ -139,7 +139,6 @@ class TeacherProfile(models.Model):
     is_employee_separated = models.BooleanField(default=False, help_text="Has the employee left?")
     bank_account = models.CharField(max_length=50, blank=True, default='')
     bank_name = models.CharField(max_length=100, blank=True, default='')
-    documents = models.FileField(upload_to='teachers/documents/', null=True, blank=True, help_text="Upload staff documents (PDF, JPG, PNG)")
 
     def __str__(self):
         base = f"{self.full_name} ({self.employee_id})"
