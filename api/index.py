@@ -25,22 +25,13 @@ def setup_database():
     
     try:
         print("[setup] Running migrations...")
-        call_command('migrate', '--run-syncdb', verbosity=2)
+        call_command('migrate', verbosity=0)
         print("[setup] Migrations completed successfully.")
         _migrations_run = True
     except Exception as e:
         print(f"[setup] Migration error: {e}")
         import traceback
         traceback.print_exc()
-        # Try without --run-syncdb
-        try:
-            print("[setup] Retrying migrations without syncdb...")
-            call_command('migrate', verbosity=2)
-            print("[setup] Migrations completed on retry.")
-            _migrations_run = True
-        except Exception as e2:
-            print(f"[setup] Migration retry also failed: {e2}")
-            traceback.print_exc()
 
 # Run setup on import (cold start)
 setup_database()
