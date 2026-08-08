@@ -985,6 +985,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                     }
                 }
                 attachFormHandler(body, url);
+                attachDeleteHandlers(body, url);
             })
             .catch(function () {
                 body.innerHTML = '<div style="text-align:center;padding:40px;">'
@@ -1082,6 +1083,39 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 };
 
                 xhr.send(formData);
+            });
+        });
+    }
+
+    function attachDeleteHandlers(container, originalUrl) {
+        container.querySelectorAll('a').forEach(function (a) {
+            var href = a.getAttribute('href') || '';
+            if (href.indexOf('/delete/') === -1) return;
+            if (a.dataset.ajaxBound) return;
+            a.dataset.ajaxBound = '1';
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                customConfirm('Delete this document?', function () {
+                    fetch(href, { credentials: 'same-origin' })
+                        .then(function (r) { return r.text(); })
+                        .then(function () {
+                            fetch(originalUrl, { credentials: 'same-origin' })
+                                .then(function (r) { return r.text(); })
+                                .then(function (html) {
+                                    var parser = new DOMParser();
+                                    var doc = parser.parseFromString(html, 'text/html');
+                                    var ctr = doc.querySelector('.container');
+                                    var drawerBody = document.getElementById('drawer-body');
+                                    if (ctr && drawerBody) {
+                                        drawerBody.innerHTML = ctr.innerHTML;
+                                        attachFormHandler(drawerBody, originalUrl);
+                                        attachDeleteHandlers(drawerBody, originalUrl);
+                                        drawerBody.scrollTop = 0;
+                                        showToast('Document deleted.');
+                                    }
+                                });
+                        });
+                });
             });
         });
     }
