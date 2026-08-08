@@ -1155,8 +1155,8 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         var href = el.getAttribute('href');
         if (!href || href === '#') return;
 
-        /* delete links → custom confirm + POST */
-        if (href.indexOf('delete') !== -1) {
+        /* delete links → custom confirm + POST (skip staff document deletes, handled by AJAX below) */
+        if (href.indexOf('delete') !== -1 && !(href.indexOf('/documents/') !== -1 && href.indexOf('/delete/') !== -1)) {
             e.preventDefault();
             e.stopImmediatePropagation();
             customConfirm('Are you sure you want to delete this?', function () {
