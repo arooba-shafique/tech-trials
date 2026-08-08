@@ -88,7 +88,9 @@ def admin_dashboard(request):
 
     from django.db.models import Q as Q2
     from hr.models import MonthlySalary, SeparationRecord
-    left_employees = teachers_qs.filter(is_employee_separated=True)
+    left_employees = TeacherProfile.objects.filter(is_employee_separated=True)
+    if school and not request.user.is_superuser:
+        left_employees = left_employees.filter(Q(school=school) | Q(school__isnull=True))
     left_search = request.GET.get('search', '').strip() if request.GET.get('section') == 'left-employees' else ''
     if left_search:
         left_employees = left_employees.filter(
