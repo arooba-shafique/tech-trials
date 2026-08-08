@@ -174,14 +174,5 @@
         </form>
         <a href="javascript:history.back()" class="back-link">← Back</a>
     </div>
-    <script>
-    document.getElementById('add-doc-row').addEventListener('click', function() {
-        var container = document.getElementById('doc-rows');
-        var row = container.querySelector('.form-row').cloneNode(true);
-        row.querySelector('[name="doc_titles[]"]').value = '';
-        row.querySelector('[name="doc_files[]"]').value = '';
-        container.appendChild(row);
-    });
-    </script>
 </body>
 </html>

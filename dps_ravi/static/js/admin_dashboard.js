@@ -986,6 +986,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 }
                 attachFormHandler(body, url);
                 attachDeleteHandlers(body, url);
+                attachAddMoreHandler(body);
             })
             .catch(function () {
                 body.innerHTML = '<div style="text-align:center;padding:40px;">'
@@ -1120,6 +1121,21 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                         });
                 });
             });
+        });
+    }
+
+    function attachAddMoreHandler(container) {
+        var addBtn = container.querySelector('#add-doc-row');
+        if (!addBtn || addBtn.dataset.ajaxBound) return;
+        addBtn.dataset.ajaxBound = '1';
+        addBtn.addEventListener('click', function () {
+            var docRows = container.querySelector('#doc-rows');
+            if (!docRows) return;
+            var row = docRows.querySelector('.form-row');
+            if (!row) return;
+            var newRow = row.cloneNode(true);
+            newRow.querySelectorAll('input').forEach(function (inp) { inp.value = ''; });
+            docRows.appendChild(newRow);
         });
     }
 
