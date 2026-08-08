@@ -269,7 +269,7 @@ class MonthlySalary(models.Model):
         self.allowed_leaves = config.max_allowed_leaves
 
         if is_new_employee:
-            # FIRST 2 MONTHS: Leave, Late, Tax, and Security apply. PF/Van/Child/Advance/Other are dead.
+            # FIRST 2 MONTHS: Only PF and Van/Child are dead. All others apply.
             # Leave deduction
             self.leave_deduction = self.unpaid_leaves * self.per_day_salary
 
@@ -280,12 +280,24 @@ class MonthlySalary(models.Model):
             # Security deduction (new employee percentage)
             self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
 
-            # Dead deductions for new employees
-            self.bonus_amount = 0
+            # Only PF and Van/Child are dead for new employees
             self.provident_fund = 0
             self.van_child_deduction = 0
-            self.advance_deduction = 0
-            self.other_deduction = 0
+
+            # Bonus applies
+            if self.days_absent == 0 and self.unpaid_leaves == 0:
+                if has_cfg:
+                    if float(self.cfg_bonus_per_day) > 0:
+                        self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
+                    else:
+                        self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
+                else:
+                    if config.bonus_per_day > 0:
+                        self.bonus_amount = config.bonus_per_day * self.total_working_days
+                    else:
+                        self.bonus_amount = config.get_bonus(basic)
+            else:
+                self.bonus_amount = 0
 
             # Overtime still applies
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
@@ -301,9 +313,10 @@ class MonthlySalary(models.Model):
             else:
                 self.tax_deduction = config.get_tax(self.gross_salary)
 
-            # Total deductions = leave + late + security + tax
+            # Total deductions = leave + late + security + tax (no PF, no Van/Child)
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.security_deduction) + float(self.tax_deduction))
+                                   float(self.security_deduction) + float(self.tax_deduction) +
+                                   float(self.advance_deduction) + float(self.other_deduction))
 
             # Net salary
             self.net_salary = self.gross_salary - self.total_deductions
