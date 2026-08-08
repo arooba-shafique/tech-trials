@@ -974,10 +974,16 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
 
                 var container = doc.querySelector('.container') || doc.querySelector('.hr-main') || doc.querySelector('.content') || doc.querySelector('main');
                 if (container) {
-                    var backLink = container.querySelector('a[href*="admin_console"], a[href*="left-employees"]');
-                    if (backLink && backLink.parentElement) {
-                        backLink.parentElement.remove();
-                    }
+                    var backLinks = container.querySelectorAll('a[href*="admin_console"], a[href*="left-employees"]');
+                    backLinks.forEach(function(l) {
+                        if (l.textContent && l.textContent.indexOf('Back to') !== -1) {
+                            if (l.parentElement && l.parentElement.children.length === 1) {
+                                l.parentElement.remove();
+                            } else {
+                                l.remove();
+                            }
+                        }
+                    });
                     body.innerHTML = container.innerHTML;
                 } else {
                     var form = doc.querySelector('form');
