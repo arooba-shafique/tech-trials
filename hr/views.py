@@ -189,7 +189,7 @@ def employee_separation(request, employee_id):
 
     if SeparationRecord.objects.filter(employee=employee).exists():
         messages.warning(request, f'{employee.full_name} already has a separation record.')
-        return redirect('hr:left_employees')
+        return redirect('hr_left_employees')
 
     if request.method == 'POST':
         form = SeparationForm(request.POST)
@@ -200,7 +200,7 @@ def employee_separation(request, employee_id):
             employee.is_employee_separated = True
             employee.save()
             messages.success(request, f'{employee.full_name} has been marked as left. Separation record created.')
-            return redirect('hr:left_employees')
+            return redirect('hr_left_employees')
     else:
         form = SeparationForm()
 
@@ -327,7 +327,7 @@ def clearance_form(request, employee_id):
                 record.clearance_date = timezone.now().date()
             record.save()
             messages.success(request, f'Clearance form saved for {employee.full_name}.')
-            return redirect('hr:left_employees')
+            return redirect('hr_left_employees')
     else:
         form = ClearanceForm(instance=separation)
 
