@@ -19,7 +19,7 @@
 
         <div class="form-group">
             <label>Last Working Date *</label>
-            <input type="date" name="last_working_date" class="form-control" required value="{{ form.last_working_date.value|default:'' }}">
+            <input type="date" name="last_working_date" class="form-control" required value="{{ separation.last_working_date|date:'Y-m-d' }}">
         </div>
 
         <div class="form-group">
@@ -31,16 +31,6 @@
                 <option value="retirement" {% if form.separation_reason.value == 'retirement' %}selected{% endif %}>Retirement</option>
                 <option value="other" {% if form.separation_reason.value == 'other' %}selected{% endif %}>Other</option>
             </select>
-        </div>
-
-        <div class="form-group">
-            <label>Reason Detail (optional)</label>
-            <textarea name="separation_reason_detail" class="form-control" rows="3">{{ form.separation_reason_detail.value|default:'' }}</textarea>
-        </div>
-
-        <div class="form-group">
-            <label>Notes (optional)</label>
-            <textarea name="notes" class="form-control" rows="3">{{ form.notes.value|default:'' }}</textarea>
         </div>
 
         <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
