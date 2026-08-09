@@ -1192,30 +1192,32 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                                         if (db) {
                                             var sel = db.querySelector('[name=clearance_status]');
                                             isClearanceComplete = sel && sel.value === 'completed';
-                                            var pf = db.querySelectorAll('.stat-card');
-                                            var getText = function(el) { return el ? el.textContent.trim() : '0'; };
-                                            clearanceData = {
-                                                name: getText(db.querySelector('.card + .card + .card .form-row .form-group input') || db.querySelector('.form-row .form-group input')) || getText(db.querySelector('div[style*="font-weight:700"]')),
-                                                employeeId: getText(db.querySelector('[value][readonly]')),
-                                                designation: (function() { var els = db.querySelectorAll('[readonly]'); return els.length > 2 ? els[2].value || els[2].textContent : ''; })(),
-                                                lastWorkingDate: (function() { var els = db.querySelectorAll('[readonly]'); return els.length > 1 ? els[1].value || els[1].textContent : ''; })(),
-                                                totalPf: getText(pf[0] ? pf[0].querySelector('h3') : null),
-                                                totalSecurity: getText(pf[1] ? pf[1].querySelector('h3') : null),
-                                                totalTax: getText(pf[2] ? pf[2].querySelector('h3') : null),
-                                                totalVanChild: getText(pf[3] ? pf[3].querySelector('h3') : null),
-                                                totalOther: getText(pf[4] ? pf[4].querySelector('h3') : null),
-                                                totalDeductions: getText(pf[5] ? pf[5].querySelector('h3') : null),
-                                                securityDeduction: db.querySelector('[name=security_deduction]') ? db.querySelector('[name=security_deduction]').value : '0',
-                                                lastSalaryWithheld: db.querySelector('[name=last_salary_withheld]') ? db.querySelector('[name=last_salary_withheld]').checked : false,
-                                                lastSalaryAmount: db.querySelector('[name=last_salary_amount]') ? db.querySelector('[name=last_salary_amount]').value : '0',
-                                                additionalDeductions: db.querySelector('[name=additional_deductions]') ? db.querySelector('[name=additional_deductions]').value : '0',
-                                                clearanceDate: db.querySelector('[name=clearance_date]') ? db.querySelector('[name=clearance_date]').value : '',
-                                                totalExitDeductions: 0
-                                            };
-                                            var sd = parseFloat(clearanceData.securityDeduction) || 0;
-                                            var ad = parseFloat(clearanceData.additionalDeductions) || 0;
-                                            var lsa = clearanceData.lastSalaryWithheld ? (parseFloat(clearanceData.lastSalaryAmount) || 0) : 0;
-                                            clearanceData.totalExitDeductions = sd + ad + lsa;
+                                            var pdfForm = db.querySelector('form[data-pdf-info]');
+                                            if (pdfForm) {
+                                                var info = JSON.parse(pdfForm.getAttribute('data-pdf-info'));
+                                                var secDed = parseFloat(db.querySelector('[name=security_deduction]').value) || 0;
+                                                var lastWithheld = db.querySelector('[name=last_salary_withheld]').checked;
+                                                var lastAmt = parseFloat(db.querySelector('[name=last_salary_amount]').value) || 0;
+                                                var addDed = parseFloat(db.querySelector('[name=additional_deductions]').value) || 0;
+                                                clearanceData = {
+                                                    name: info.name,
+                                                    employeeId: info.id,
+                                                    designation: info.designation,
+                                                    lastWorkingDate: info.lastDate,
+                                                    totalPf: info.pf,
+                                                    totalSecurity: info.security,
+                                                    totalTax: info.tax,
+                                                    totalVanChild: info.vanChild,
+                                                    totalOther: info.other,
+                                                    totalDeductions: info.grandTotal,
+                                                    securityDeduction: secDed,
+                                                    lastSalaryWithheld: lastWithheld,
+                                                    lastSalaryAmount: lastAmt,
+                                                    additionalDeductions: addDed,
+                                                    clearanceDate: db.querySelector('[name=clearance_date]').value || '',
+                                                    totalExitDeductions: secDed + addDed + (lastWithheld ? lastAmt : 0)
+                                                };
+                                            }
                                         }
                                     }
                                     closeDrawer();
@@ -1254,30 +1256,32 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                             if (db2) {
                                 var sel2 = db2.querySelector('[name=clearance_status]');
                                 isClearanceComplete2 = sel2 && sel2.value === 'completed';
-                                var pf2 = db2.querySelectorAll('.stat-card');
-                                var getText2 = function(el) { return el ? el.textContent.trim() : '0'; };
-                                clearanceData2 = {
-                                    name: getText2(db2.querySelector('div[style*="font-weight:700"]')),
-                                    employeeId: (function() { var el = db2.querySelector('[value][readonly]'); return el ? el.value : ''; })(),
-                                    designation: (function() { var els = db2.querySelectorAll('[readonly]'); return els.length > 2 ? (els[2].value || els[2].textContent) : ''; })(),
-                                    lastWorkingDate: (function() { var els = db2.querySelectorAll('[readonly]'); return els.length > 1 ? (els[1].value || els[1].textContent) : ''; })(),
-                                    totalPf: getText2(pf2[0] ? pf2[0].querySelector('h3') : null),
-                                    totalSecurity: getText2(pf2[1] ? pf2[1].querySelector('h3') : null),
-                                    totalTax: getText2(pf2[2] ? pf2[2].querySelector('h3') : null),
-                                    totalVanChild: getText2(pf2[3] ? pf2[3].querySelector('h3') : null),
-                                    totalOther: getText2(pf2[4] ? pf2[4].querySelector('h3') : null),
-                                    totalDeductions: getText2(pf2[5] ? pf2[5].querySelector('h3') : null),
-                                    securityDeduction: db2.querySelector('[name=security_deduction]') ? db2.querySelector('[name=security_deduction]').value : '0',
-                                    lastSalaryWithheld: db2.querySelector('[name=last_salary_withheld]') ? db2.querySelector('[name=last_salary_withheld]').checked : false,
-                                    lastSalaryAmount: db2.querySelector('[name=last_salary_amount]') ? db2.querySelector('[name=last_salary_amount]').value : '0',
-                                    additionalDeductions: db2.querySelector('[name=additional_deductions]') ? db2.querySelector('[name=additional_deductions]').value : '0',
-                                    clearanceDate: db2.querySelector('[name=clearance_date]') ? db2.querySelector('[name=clearance_date]').value : '',
-                                    totalExitDeductions: 0
-                                };
-                                var sd2 = parseFloat(clearanceData2.securityDeduction) || 0;
-                                var ad2 = parseFloat(clearanceData2.additionalDeductions) || 0;
-                                var lsa2 = clearanceData2.lastSalaryWithheld ? (parseFloat(clearanceData2.lastSalaryAmount) || 0) : 0;
-                                clearanceData2.totalExitDeductions = sd2 + ad2 + lsa2;
+                                var pdfForm2 = db2.querySelector('form[data-pdf-info]');
+                                if (pdfForm2) {
+                                    var info2 = JSON.parse(pdfForm2.getAttribute('data-pdf-info'));
+                                    var sd2 = parseFloat(db2.querySelector('[name=security_deduction]').value) || 0;
+                                    var lw2 = db2.querySelector('[name=last_salary_withheld]').checked;
+                                    var la2 = parseFloat(db2.querySelector('[name=last_salary_amount]').value) || 0;
+                                    var ad2 = parseFloat(db2.querySelector('[name=additional_deductions]').value) || 0;
+                                    clearanceData2 = {
+                                        name: info2.name,
+                                        employeeId: info2.id,
+                                        designation: info2.designation,
+                                        lastWorkingDate: info2.lastDate,
+                                        totalPf: info2.pf,
+                                        totalSecurity: info2.security,
+                                        totalTax: info2.tax,
+                                        totalVanChild: info2.vanChild,
+                                        totalOther: info2.other,
+                                        totalDeductions: info2.grandTotal,
+                                        securityDeduction: sd2,
+                                        lastSalaryWithheld: lw2,
+                                        lastSalaryAmount: la2,
+                                        additionalDeductions: ad2,
+                                        clearanceDate: db2.querySelector('[name=clearance_date]').value || '',
+                                        totalExitDeductions: sd2 + ad2 + (lw2 ? la2 : 0)
+                                    };
+                                }
                             }
                         }
                         closeDrawer();

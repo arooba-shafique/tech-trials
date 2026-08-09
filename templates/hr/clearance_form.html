@@ -121,7 +121,7 @@
         {% endif %}
     </div>
 
-    <form method="post">
+    <form method="post" data-pdf-info='{"name":"{{ employee.full_name|escapejs }}","id":"{{ employee.employee_id|default:"N/A"|escapejs }}","designation":"{{ employee.get_designation_display|default:employee.designation|default:"-"|escapejs }}","lastDate":"{{ separation.last_working_date|escapejs }}","pf":"{{ salary_totals.total_pf|floatformat:0 }}","security":"{{ salary_totals.total_security|floatformat:0 }}","tax":"{{ salary_totals.total_tax|floatformat:0 }}","vanChild":"{{ salary_totals.total_van_child|floatformat:0 }}","other":"{{ salary_totals.total_other|floatformat:0 }}","grandTotal":"{{ salary_totals.total_deductions|floatformat:0 }}"}'>
         {% csrf_token %}
 
         <div class="form-row">
@@ -191,6 +191,12 @@
         xhr.onreadystatechange = function() {
             if (xhr.readyState !== 4) return;
             if (xhr.status === 200 || xhr.status === 302) {
+                var info = JSON.parse(form.getAttribute('data-pdf-info'));
+                var secDed = parseFloat(form.querySelector('[name=security_deduction]').value) || 0;
+                var lastWithheld = form.querySelector('[name=last_salary_withheld]').checked;
+                var lastAmt = parseFloat(form.querySelector('[name=last_salary_amount]').value) || 0;
+                var addDed = parseFloat(form.querySelector('[name=additional_deductions]').value) || 0;
+                var clearDate = form.querySelector('[name=clearance_date]').value || 'N/A';
                 var jsPDF = window.jspdf.jsPDF;
                 var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
                 var pw = doc.internal.pageSize.getWidth();
@@ -205,22 +211,18 @@
                 doc.setFontSize(9);
                 doc.text('Generated: ' + new Date().toLocaleDateString(), pw / 2, 22, { align: 'center' });
                 y = 42;
-                var empName = '{{ employee.full_name|escapejs }}';
-                var empId = '{{ employee.employee_id|default:"N/A"|escapejs }}';
-                var empDesig = '{{ employee.get_designation_display|default:employee.designation|default:"-"|escapejs }}';
-                var lastDate = '{{ separation.last_working_date|escapejs }}';
                 doc.setFillColor(249, 250, 251);
                 doc.rect(10, y - 5, pw - 20, 30, 'F');
                 doc.setTextColor(26, 29, 35);
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(10);
-                doc.text('Employee: ' + empName, 15, y + 3);
+                doc.text('Employee: ' + info.name, 15, y + 3);
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 doc.setTextColor(100, 100, 100);
-                doc.text('ID: ' + empId, 15, y + 10);
-                doc.text('Designation: ' + empDesig, 15, y + 16);
-                doc.text('Last Working Date: ' + lastDate, 15, y + 22);
+                doc.text('ID: ' + info.id, 15, y + 10);
+                doc.text('Designation: ' + info.designation, 15, y + 16);
+                doc.text('Last Working Date: ' + info.lastDate, 15, y + 22);
                 y += 35;
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(11);
@@ -234,12 +236,12 @@
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
                 var deductions = [
-                    ['Provident Fund', '{{ salary_totals.total_pf|floatformat:0|escapejs }}'],
-                    ['Security', '{{ salary_totals.total_security|floatformat:0|escapejs }}'],
-                    ['Tax', '{{ salary_totals.total_tax|floatformat:0|escapejs }}'],
-                    ['Van/Child Deductions', '{{ salary_totals.total_van_child|floatformat:0|escapejs }}'],
-                    ['Other Deductions', '{{ salary_totals.total_other|floatformat:0|escapejs }}'],
-                    ['Grand Total Deductions', '{{ salary_totals.total_deductions|floatformat:0|escapejs }}']
+                    ['Provident Fund', info.pf],
+                    ['Security', info.security],
+                    ['Tax', info.tax],
+                    ['Van/Child Deductions', info.vanChild],
+                    ['Other Deductions', info.other],
+                    ['Grand Total Deductions', info.grandTotal]
                 ];
                 deductions.forEach(function(d) {
                     doc.setTextColor(80, 80, 80);
@@ -259,16 +261,11 @@
                 y += 7;
                 doc.setFont('helvetica', 'normal');
                 doc.setFontSize(9);
-                var secDed = form.querySelector('[name=security_deduction]').value || '0';
-                var lastWithheld = form.querySelector('[name=last_salary_withheld]').checked;
-                var lastAmt = form.querySelector('[name=last_salary_amount]').value || '0';
-                var addDed = form.querySelector('[name=additional_deductions]').value || '0';
-                var clearDate = form.querySelector('[name=clearance_date]').value || 'N/A';
                 var exitItems = [
-                    ['Security Deposit Deduction', 'PKR ' + Number(secDed).toLocaleString()],
+                    ['Security Deposit Deduction', 'PKR ' + secDed.toLocaleString()],
                     ['Last Salary Withheld', lastWithheld ? 'Yes' : 'No'],
-                    ['Last Salary Amount', lastWithheld ? 'PKR ' + Number(lastAmt).toLocaleString() : 'N/A'],
-                    ['Additional Deductions', 'PKR ' + Number(addDed).toLocaleString()],
+                    ['Last Salary Amount', lastWithheld ? 'PKR ' + lastAmt.toLocaleString() : 'N/A'],
+                    ['Additional Deductions', 'PKR ' + addDed.toLocaleString()],
                     ['Clearance Date', clearDate]
                 ];
                 exitItems.forEach(function(item) {
@@ -279,7 +276,7 @@
                     y += 6;
                 });
                 y += 5;
-                var totalExit = parseFloat(secDed) + parseFloat(addDed) + (lastWithheld ? parseFloat(lastAmt) : 0);
+                var totalExit = secDed + addDed + (lastWithheld ? lastAmt : 0);
                 doc.setFillColor(254, 226, 226);
                 doc.rect(10, y - 5, pw - 20, 12, 'F');
                 doc.setFont('helvetica', 'bold');
@@ -294,12 +291,12 @@
                 doc.setFontSize(10);
                 doc.setTextColor(22, 163, 74);
                 doc.text('Clearance Status: COMPLETED', pw / 2, y + 2, { align: 'center' });
-                var safeName = empName.replace(/[^a-zA-Z0-9]/g, '_');
+                var safeName = info.name.replace(/[^a-zA-Z0-9]/g, '_');
                 doc.save('clearance_' + safeName + '_' + new Date().toISOString().slice(0, 10) + '.pdf');
                 window.location.href = '/admin-console/?section=left-employees';
             } else {
                 if (btn) { btn.disabled = false; btn.textContent = 'Save Clearance'; }
-                showToast('Error saving. Please try again.');
+                alert('Error saving. Please try again.');
             }
         };
         xhr.send(formData);
