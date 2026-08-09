@@ -1021,6 +1021,128 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         document.body.style.overflow = '';
     };
 
+    window.generateClearancePDF = function (data) {
+        if (!window.jspdf) return;
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        var pw = doc.internal.pageSize.getWidth();
+        var y = 0;
+
+        // Header
+        doc.setFillColor(13, 148, 136);
+        doc.rect(0, 0, pw, 32, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(15);
+        doc.text('Employee Clearance Certificate', pw / 2, 13, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('Generated: ' + new Date().toLocaleDateString(), pw / 2, 22, { align: 'center' });
+
+        y = 42;
+
+        // Employee Info
+        doc.setFillColor(249, 250, 251);
+        doc.rect(10, y - 5, pw - 20, 30, 'F');
+        doc.setTextColor(26, 29, 35);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text('Employee: ' + data.name, 15, y + 3);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(100, 100, 100);
+        doc.text('ID: ' + (data.employeeId || 'N/A'), 15, y + 10);
+        doc.text('Designation: ' + (data.designation || 'N/A'), 15, y + 16);
+        doc.text('Last Working Date: ' + data.lastWorkingDate, 15, y + 22);
+        y += 35;
+
+        // Accumulated Deductions
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(26, 29, 35);
+        doc.text('Accumulated Deductions', 15, y);
+        y += 3;
+
+        doc.setDrawColor(13, 148, 136);
+        doc.setLineWidth(0.5);
+        doc.line(15, y, pw - 15, y);
+        y += 7;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        var deductions = [
+            ['Provident Fund', data.totalPf],
+            ['Security', data.totalSecurity],
+            ['Tax', data.totalTax],
+            ['Van/Child Deductions', data.totalVanChild],
+            ['Other Deductions', data.totalOther],
+            ['Grand Total Deductions', data.totalDeductions]
+        ];
+        deductions.forEach(function (d) {
+            doc.setTextColor(80, 80, 80);
+            doc.text(d[0], 20, y);
+            doc.setTextColor(26, 29, 35);
+            doc.text('PKR ' + Number(d[1]).toLocaleString(), pw - 20, y, { align: 'right' });
+            y += 6;
+        });
+
+        y += 5;
+
+        // Exit Clearance
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(26, 29, 35);
+        doc.text('Exit Clearance', 15, y);
+        y += 3;
+
+        doc.setDrawColor(13, 148, 136);
+        doc.setLineWidth(0.5);
+        doc.line(15, y, pw - 15, y);
+        y += 7;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        var exitItems = [
+            ['Security Deposit Deduction', data.securityDeduction],
+            ['Last Salary Withheld', data.lastSalaryWithheld],
+            ['Last Salary Amount', data.lastSalaryAmount],
+            ['Additional Deductions', data.additionalDeductions],
+            ['Clearance Date', data.clearanceDate]
+        ];
+        exitItems.forEach(function (item) {
+            doc.setTextColor(80, 80, 80);
+            doc.text(item[0], 20, y);
+            doc.setTextColor(26, 29, 35);
+            var val = item[1];
+            if (typeof val === 'number') val = 'PKR ' + val.toLocaleString();
+            doc.text(String(val || 'N/A'), pw - 20, y, { align: 'right' });
+            y += 6;
+        });
+
+        y += 5;
+
+        // Total Exit Deductions
+        doc.setFillColor(254, 226, 226);
+        doc.rect(10, y - 5, pw - 20, 12, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(220, 38, 38);
+        doc.text('Total Exit Deductions:', 20, y + 2);
+        doc.text('PKR ' + Number(data.totalExitDeductions).toLocaleString(), pw - 20, y + 2, { align: 'right' });
+        y += 18;
+
+        // Status
+        doc.setFillColor(240, 253, 244);
+        doc.rect(10, y - 5, pw - 20, 12, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(22, 163, 74);
+        doc.text('Clearance Status: COMPLETED', pw / 2, y + 2, { align: 'center' });
+
+        var safeName = (data.name || 'employee').replace(/[^a-zA-Z0-9]/g, '_');
+        doc.save('clearance_' + safeName + '_' + new Date().toISOString().slice(0, 10) + '.pdf');
+    };
+
     function attachFormHandler(container, originalUrl) {
         container.querySelectorAll('form').forEach(function (f) {
             var action = f.getAttribute('action');
@@ -1063,8 +1185,44 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                                     drawerBody.scrollTop = 0;
                                     showToast('Uploaded successfully!');
                                 } else {
+                                    var isClearanceComplete = false;
+                                    var clearanceData = {};
+                                    if (submitUrl.indexOf('clearance') !== -1) {
+                                        var db = document.getElementById('drawer-body');
+                                        if (db) {
+                                            var sel = db.querySelector('[name=clearance_status]');
+                                            isClearanceComplete = sel && sel.value === 'completed';
+                                            var pf = db.querySelectorAll('.stat-card');
+                                            var getText = function(el) { return el ? el.textContent.trim() : '0'; };
+                                            clearanceData = {
+                                                name: getText(db.querySelector('.card + .card + .card .form-row .form-group input') || db.querySelector('.form-row .form-group input')) || getText(db.querySelector('div[style*="font-weight:700"]')),
+                                                employeeId: getText(db.querySelector('[value][readonly]')),
+                                                designation: (function() { var els = db.querySelectorAll('[readonly]'); return els.length > 2 ? els[2].value || els[2].textContent : ''; })(),
+                                                lastWorkingDate: (function() { var els = db.querySelectorAll('[readonly]'); return els.length > 1 ? els[1].value || els[1].textContent : ''; })(),
+                                                totalPf: getText(pf[0] ? pf[0].querySelector('h3') : null),
+                                                totalSecurity: getText(pf[1] ? pf[1].querySelector('h3') : null),
+                                                totalTax: getText(pf[2] ? pf[2].querySelector('h3') : null),
+                                                totalVanChild: getText(pf[3] ? pf[3].querySelector('h3') : null),
+                                                totalOther: getText(pf[4] ? pf[4].querySelector('h3') : null),
+                                                totalDeductions: getText(pf[5] ? pf[5].querySelector('h3') : null),
+                                                securityDeduction: db.querySelector('[name=security_deduction]') ? db.querySelector('[name=security_deduction]').value : '0',
+                                                lastSalaryWithheld: db.querySelector('[name=last_salary_withheld]') ? db.querySelector('[name=last_salary_withheld]').checked : false,
+                                                lastSalaryAmount: db.querySelector('[name=last_salary_amount]') ? db.querySelector('[name=last_salary_amount]').value : '0',
+                                                additionalDeductions: db.querySelector('[name=additional_deductions]') ? db.querySelector('[name=additional_deductions]').value : '0',
+                                                clearanceDate: db.querySelector('[name=clearance_date]') ? db.querySelector('[name=clearance_date]').value : '',
+                                                totalExitDeductions: 0
+                                            };
+                                            var sd = parseFloat(clearanceData.securityDeduction) || 0;
+                                            var ad = parseFloat(clearanceData.additionalDeductions) || 0;
+                                            var lsa = clearanceData.lastSalaryWithheld ? (parseFloat(clearanceData.lastSalaryAmount) || 0) : 0;
+                                            clearanceData.totalExitDeductions = sd + ad + lsa;
+                                        }
+                                    }
                                     closeDrawer();
                                     showToast('Saved successfully!');
+                                    if (isClearanceComplete && window.jspdf) {
+                                        window.generateClearancePDF(clearanceData);
+                                    }
                                     var targetReload = (submitUrl.indexOf('clearance') !== -1 || submitUrl.indexOf('separation') !== -1 || submitUrl.indexOf('move-back') !== -1)
                                         ? (window.location.pathname + '?section=left-employees')
                                         : window.location.href;
@@ -1089,8 +1247,44 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                         attachFormHandler(drawerBody, originalUrl);
                         drawerBody.scrollTop = 0;
                     } else {
+                        var isClearanceComplete2 = false;
+                        var clearanceData2 = {};
+                        if (submitUrl.indexOf('clearance') !== -1) {
+                            var db2 = document.getElementById('drawer-body');
+                            if (db2) {
+                                var sel2 = db2.querySelector('[name=clearance_status]');
+                                isClearanceComplete2 = sel2 && sel2.value === 'completed';
+                                var pf2 = db2.querySelectorAll('.stat-card');
+                                var getText2 = function(el) { return el ? el.textContent.trim() : '0'; };
+                                clearanceData2 = {
+                                    name: getText2(db2.querySelector('div[style*="font-weight:700"]')),
+                                    employeeId: (function() { var el = db2.querySelector('[value][readonly]'); return el ? el.value : ''; })(),
+                                    designation: (function() { var els = db2.querySelectorAll('[readonly]'); return els.length > 2 ? (els[2].value || els[2].textContent) : ''; })(),
+                                    lastWorkingDate: (function() { var els = db2.querySelectorAll('[readonly]'); return els.length > 1 ? (els[1].value || els[1].textContent) : ''; })(),
+                                    totalPf: getText2(pf2[0] ? pf2[0].querySelector('h3') : null),
+                                    totalSecurity: getText2(pf2[1] ? pf2[1].querySelector('h3') : null),
+                                    totalTax: getText2(pf2[2] ? pf2[2].querySelector('h3') : null),
+                                    totalVanChild: getText2(pf2[3] ? pf2[3].querySelector('h3') : null),
+                                    totalOther: getText2(pf2[4] ? pf2[4].querySelector('h3') : null),
+                                    totalDeductions: getText2(pf2[5] ? pf2[5].querySelector('h3') : null),
+                                    securityDeduction: db2.querySelector('[name=security_deduction]') ? db2.querySelector('[name=security_deduction]').value : '0',
+                                    lastSalaryWithheld: db2.querySelector('[name=last_salary_withheld]') ? db2.querySelector('[name=last_salary_withheld]').checked : false,
+                                    lastSalaryAmount: db2.querySelector('[name=last_salary_amount]') ? db2.querySelector('[name=last_salary_amount]').value : '0',
+                                    additionalDeductions: db2.querySelector('[name=additional_deductions]') ? db2.querySelector('[name=additional_deductions]').value : '0',
+                                    clearanceDate: db2.querySelector('[name=clearance_date]') ? db2.querySelector('[name=clearance_date]').value : '',
+                                    totalExitDeductions: 0
+                                };
+                                var sd2 = parseFloat(clearanceData2.securityDeduction) || 0;
+                                var ad2 = parseFloat(clearanceData2.additionalDeductions) || 0;
+                                var lsa2 = clearanceData2.lastSalaryWithheld ? (parseFloat(clearanceData2.lastSalaryAmount) || 0) : 0;
+                                clearanceData2.totalExitDeductions = sd2 + ad2 + lsa2;
+                            }
+                        }
                         closeDrawer();
                         showToast('Saved successfully!');
+                        if (isClearanceComplete2 && window.jspdf) {
+                            window.generateClearancePDF(clearanceData2);
+                        }
                         var targetReload = (submitUrl.indexOf('clearance') !== -1 || submitUrl.indexOf('separation') !== -1 || submitUrl.indexOf('move-back') !== -1)
                             ? (window.location.pathname + '?section=left-employees')
                             : window.location.href;
