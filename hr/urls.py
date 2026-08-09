@@ -24,6 +24,7 @@ urlpatterns = [
     path('attendance/monthly/', views.monthly_attendance_summary, name='hr_monthly_attendance'),
     path('left-employees/', views.left_employees, name='hr_left_employees'),
     path('separation/<int:employee_id>/', views.employee_separation, name='hr_employee_separation'),
+    path('separation/<int:employee_id>/edit/', views.edit_separation, name='hr_edit_separation'),
     path('move-back/<int:employee_id>/', views.employee_move_back, name='hr_employee_move_back'),
     path('clearance/<int:employee_id>/', views.clearance_form, name='hr_clearance_form'),
 ]

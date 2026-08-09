@@ -212,6 +212,37 @@ def employee_separation(request, employee_id):
 
 
 # ─────────────────────────────────────────────
+# EDIT SEPARATION (fix left date / reason)
+# ─────────────────────────────────────────────
+
+@login_required(login_url='admin_login')
+def edit_separation(request, employee_id):
+    """Edit an existing separation record (e.g. fix wrong left date)."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    employee = get_object_or_404(TeacherProfile, pk=employee_id)
+    separation = get_object_or_404(SeparationRecord, employee=employee)
+
+    if request.method == 'POST':
+        form = SeparationForm(request.POST, instance=separation)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Separation record updated for {employee.full_name}.')
+            return redirect('/admin-console/?section=left-employees')
+    else:
+        form = SeparationForm(instance=separation)
+
+    return render(request, 'hr/edit_separation_form.html', {
+        'form': form,
+        'employee': employee,
+        'separation': separation,
+        'section': 'left_employees',
+    })
+
+
+# ─────────────────────────────────────────────
 # MOVE BACK (undo separation)
 # ─────────────────────────────────────────────
 
