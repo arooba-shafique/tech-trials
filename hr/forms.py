@@ -10,7 +10,7 @@ class EmployeeSalaryForm(forms.ModelForm):
             'employee', 'basic_salary', 'salary_type', 'employment_type',
             'working_days_per_week', 'bank_account', 'bank_name',
             'housing_allowance', 'medical_allowance', 'transport_allowance',
-            'fuel_allowance', 'other_allowance',
+            'kid_fee', 'other_allowance',
         ]
 
 

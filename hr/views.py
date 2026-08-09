@@ -399,7 +399,7 @@ def salary_config(request):
         config.housing_allowance_pct = float(request.POST.get('housing_allowance_pct', 0))
         config.medical_allowance_pct = float(request.POST.get('medical_allowance_pct', 0))
         config.transport_allowance_pct = float(request.POST.get('transport_allowance_pct', 0))
-        config.fuel_allowance_pct = float(request.POST.get('fuel_allowance_pct', 0))
+        config.kid_fee_pct = float(request.POST.get('kid_fee_pct', 0))
         config.bonus_per_day = float(request.POST.get('bonus_per_day', 0))
         config.bonus_percentage = float(request.POST.get('bonus_percentage', 0))
         config.save()
@@ -424,7 +424,7 @@ def salary_config(request):
                 emp_salary.custom_housing_pct = config.housing_allowance_pct
                 emp_salary.custom_medical_pct = config.medical_allowance_pct
                 emp_salary.custom_transport_pct = config.transport_allowance_pct
-                emp_salary.custom_fuel_pct = config.fuel_allowance_pct
+                emp_salary.custom_kid_fee_pct = config.kid_fee_pct
                 emp_salary.custom_tax_pct = config.tax_percentage
                 emp_salary.custom_pf_pct = config.provident_fund_pct
                 emp_salary.custom_security_pct = config.security_pct
@@ -499,7 +499,7 @@ def save_employee_overrides(request):
         ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
         ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
         ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
-        ms.cfg_fuel_pct = float(request.POST.get(f'custom_fuel_{emp_id}', 0))
+        ms.cfg_kid_fee_pct = float(request.POST.get(f'custom_kid_fee_{emp_id}', 0))
         ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
         ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
         ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
@@ -768,7 +768,7 @@ def edit_monthly_salary(request, pk):
         salary.housing_allowance = float(request.POST.get('housing_allowance', salary.housing_allowance))
         salary.medical_allowance = float(request.POST.get('medical_allowance', salary.medical_allowance))
         salary.transport_allowance = float(request.POST.get('transport_allowance', salary.transport_allowance))
-        salary.fuel_allowance = float(request.POST.get('fuel_allowance', salary.fuel_allowance))
+        salary.kid_fee = float(request.POST.get('kid_fee', salary.kid_fee))
         salary.other_allowance = float(request.POST.get('other_allowance', salary.other_allowance))
         salary.advance_deduction = float(request.POST.get('advance_deduction', salary.advance_deduction))
         salary.provident_fund = float(request.POST.get('provident_fund', salary.provident_fund))
@@ -920,7 +920,7 @@ def export_salary_excel(request):
             float(s.housing_allowance),
             float(s.medical_allowance),
             float(s.transport_allowance),
-            float(s.fuel_allowance),
+            float(s.kid_fee),
             float(s.bonus_amount),
             float(s.gross_salary),
             float(s.tax_deduction),
@@ -954,7 +954,7 @@ def export_salary_excel(request):
 
         total_fields = {
             5: 'basic_salary', 6: 'housing_allowance', 7: 'medical_allowance',
-            8: 'transport_allowance', 9: 'fuel_allowance',
+            8: 'transport_allowance', 9: 'kid_fee',
             10: 'bonus_amount', 11: 'gross_salary', 12: 'tax_deduction',
             13: 'provident_fund', 14: 'security_deduction', 15: 'van_child_deduction',
             16: 'leave_deduction', 17: 'late_coming_deduction',
@@ -1028,8 +1028,8 @@ def import_salary_excel(request):
                 col_map['medical_allowance'] = idx
             elif 'transport' in h:
                 col_map['transport_allowance'] = idx
-            elif 'fuel' in h:
-                col_map['fuel_allowance'] = idx
+            elif 'kid' in h or 'child' in h and 'fee' in h:
+                col_map['kid_fee'] = idx
             elif 'other allowance' in h:
                 col_map['other_allowance'] = idx
             elif 'bonus' in h:
@@ -1150,7 +1150,7 @@ def import_salary_excel(request):
             ms.housing_allowance = get_val(row, 'housing_allowance')
             ms.medical_allowance = get_val(row, 'medical_allowance')
             ms.transport_allowance = get_val(row, 'transport_allowance')
-            ms.fuel_allowance = get_val(row, 'fuel_allowance')
+            ms.kid_fee = get_val(row, 'kid_fee')
             ms.other_allowance = get_val(row, 'other_allowance')
             ms.bonus_amount = get_val(row, 'bonus_amount')
             ms.tax_deduction = get_val(row, 'tax_deduction')

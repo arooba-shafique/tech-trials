@@ -23,7 +23,7 @@ class SalaryConfig(models.Model):
     housing_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Housing allowance % of basic")
     medical_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Medical allowance % of basic")
     transport_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Transport allowance % of basic")
-    fuel_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Fuel allowance % of basic")
+    kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Kid's fee allowance % of basic")
     
     # Bonus
     bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Bonus amount per day if 0 leaves in month")
@@ -56,8 +56,8 @@ class SalaryConfig(models.Model):
         return basic * (self.medical_allowance_pct / 100)
     def get_transport(self, basic):
         return basic * (self.transport_allowance_pct / 100)
-    def get_fuel(self, basic):
-        return basic * (self.fuel_allowance_pct / 100)
+    def get_kid_fee(self, basic):
+        return basic * (self.kid_fee_pct / 100)
     def get_pf(self, basic):
         return basic * (self.provident_fund_pct / 100)
     def get_security(self, basic):
@@ -96,7 +96,7 @@ class EmployeeSalary(models.Model):
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     medical_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    fuel_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    kid_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # Per-employee salary config override (overrides global SalaryConfig when enabled)
@@ -104,7 +104,7 @@ class EmployeeSalary(models.Model):
     custom_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_fuel_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    custom_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -118,7 +118,7 @@ class EmployeeSalary(models.Model):
     @property
     def total_allowances(self):
         return (self.housing_allowance + self.medical_allowance +
-                self.transport_allowance + self.fuel_allowance + self.other_allowance)
+                self.transport_allowance + self.kid_fee + self.other_allowance)
 
     def __str__(self):
         return f"{self.employee.full_name} - {self.basic_salary}"
@@ -150,7 +150,7 @@ class MonthlySalary(models.Model):
     cfg_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_fuel_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -180,7 +180,7 @@ class MonthlySalary(models.Model):
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     medical_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    fuel_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    kid_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # Deductions
@@ -249,12 +249,12 @@ class MonthlySalary(models.Model):
             self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
             self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
             self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
-            self.fuel_allowance = float(basic) * float(self.cfg_fuel_pct) / 100
+            self.kid_fee = float(basic) * float(self.cfg_kid_fee_pct) / 100
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
             self.transport_allowance = config.get_transport(basic)
-            self.fuel_allowance = config.get_fuel(basic)
+            self.kid_fee = config.get_kid_fee(basic)
 
         # Calculate per day salary
         working = self.total_working_days if self.total_working_days > 0 else config.default_working_days
@@ -303,7 +303,7 @@ class MonthlySalary(models.Model):
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
             # Gross salary (with leave/late deductions)
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
             self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
                                - float(self.leave_deduction) - float(self.late_coming_deduction))
 
@@ -363,7 +363,7 @@ class MonthlySalary(models.Model):
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
             # Gross salary
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.fuel_allowance) + float(self.other_allowance)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
             self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
                                - float(self.leave_deduction) - float(self.late_coming_deduction))
 
@@ -393,7 +393,7 @@ class MonthlySalary(models.Model):
     @property
     def total_allowances(self):
         return (self.housing_allowance + self.medical_allowance +
-                self.transport_allowance + self.fuel_allowance + self.other_allowance)
+                self.transport_allowance + self.kid_fee + self.other_allowance)
 
     @property
     def days_in_month(self):

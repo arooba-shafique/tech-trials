@@ -251,7 +251,7 @@ def admin_dashboard(request):
                         teacher.ov_housing = float(ms.cfg_housing_pct)
                         teacher.ov_medical = float(ms.cfg_medical_pct)
                         teacher.ov_transport = float(ms.cfg_transport_pct)
-                        teacher.ov_fuel = float(ms.cfg_fuel_pct)
+                        teacher.ov_kid_fee = float(ms.cfg_kid_fee_pct)
                         teacher.ov_tax = float(ms.cfg_tax_pct)
                         teacher.ov_pf = float(ms.cfg_pf_pct)
                         teacher.ov_security = float(ms.cfg_security_pct)
@@ -264,7 +264,7 @@ def admin_dashboard(request):
                         teacher.ov_housing = 0
                         teacher.ov_medical = 0
                         teacher.ov_transport = 0
-                        teacher.ov_fuel = 0
+                        teacher.ov_kid_fee = 0
                         teacher.ov_tax = 0
                         teacher.ov_pf = 0
                         teacher.ov_security = 0
@@ -277,7 +277,7 @@ def admin_dashboard(request):
                     teacher.ov_housing = 0
                     teacher.ov_medical = 0
                     teacher.ov_transport = 0
-                    teacher.ov_fuel = 0
+                    teacher.ov_kid_fee = 0
                     teacher.ov_tax = 0
                     teacher.ov_pf = 0
                     teacher.ov_security = 0
