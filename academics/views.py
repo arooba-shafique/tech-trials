@@ -327,7 +327,7 @@ def admin_dashboard(request):
 
 SECTION_TAGS = {
     'Student':            'students',
-    'Teacher':            'teachers',
+    'Teacher':            'staff',
     'Parent':             'parents',
     'Class':              'classes',
     'Subject':            'subjects',
@@ -485,7 +485,7 @@ def add_teacher(request):
             form.save_m2m()  # save ManyToMany fields like subjects
 
             messages.success(request, 'Teacher added successfully.', extra_tags='teachers')
-            return redirect('admin_console')
+            return redirect('/admin-console/?section=staff')
     else:
         form = TeacherProfileForm(school=school)
     return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher'})
@@ -528,7 +528,7 @@ def edit_teacher(request, pk):
                 teacher.user.email = form.cleaned_data['email']
                 teacher.user.save()
             messages.success(request, 'Teacher updated successfully.', extra_tags='teachers')
-            return redirect('admin_console')
+            return redirect('/admin-console/?section=staff')
     else:
         form = TeacherProfileForm(
             instance=teacher,
