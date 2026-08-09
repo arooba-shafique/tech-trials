@@ -1,17 +1,12 @@
 {% extends "hr/base_hr.html" %}
 
-{% block content %}
-<div class="hr-topbar">
-    <div>
-        <h1>Clearance — {{ employee.full_name }}</h1>
-        <div class="breadcrumb">HR Module / Left Employees / Clearance</div>
-    </div>
-</div>
+{% block back_link %}{% endblock back_link %}
 
+{% block content %}
 <!-- Employee Info -->
 <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-    <div style="width:50px;height:50px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">
-        {{ employee.full_name|first|upper }}
+    <div style="width:48px;height:48px;border-radius:50%;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
     </div>
     <div style="flex:1;">
         <div style="font-size:16px;font-weight:700;">{{ employee.full_name }}</div>
@@ -163,26 +158,15 @@
         </div>
 
         <div class="form-group">
-            <label>Reason for Additional Deductions</label>
-            <textarea name="deduction_reason" class="form-control" rows="3" placeholder="Explain any additional deductions...">{{ form.deduction_reason.value|default:'' }}</textarea>
-        </div>
-
-        <div class="form-group">
             <label>Clearance Date</label>
             <input type="date" name="clearance_date" class="form-control" value="{{ form.clearance_date.value|default:'' }}">
         </div>
 
-        <div class="form-group">
-            <label>Notes</label>
-            <textarea name="notes" class="form-control" rows="3" placeholder="Any additional clearance notes...">{{ form.notes.value|default:'' }}</textarea>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:20px;">
-            <button type="submit" class="btn btn-primary" style="padding:10px 24px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        <div style="text-align:center;margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px 40px;font-size:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Save Clearance
             </button>
-            <a href="{% url 'hr_left_employees' %}" class="btn btn-ghost" style="padding:10px 24px;">Back to Left Employees</a>
         </div>
     </form>
 </div>
