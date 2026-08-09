@@ -103,6 +103,7 @@ def admin_dashboard(request):
     left_data = []
     left_pending_count = 0
     left_completed_count = 0
+    pending_clearance_alerts = []
     for emp in left_employees:
         sep = SeparationRecord.objects.filter(employee=emp).first()
         if sep:
@@ -110,6 +111,15 @@ def admin_dashboard(request):
                 left_completed_count += 1
             else:
                 left_pending_count += 1
+                # Check if 3+ months have passed since leaving
+                if sep.last_working_date:
+                    months_passed = (today.year - sep.last_working_date.year) * 12 + (today.month - sep.last_working_date.month)
+                    if months_passed >= 3:
+                        pending_clearance_alerts.append({
+                            'employee': emp,
+                            'separation': sep,
+                            'months_passed': months_passed,
+                        })
         else:
             left_pending_count += 1
 
@@ -147,6 +157,7 @@ def admin_dashboard(request):
         'left_pending_count': left_pending_count,
         'left_completed_count': left_completed_count,
         'left_search': left_search,
+        'pending_clearance_alerts': pending_clearance_alerts,
     }
 
     # Add HR data for admin_manager
