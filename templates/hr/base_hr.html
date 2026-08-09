@@ -86,12 +86,14 @@
 <body>
     <div class="hr-layout">
         <main class="hr-main">
+            {% block back_link %}
             <div style="margin-bottom:16px;">
                 <a href="{% url 'admin_console' %}" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--primary);text-decoration:none;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                     Back to Dashboard
                 </a>
             </div>
+            {% endblock back_link %}
             {% if messages %}
             {% for message in messages %}
             <div class="toast">{{ message }}</div>
