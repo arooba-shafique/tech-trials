@@ -1,13 +1,6 @@
 {% extends "hr/base_hr.html" %}
 
 {% block content %}
-<div class="hr-topbar">
-    <div>
-        <h1>Mark as Left — {{ employee.full_name }}</h1>
-        <div class="breadcrumb">HR Module / Staff / Mark as Left</div>
-    </div>
-</div>
-
 <div class="card" style="max-width:600px;margin:0 auto;">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);">
         <div style="width:50px;height:50px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;flex-shrink:0;">
@@ -38,12 +31,11 @@
             </select>
         </div>
 
-        <div style="display:flex;gap:10px;margin-top:20px;">
+        <div style="text-align:center;margin-top:20px;">
             <button type="submit" class="btn btn-danger" style="padding:10px 24px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
                 Mark as Left
             </button>
-            <a href="/admin-console/" class="btn btn-ghost" style="padding:10px 24px;">Cancel</a>
         </div>
     </form>
 </div>
