@@ -42,6 +42,11 @@ function showSection(name, el) {
     document.getElementById('section-' + name).classList.add('active');
     if (el) el.classList.add('active');
     document.getElementById('pageTitle').textContent = titles[name] || name;
+    if (name === 'dashboard') {
+        history.pushState(null, '', '/admin-console/');
+    } else {
+        history.pushState(null, '', '/admin-console/?section=' + name);
+    }
     if (window.innerWidth <= 768) {
         document.querySelector('.sidebar').classList.remove('show');
         var ov = document.getElementById('sidebarOverlay');
