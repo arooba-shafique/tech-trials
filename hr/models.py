@@ -303,8 +303,8 @@ class MonthlySalary(models.Model):
             # Overtime still applies
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary = per_day_salary * present_days + all allowances
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
+            # Gross salary = per_day_salary * present_days + all allowances (excluding kid_fee)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
             self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
 
             # Tax deduction
@@ -313,9 +313,9 @@ class MonthlySalary(models.Model):
             else:
                 self.tax_deduction = config.get_tax(self.gross_salary)
 
-            # Total deductions = leave + late + security + tax (no PF, no Van/Child)
+            # Total deductions = leave + late + kid_fee + security + tax (no PF, no Van/Child)
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.security_deduction) + float(self.tax_deduction) +
+                                   float(self.kid_fee) + float(self.security_deduction) + float(self.tax_deduction) +
                                    float(self.advance_deduction) + float(self.other_deduction))
 
             # Net salary
@@ -363,8 +363,8 @@ class MonthlySalary(models.Model):
             # Overtime
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary = per_day_salary * present_days + all allowances
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
+            # Gross salary = per_day_salary * present_days + all allowances (excluding kid_fee)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
             self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
 
             # Tax
@@ -375,7 +375,7 @@ class MonthlySalary(models.Model):
 
             # Total deductions
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.advance_deduction) + float(self.provident_fund) +
+                                   float(self.kid_fee) + float(self.advance_deduction) + float(self.provident_fund) +
                                    float(self.security_deduction) + float(self.van_child_deduction) +
                                    float(self.tax_deduction) + float(self.other_deduction))
 
@@ -393,7 +393,7 @@ class MonthlySalary(models.Model):
     @property
     def total_allowances(self):
         return (self.housing_allowance + self.medical_allowance +
-                self.transport_allowance + self.kid_fee + self.other_allowance)
+                self.transport_allowance + self.other_allowance)
 
     @property
     def days_in_month(self):
