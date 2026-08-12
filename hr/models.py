@@ -270,8 +270,9 @@ class MonthlySalary(models.Model):
 
         if is_new_employee:
             # FIRST 2 MONTHS: Only PF and Van/Child are dead. All others apply.
-            # Leave deduction
-            self.leave_deduction = self.unpaid_leaves * self.per_day_salary
+            # Leave deduction: 1 paid leave/month, deduction = per_day_salary * (days_absent - 1) if absent > 1
+            unpaid_days = max(0, self.days_absent - 1)
+            self.leave_deduction = self.per_day_salary * unpaid_days
 
             # Late coming deduction
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
@@ -323,8 +324,9 @@ class MonthlySalary(models.Model):
         else:
             # NORMAL: 3rd month onwards — all deductions apply
 
-            # Leave deduction = unpaid_leaves * per_day_salary
-            self.leave_deduction = self.unpaid_leaves * self.per_day_salary
+            # Leave deduction: 1 paid leave/month, deduction = per_day_salary * (days_absent - 1) if absent > 1
+            unpaid_days = max(0, self.days_absent - 1)
+            self.leave_deduction = self.per_day_salary * unpaid_days
 
             # Late coming deduction (every N lates = 1 half-day deduction)
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
