@@ -303,10 +303,9 @@ class MonthlySalary(models.Model):
             # Overtime still applies
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary (with leave/late deductions)
+            # Gross salary = per_day_salary * present_days + all allowances
             total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
-            self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
-                               - float(self.leave_deduction) - float(self.late_coming_deduction))
+            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
 
             # Tax deduction
             if has_cfg:
@@ -364,10 +363,9 @@ class MonthlySalary(models.Model):
             # Overtime
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary
+            # Gross salary = per_day_salary * present_days + all allowances
             total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kid_fee) + float(self.other_allowance)
-            self.gross_salary = (basic + float(self.increment) + total_allow + float(self.bonus_amount) + overtime_pay
-                               - float(self.leave_deduction) - float(self.late_coming_deduction))
+            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
 
             # Tax
             if has_cfg:
