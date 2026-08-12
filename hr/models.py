@@ -23,7 +23,6 @@ class SalaryConfig(models.Model):
     housing_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Housing allowance % of basic")
     medical_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Medical allowance % of basic")
     transport_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Transport allowance % of basic")
-    kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Kid's fee allowance % of basic")
     
     # Bonus
     bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Bonus amount per day if 0 leaves in month")
@@ -56,8 +55,6 @@ class SalaryConfig(models.Model):
         return basic * (self.medical_allowance_pct / 100)
     def get_transport(self, basic):
         return basic * (self.transport_allowance_pct / 100)
-    def get_kid_fee(self, basic):
-        return basic * (self.kid_fee_pct / 100)
     def get_pf(self, basic):
         return basic * (self.provident_fund_pct / 100)
     def get_security(self, basic):
@@ -96,7 +93,6 @@ class EmployeeSalary(models.Model):
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     medical_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    kid_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # Per-employee salary config override (overrides global SalaryConfig when enabled)
@@ -104,7 +100,6 @@ class EmployeeSalary(models.Model):
     custom_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     custom_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -118,7 +113,7 @@ class EmployeeSalary(models.Model):
     @property
     def total_allowances(self):
         return (self.housing_allowance + self.medical_allowance +
-                self.transport_allowance + self.kid_fee + self.other_allowance)
+                self.transport_allowance + self.other_allowance)
 
     def __str__(self):
         return f"{self.employee.full_name} - {self.basic_salary}"
@@ -150,7 +145,6 @@ class MonthlySalary(models.Model):
     cfg_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
@@ -180,7 +174,6 @@ class MonthlySalary(models.Model):
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     medical_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    kid_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # Deductions
@@ -249,12 +242,10 @@ class MonthlySalary(models.Model):
             self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
             self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
             self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
-            self.kid_fee = float(basic) * float(self.cfg_kid_fee_pct) / 100
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
             self.transport_allowance = config.get_transport(basic)
-            self.kid_fee = config.get_kid_fee(basic)
 
         # Calculate per day salary
         working = self.total_working_days if self.total_working_days > 0 else config.default_working_days
@@ -313,9 +304,9 @@ class MonthlySalary(models.Model):
             else:
                 self.tax_deduction = config.get_tax(self.gross_salary)
 
-            # Total deductions = leave + late + kid_fee + security + tax (no PF, no Van/Child)
+            # Total deductions = leave + late + van/child + security + tax (no PF for new employees)
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.kid_fee) + float(self.security_deduction) + float(self.tax_deduction) +
+                                   float(self.van_child_deduction) + float(self.security_deduction) + float(self.tax_deduction) +
                                    float(self.advance_deduction) + float(self.other_deduction))
 
             # Net salary
@@ -375,7 +366,7 @@ class MonthlySalary(models.Model):
 
             # Total deductions
             self.total_deductions = (float(self.leave_deduction) + float(self.late_coming_deduction) +
-                                   float(self.kid_fee) + float(self.advance_deduction) + float(self.provident_fund) +
+                                   float(self.advance_deduction) + float(self.provident_fund) +
                                    float(self.security_deduction) + float(self.van_child_deduction) +
                                    float(self.tax_deduction) + float(self.other_deduction))
 
