@@ -149,6 +149,7 @@ class MonthlySalary(models.Model):
     cfg_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     cfg_bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
 
