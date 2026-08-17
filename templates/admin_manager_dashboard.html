@@ -1147,7 +1147,6 @@
                                         <th>PF %</th>
                                         <th>Security %</th>
                                         <th>Van/Child %</th>
-                                        <th>Bonus %</th>
                                         <th>Transaction Type</th>
                                     </tr>
                                 </thead>
@@ -1166,7 +1165,6 @@
                                         <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_pf }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
                                         <td><input type="number" name="custom_security_{{ teacher.id }}" value="{% if not teacher.is_new_employee %}0{% else %}{{ teacher.ov_security }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if not teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if not teacher.is_new_employee %}disabled readonly title="Only applies for new employees (first 2 months)"{% endif %}></td>
                                         <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_van_child }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
-                                        <td><input type="number" name="custom_bonus_pct_{{ teacher.id }}" value="{{ teacher.ov_bonus_pct }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
                                         <td><select name="custom_transaction_type_{{ teacher.id }}" style="width:120px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="bank_islami" {% if teacher.ov_transaction_type == 'bank_islami' %}selected{% endif %}>Bank Islami</option><option value="ubl" {% if teacher.ov_transaction_type == 'ubl' %}selected{% endif %}>UBL</option><option value="cash" {% if teacher.ov_transaction_type == 'cash' %}selected{% endif %}>Cash in Hand</option><option value="personal" {% if teacher.ov_transaction_type == 'personal' %}selected{% endif %}>Personal Account</option></select></td>
                                     </tr>
                                     {% endfor %}
