@@ -184,6 +184,7 @@ class MonthlySalary(models.Model):
     provident_fund = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     security_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     van_child_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    kid_fee = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     tax_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_deduction = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
