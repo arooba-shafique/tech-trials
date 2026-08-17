@@ -276,18 +276,9 @@ class MonthlySalary(models.Model):
             self.provident_fund = 0
             self.van_child_deduction = 0
 
-            # Bonus applies
-            if self.days_absent == 0 and self.unpaid_leaves == 0:
-                if has_cfg:
-                    if float(self.cfg_bonus_per_day) > 0:
-                        self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
-                    else:
-                        self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
-                else:
-                    if config.bonus_per_day > 0:
-                        self.bonus_amount = config.bonus_per_day * self.total_working_days
-                    else:
-                        self.bonus_amount = config.get_bonus(basic)
+            # Bonus: 1 day salary if 0 absent days
+            if self.days_absent == 0:
+                self.bonus_amount = self.per_day_salary
             else:
                 self.bonus_amount = 0
 
@@ -322,18 +313,9 @@ class MonthlySalary(models.Model):
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
             self.late_coming_deduction = lates_for_deduct * self.per_day_salary
 
-            # Bonus: only if 0 absent days AND 0 unpaid leaves
-            if self.days_absent == 0 and self.unpaid_leaves == 0:
-                if has_cfg:
-                    if float(self.cfg_bonus_per_day) > 0:
-                        self.bonus_amount = float(self.cfg_bonus_per_day) * self.total_working_days
-                    else:
-                        self.bonus_amount = float(basic) * float(self.cfg_bonus_pct) / 100
-                else:
-                    if config.bonus_per_day > 0:
-                        self.bonus_amount = config.bonus_per_day * self.total_working_days
-                    else:
-                        self.bonus_amount = config.get_bonus(basic)
+            # Bonus: 1 day salary if 0 absent days
+            if self.days_absent == 0:
+                self.bonus_amount = self.per_day_salary
             else:
                 self.bonus_amount = 0
 
