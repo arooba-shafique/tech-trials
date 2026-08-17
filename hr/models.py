@@ -265,9 +265,9 @@ class MonthlySalary(models.Model):
             unpaid_days = max(0, self.days_absent - 1)
             self.leave_deduction = self.per_day_salary * unpaid_days
 
-            # Late coming deduction
+            # Late coming deduction (every N lates = 1 full-day deduction)
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
-            self.late_coming_deduction = lates_for_deduct * (self.per_day_salary / 2)
+            self.late_coming_deduction = lates_for_deduct * self.per_day_salary
 
             # Security deduction (new employee percentage)
             self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
@@ -318,9 +318,9 @@ class MonthlySalary(models.Model):
             unpaid_days = max(0, self.days_absent - 1)
             self.leave_deduction = self.per_day_salary * unpaid_days
 
-            # Late coming deduction (every N lates = 1 half-day deduction)
+            # Late coming deduction (every N lates = 1 full-day deduction)
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
-            self.late_coming_deduction = lates_for_deduct * (self.per_day_salary / 2)
+            self.late_coming_deduction = lates_for_deduct * self.per_day_salary
 
             # Bonus: only if 0 absent days AND 0 unpaid leaves
             if self.days_absent == 0 and self.unpaid_leaves == 0:
