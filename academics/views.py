@@ -606,7 +606,12 @@ def edit_teacher(request, pk):
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
     if request.method == 'POST':
-        form = TeacherProfileForm(request.POST, request.FILES, instance=teacher, school=school)
+        post_data = request.POST.copy()
+        if hide_salary:
+            for f in salary_fields:
+                if f not in post_data or not post_data[f]:
+                    post_data[f] = getattr(teacher, f, '') or ''
+        form = TeacherProfileForm(post_data, request.FILES, instance=teacher, school=school)
         if form.is_valid():
             if hide_salary:
                 for f in salary_fields:
