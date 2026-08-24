@@ -585,10 +585,11 @@ def add_teacher(request):
 
 @login_required(login_url='admin_login')
 def edit_teacher(request, pk):
+    from django.db.models import Q
     qs = TeacherProfile.objects.all()
     school = get_user_school(request.user)
     if not request.user.is_superuser and school:
-        qs = qs.filter(school=school)
+        qs = qs.filter(Q(school=school) | Q(school__isnull=True))
     teacher = get_object_or_404(qs, pk=pk)
     school = get_user_school(request.user)
 
@@ -661,10 +662,11 @@ def edit_teacher(request, pk):
 
 @login_required(login_url='admin_login')
 def delete_teacher(request, pk):
+    from django.db.models import Q
     qs = TeacherProfile.objects.all()
     school = get_user_school(request.user)
     if not request.user.is_superuser and school:
-        qs = qs.filter(school=school)
+        qs = qs.filter(Q(school=school) | Q(school__isnull=True))
     teacher = get_object_or_404(qs, pk=pk)
     return delete_model_entry(request, teacher, 'Teacher')
 
