@@ -252,7 +252,7 @@
                     </div>
                     <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
                         <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Docs</a>
-                        <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
+                        <a href="#" onclick="openDrawer('{% url 'edit_teacher' teacher.id %}','Edit Staff — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
                     </div>
                 </div>
                 {% empty %}<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff found.</div>{% endfor %}
@@ -273,7 +273,7 @@
     <div id="drawer-body"></div>
 </div>
 
-<script src="{% static 'js/admin_dashboard.js' %}?v=4"></script>
+
 <script>
     function showSection(id, navEl) {
         document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
@@ -283,6 +283,11 @@
         if (navEl) navEl.classList.add('active');
         var title = document.getElementById('pageTitle');
         if (title) title.textContent = navEl ? navEl.textContent.trim() : 'Dashboard';
+    }
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('show');
+        var ov = document.getElementById('sidebarOverlay');
+        if (ov) ov.classList.toggle('show');
     }
     function closeAllDropdowns() {
         document.querySelectorAll('.avatar-dropdown').forEach(function(d) { d.style.display = 'none'; });
