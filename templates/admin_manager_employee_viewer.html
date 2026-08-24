@@ -372,6 +372,7 @@
                 }
                 attachFormHandler(body, url);
                 attachAddMoreHandler(body);
+                attachDeleteHandlers(body);
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -401,6 +402,37 @@
             var newRow = row.cloneNode(true);
             newRow.querySelectorAll('input').forEach(function (inp) { inp.value = ''; });
             docRows.appendChild(newRow);
+        });
+    }
+    function attachDeleteHandlers(container) {
+        container.querySelectorAll('.js-delete-doc').forEach(function(link) {
+            if (link.dataset.ajaxBound) return;
+            link.dataset.ajaxBound = '1';
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var href = link.getAttribute('href');
+                if (!confirm('Delete this document?')) return;
+                var row = link.closest('.doc-item');
+                fetch(href, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function(r) { return r.json(); })
+                    .then(function() {
+                        if (row) {
+                            row.style.transition = 'opacity 0.2s';
+                            row.style.opacity = '0';
+                            setTimeout(function() {
+                                row.remove();
+                                var list = container.querySelector('.docs-list');
+                                if (list) {
+                                    var remaining = list.querySelectorAll('.doc-item').length;
+                                    var header = list.querySelector('.docs-header');
+                                    if (header) header.textContent = 'Uploaded Documents (' + remaining + ')';
+                                }
+                            }, 200);
+                        }
+                    })
+                    .catch(function() {});
+            });
         });
     }
     function attachFormHandler(container, originalUrl) {
@@ -436,6 +468,7 @@
                     else { var f2 = doc.querySelector('form'); body.innerHTML = f2 ? f2.outerHTML : html; }
                     attachFormHandler(body, originalUrl);
                     attachAddMoreHandler(body);
+                    attachDeleteHandlers(body);
                     body.scrollTop = 0;
                 });
             }).catch(function(){
