@@ -178,34 +178,18 @@
         </div>
 
         <div style="padding:12px 18px;border-bottom:1px solid #f3f4f6;">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:8px;">Permissions</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:8px;">Role</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            {% if admin.can_manage_students %}
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#eff6ff;color:#2563eb;">Students</span>
-            {% endif %}
-            {% if admin.can_manage_teachers %}
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdf4;color:#16a34a;">Staff</span>
-            {% endif %}
-            {% if admin.can_manage_classes %}
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fffbeb;color:#d97706;">Classes</span>
-            {% endif %}
-            {% if admin.can_manage_hr_attendance %}
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdfa;color:#0d9488;">HR Attendance</span>
-            {% endif %}
-            {% if admin.can_view_edit_employees %}
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f5f3ff;color:#7c3aed;">Employee Info</span>
+            {% if admin.can_manage_students and admin.can_manage_teachers and admin.can_manage_classes %}
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#0f1623;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Full Admin Manager</span>
+            {% elif admin.can_manage_hr_attendance %}
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#0d9488;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Attendance Manager</span>
+            {% elif admin.can_view_edit_employees %}
+            <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:#7c3aed;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Employee Viewer</span>
+            {% else %}
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f3f4f6;color:#6b7280;">No Role Assigned</span>
             {% endif %}
           </div>
-          {% if not admin.can_manage_students and not admin.can_manage_teachers and not admin.can_manage_classes and admin.can_manage_hr_attendance %}
-          <div style="margin-top:8px;">
-            <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#0d9488;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Attendance Only</span>
-          </div>
-          {% endif %}
-          {% if not admin.can_manage_students and not admin.can_manage_teachers and not admin.can_manage_classes and not admin.can_manage_hr_attendance and admin.can_view_edit_employees %}
-          <div style="margin-top:8px;">
-            <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#7c3aed;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Employee Viewer</span>
-          </div>
-          {% endif %}
         </div>
 
         <div style="padding:10px 18px;display:flex;gap:8px;">
