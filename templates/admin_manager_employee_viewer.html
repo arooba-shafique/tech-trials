@@ -331,7 +331,7 @@
     }
 
     /* ── Drawer ── */
-    function openDrawer(url, title) {
+    window.openDrawer = function(url, title) {
         document.getElementById('drawer-title').textContent = title || 'Details';
         document.getElementById('drawer-overlay').style.display = 'block';
         document.getElementById('drawer').classList.add('open');
@@ -341,11 +341,19 @@
         }).catch(function(){
             document.getElementById('drawer-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">Failed to load.</div>';
         });
-    }
-    function closeDrawer() {
+    };
+    window.closeDrawer = function() {
         document.getElementById('drawer-overlay').style.display = 'none';
         document.getElementById('drawer').classList.remove('open');
-    }
+    };
+    /* Prevent admin_dashboard.js from intercepting edit/add links into drawer */
+    document.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href*="/edit/teacher"], a[href*="/add/teacher"]');
+        if (link) {
+            e.stopImmediatePropagation();
+            window.location.href = link.getAttribute('href');
+        }
+    }, true);
 </script>
 </body>
 </html>
