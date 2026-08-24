@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    <style>
+        .manager-badge {
+            font-size: 9px; font-weight: 800; letter-spacing: 1px;
+            padding: 3px 8px; border-radius: 20px;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: #fff; text-transform: uppercase;
+        }
+        .avd-role { background: #7c3aed !important; }
+        .readonly-notice {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11.5px; color: #7c3aed; font-weight: 600;
+            background: #f5f3ff; border: 1px solid #c4b5fd;
+            padding: 4px 10px; border-radius: 20px;
+            white-space: nowrap;
+        }
+        html, body { overflow-x: hidden; max-width: 100%; }
+        .main { min-width: 0; overflow-x: hidden; }
+        .content { min-width: 0; overflow-x: hidden; }
+        .section { min-width: 0; }
+        .topbar { overflow: visible !important; }
+        .btn-primary { background:#7c3aed !important; color:#fff !important; }
+        .btn-primary:hover { background:#6d28d9 !important; }
+
+        .staff-filter-btn { transition: all 0.15s; }
+        .staff-filter-btn:hover { opacity: 0.85; }
+
+        /* Drawer */
+        #drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2000;}
+        #drawer{position:fixed;top:0;right:-520px;width:500px;max-width:92vw;height:100vh;background:#fff;z-index:2001;box-shadow:-8px 0 40px rgba(0,0,0,.18);transition:right .3s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden;}
+        #drawer.open{right:0;}
+        #drawer-header{padding:18px 22px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#fafafa;}
+        #drawer-title{font-size:15px;font-weight:700;color:#1a1d23;}
+        #drawer-close{width:32px;height:32px;border-radius:8px;background:#f3f4f6;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:#6b7280;transition:background .12s;}
+        #drawer-close:hover{background:#e5e7eb;}
+        #drawer-body{flex:1;overflow-y:auto;padding:22px;}
+        #drawer-body .upload-form .form-group label{text-align:left;}
+        #drawer-body .upload-form .form-group:last-child{flex:0 0 auto;max-width:none;}
+        #drawer-body .upload-form button[type=submit]{width:auto;flex:0 0 auto;}
+        #drawer-body label { display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:#6b7280;margin-bottom:6px; }
+        #drawer-body input[type=text],#drawer-body input[type=email],#drawer-body input[type=password],#drawer-body input[type=number],#drawer-body input[type=date],#drawer-body input[type=tel],#drawer-body select,#drawer-body textarea { width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;font-size:13.5px;font-family:inherit;color:#1a1d23;outline:none;background:#fff;transition:border-color 0.15s;box-sizing:border-box; }
+        #drawer-body input:focus,#drawer-body select:focus,#drawer-body textarea:focus { border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,0.1); }
+        #drawer-body textarea { min-height:100px;resize:vertical; }
+        #drawer-body input[type=submit],#drawer-body button[type=submit] { margin-top:8px;padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:background 0.15s;width:100%; }
+        #drawer-body input[type=submit]:hover,#drawer-body button[type=submit]:hover { background:#6d28d9; }
+        #drawer-body .staff-info{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:#f9fafb;border-radius:12px;}
+        #drawer-body .staff-avatar{width:48px;height:48px;border-radius:50%;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;}
+        #drawer-body .staff-name{font-size:16px;font-weight:700;color:#1e293b;}
+        #drawer-body .staff-id{font-size:12px;color:#6b7280;margin-top:2px;}
+        #drawer-body .upload-section{margin-bottom:20px;}
+        #drawer-body .upload-section h2{font-size:14px;font-weight:700;color:#1e293b;margin-bottom:12px;}
+        #drawer-body .upload-form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;}
+        #drawer-body .upload-form .form-group{flex:1 1 0;min-width:0;text-align:left;}
+        #drawer-body .upload-form .form-group label{text-align:left;}
+        #drawer-body .upload-form .form-group:last-child{flex:0 0 auto;max-width:none;}
+        #drawer-body .upload-form button[type=submit]{width:auto;flex:0 0 auto;}
+        #drawer-body .docs-list{background:#f9fafb;border-radius:12px;overflow:hidden;}
+        #drawer-body .docs-header{padding:12px 16px;border-bottom:1px solid #e5e7eb;font-size:14px;font-weight:700;color:#1e293b;}
+        #drawer-body .doc-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #e5e7eb;}
+        #drawer-body .doc-item:last-child{border-bottom:none;}
+        #drawer-body .doc-info{display:flex;align-items:center;gap:12px;min-width:0;}
+        #drawer-body .doc-icon{width:36px;height:36px;border-radius:8px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        #drawer-body .doc-icon svg{width:18px;height:18px;color:#7c3aed;}
+        #drawer-body .doc-title{font-size:13px;font-weight:600;color:#1e293b;}
+        #drawer-body .doc-date{font-size:11px;color:#9ca3af;margin-top:2px;}
+        #drawer-body .doc-actions{display:flex;gap:6px;flex-shrink:0;}
+        #drawer-body .doc-actions .btn-sm{padding:5px 10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;font-weight:600;text-decoration:none;display:inline-block;}
+        #drawer-body .doc-actions .btn-primary{background:#7c3aed;color:#fff;}
+        #drawer-body .doc-actions .btn-primary:hover{background:#6d28d9;}
+        #drawer-body .doc-actions .btn-danger{background:#ef4444;color:#fff;}
+        #drawer-body .doc-actions .btn-danger:hover{background:#dc2626;}
+        #drawer-body .empty-state{padding:32px;text-align:center;color:#9ca3af;font-size:13px;}
+        #drawer-body .msg{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:12px;}
+        #drawer-body .msg-success{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;}
+        #drawer-body .msg-error{background:#fef2f2;color:#dc2626;border:1px solid #fecaca;}
+        #drawer-body input[type=file]{padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;}
+        @media (max-width:480px) { #drawer { width:100vw!important;border-radius:16px 16px 0 0!important;top:auto!important;bottom:0!important;left:0!important;transform:none!important; } }
+    </style>
+</head>
+<body>
+
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR — Employee Viewer
+══════════════════════════════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </div>
+        <div class="brand-text">
+            <h2>Institution<br>Management</h2>
+            <span>Employee Console</span>
+        </div>
+        <span class="manager-badge">EMP MGR</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <a class="nav-item active" href="#" onclick="showSection('dashboard',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+        </a>
+
+        <div class="nav-label">People</div>
+        <a class="nav-item" href="#" onclick="showSection('staff',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Staff
+        </a>
+    </nav>
+
+    <div class="sidebar-user">
+        <div class="user-avatar" style="background:#7c3aed;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+        <div class="user-info">
+            <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+            <p>{{ request.user.email }}</p>
+        </div>
+    </div>
+</aside>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<main class="main">
+    <header class="topbar">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="topbar-right">
+            <span id="topDate"></span>
+            <div class="avatar-wrap">
+                <div class="admin-top-avatar" id="topAvatarBtn" style="background:#7c3aed;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+                <div class="avatar-dropdown" id="topAvatarDropdown">
+                    <div class="avd-profile">
+                        <div class="avd-avatar" style="background:#7c3aed;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+                        <div>
+                            <div class="avd-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="avd-email">{{ request.user.email }}</div>
+                            <span class="avd-role" style="background:#7c3aed;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;">EMPLOYEE VIEWER</span>
+                        </div>
+                    </div>
+                    <div class="avd-menu">
+                        <a href="#" class="avd-item" onclick="showSection('dashboard', document.querySelector('.nav-item[onclick*=\'dashboard\']')); closeAllDropdowns(); return false;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Dashboard
+                        </a>
+                        <div class="avd-divider"></div>
+                        <a href="{% url 'password_change' %}" class="avd-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Change Password
+                        </a>
+                        <div class="avd-divider"></div>
+                        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="avd-item danger" style="width:100%;border:none;background:none;font-family:inherit;text-align:left;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                Log Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div id="toast-msg" data-section="{{ message.tags }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- ═══════════ DASHBOARD ═══════════ -->
+        <div id="section-dashboard" class="section active">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <p style="color:var(--text-secondary);font-size:14px;">Welcome back, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>. You have access to employee information only.</p>
+                <span class="readonly-notice">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Employee Viewer
+                </span>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f5f3ff;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div class="stat-info"><p>Total Staff</p><h3>{{ teachers|length }}</h3></div>
+                </div>
+            </div>
+            <div style="background:var(--white);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:24px;">
+                <p style="font-size:13px;font-weight:700;margin-bottom:12px;">Quick Actions</p>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <a href="#" onclick="showSection('staff',document.querySelector('.nav-item[onclick*=\'staff\']'));return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">View Staff</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ STAFF ═══════════ -->
+        <div id="section-staff" class="section">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                <h2 style="font-size:15px;font-weight:700;">All Staff</h2>
+                <span class="readonly-notice">View &amp; Edit Only — No Salary Access</span>
+            </div>
+            <!-- Designation filter pills -->
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+                <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#7c3aed;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                <button class="staff-filter-btn" onclick="filterStaff('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teachers</button>
+                <button class="staff-filter-btn" onclick="filterStaff('coordinator',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Coordinators</button>
+                <button class="staff-filter-btn" onclick="filterStaff('vp',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">VP</button>
+                <button class="staff-filter-btn" onclick="filterStaff('manager',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Managers</button>
+                <button class="staff-filter-btn" onclick="filterStaff('group_head',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Group Heads</button>
+            </div>
+            <div id="staff-cards-grid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
+                {% for teacher in teachers %}
+                <div class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
+                    <div style="padding:18px 18px 14px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #f3f4f6;">
+                        <div style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;background:#7c3aed;">{{ teacher.full_name|first|upper }}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:14.5px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ teacher.full_name }}</div>
+                            <div style="font-size:11px;color:var(--text-muted);">{{ teacher.employee_id|default:"No ID" }}</div>
+                        </div>
+                        <span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span>
+                    </div>
+                    <div style="padding:10px 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text-secondary);border-bottom:1px solid #f3f4f6;">
+                        <div><span style="color:var(--text-muted);">Father:</span> {{ teacher.father_name|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">CNIC:</span> {{ teacher.cnic|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">Desig:</span> {{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">Type:</span> {{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">Phone:</span> {{ teacher.phone|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">Joined:</span> {{ teacher.joining_date|default:"-" }}</div>
+                    </div>
+                    <div style="padding:10px 18px;">
+                        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:6px;">Assigned Subjects</div>
+                        {% for ts in teacher.assignments.all %}
+                        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f9fafb;gap:8px;">
+                            <div style="font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ts.subject.name }}</div>
+                            <span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px;background:#f5f3ff;color:#7c3aed;flex-shrink:0;">{{ ts.assigned_class }}</span>
+                        </div>
+                        {% empty %}<div style="font-size:11px;color:var(--text-muted);padding:2px 0;">No subjects assigned.</div>{% endfor %}
+                    </div>
+                    <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
+                        <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Docs</a>
+                        <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
+                    </div>
+                </div>
+                {% empty %}<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff found.</div>{% endfor %}
+            </div>
+            <div id="staff-no-results" style="display:none;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff match the selected filter.</div>
+        </div>
+
+    </div><!-- end .content -->
+</main>
+
+<!-- ═══════════ DRAWER ═══════════ -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer">
+    <div id="drawer-header">
+        <div id="drawer-title">Document</div>
+        <button id="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div id="drawer-body"></div>
+</div>
+
+<script src="{% static 'js/admin_dashboard.js' %}?v=4"></script>
+<script>
+    function showSection(id, navEl) {
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+        var target = document.getElementById('section-' + id);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+        if (navEl) navEl.classList.add('active');
+        var title = document.getElementById('pageTitle');
+        if (title) title.textContent = navEl ? navEl.textContent.trim() : 'Dashboard';
+    }
+    function closeAllDropdowns() {
+        document.querySelectorAll('.avatar-dropdown').forEach(function(d) { d.style.display = 'none'; });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var section = new URLSearchParams(window.location.search).get('section');
+        if (section) {
+            var nav = document.querySelector('.nav-item[onclick*="' + section + '"]');
+            showSection(section, nav);
+        }
+        var topDate = document.getElementById('topDate');
+        if (topDate) {
+            var d = new Date();
+            var opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            topDate.textContent = d.toLocaleDateString('en-US', opts);
+        }
+        var avatarBtn = document.getElementById('topAvatarBtn');
+        if (avatarBtn) {
+            avatarBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var dd = document.getElementById('topAvatarDropdown');
+                dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('topAvatarDropdown');
+            if (dd && !e.target.closest('.avatar-wrap')) dd.style.display = 'none';
+        });
+    });
+
+    /* ── Staff filter ── */
+    function filterStaff(desig, btn) {
+        document.querySelectorAll('.staff-filter-btn').forEach(function(b) {
+            b.style.background = '#fff'; b.style.color = '#374151';
+        });
+        btn.style.background = '#7c3aed'; btn.style.color = '#fff';
+        var cards = document.querySelectorAll('.staff-card');
+        var visible = 0;
+        cards.forEach(function(card) {
+            var match = desig === 'all' || card.getAttribute('data-designation') === desig;
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        var noResults = document.getElementById('staff-no-results');
+        if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    /* ── Drawer ── */
+    function openDrawer(url, title) {
+        document.getElementById('drawer-title').textContent = title || 'Details';
+        document.getElementById('drawer-overlay').style.display = 'block';
+        document.getElementById('drawer').classList.add('open');
+        document.getElementById('drawer-body').innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div>';
+        fetch(url).then(function(r){ return r.text(); }).then(function(html){
+            document.getElementById('drawer-body').innerHTML = html;
+        }).catch(function(){
+            document.getElementById('drawer-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">Failed to load.</div>';
+        });
+    }
+    function closeDrawer() {
+        document.getElementById('drawer-overlay').style.display = 'none';
+        document.getElementById('drawer').classList.remove('open');
+    }
+</script>
+</body>
+</html>

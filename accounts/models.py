@@ -50,6 +50,7 @@ class AdminManager(models.Model):
     can_manage_teachers = models.BooleanField(default=True)
     can_manage_classes  = models.BooleanField(default=True)
     can_manage_hr_attendance = models.BooleanField(default=False)
+    can_view_edit_employees = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -60,6 +61,17 @@ class AdminManager(models.Model):
             and not self.can_manage_students
             and not self.can_manage_teachers
             and not self.can_manage_classes
+            and not self.can_view_edit_employees
+        )
+
+    @property
+    def is_employee_viewer(self):
+        return (
+            self.can_view_edit_employees
+            and not self.can_manage_students
+            and not self.can_manage_teachers
+            and not self.can_manage_classes
+            and not self.can_manage_hr_attendance
         )
 
     def __str__(self):

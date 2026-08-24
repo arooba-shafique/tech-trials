@@ -192,10 +192,18 @@
             {% if admin.can_manage_hr_attendance %}
             <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f0fdfa;color:#0d9488;">HR Attendance</span>
             {% endif %}
+            {% if admin.can_view_edit_employees %}
+            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;background:#f5f3ff;color:#7c3aed;">Employee Info</span>
+            {% endif %}
           </div>
           {% if not admin.can_manage_students and not admin.can_manage_teachers and not admin.can_manage_classes and admin.can_manage_hr_attendance %}
           <div style="margin-top:8px;">
             <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#0d9488;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Attendance Only</span>
+          </div>
+          {% endif %}
+          {% if not admin.can_manage_students and not admin.can_manage_teachers and not admin.can_manage_classes and not admin.can_manage_hr_attendance and admin.can_view_edit_employees %}
+          <div style="margin-top:8px;">
+            <span style="font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:#7c3aed;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Employee Viewer</span>
           </div>
           {% endif %}
         </div>

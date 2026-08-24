@@ -90,6 +90,28 @@ def _attendance_only_dashboard(request, today):
 
 
 # ─────────────────────────────────────────────
+# EMPLOYEE VIEWER ADMIN MANAGER DASHBOARD
+# ─────────────────────────────────────────────
+
+def _employee_viewer_dashboard(request, today):
+    """Dashboard for employee-viewer admin managers — view/edit staff info only, no salary access."""
+    school = get_user_school(request.user)
+
+    from django.db.models import Q
+    if not request.user.is_superuser and school:
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+    else:
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+
+    context = {
+        'teachers': teachers_qs,
+        'user_role': 'admin_manager',
+    }
+
+    return render(request, 'admin_manager_employee_viewer.html', context)
+
+
+# ─────────────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────────────
 
@@ -105,16 +127,21 @@ def admin_dashboard(request):
 
     # Check if this admin_manager is attendance-only
     is_attendance_only = False
+    is_employee_viewer = False
     if role == 'admin_manager':
         from accounts.models import AdminManager
         try:
             profile = request.user.admin_manager_profile
             is_attendance_only = profile.is_attendance_only
+            is_employee_viewer = profile.is_employee_viewer
         except AdminManager.DoesNotExist:
             pass
 
     if is_attendance_only:
         return _attendance_only_dashboard(request, today)
+
+    if is_employee_viewer:
+        return _employee_viewer_dashboard(request, today)
 
     from django.db.models import Q
 
