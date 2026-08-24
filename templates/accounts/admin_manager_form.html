@@ -163,13 +163,31 @@
       font-weight: 500;
       color: #374151;
       cursor: pointer;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e5e7eb;
+      background: #fff;
+      transition: border-color 0.15s, background 0.15s;
     }
-    .perm-row input[type=checkbox] {
+    .perm-row:hover {
+      border-color: #0f1623;
+    }
+    .perm-row input[type=radio] {
       width: 16px;
       height: 16px;
       cursor: pointer;
       accent-color: #0f1623;
       flex-shrink: 0;
+    }
+    .perm-row:has(input:checked) {
+      border-color: #0f1623;
+      background: #f0fdf4;
+    }
+    .perm-desc {
+      font-size: 11.5px;
+      color: #9ca3af;
+      margin-top: 2px;
+      font-weight: 400;
     }
 
     /* Error banner */
@@ -342,29 +360,27 @@
 
         <!-- Permissions -->
         <div class="field">
-          <label>Permissions</label>
+          <label>Role</label>
           <div class="perm-box">
+            {% for radio in form.role %}
             <label class="perm-row">
-              {{ form.can_manage_students }}
-              <span>Can Manage Students</span>
+              {{ radio }}
+              <span>
+                {% if radio.choice_value == 'full' %}
+                  <strong>Full Admin Manager</strong>
+                  <div class="perm-desc">Full access: students, teachers, classes &amp; subjects</div>
+                {% elif radio.choice_value == 'attendance' %}
+                  <strong>Attendance Manager</strong>
+                  <div class="perm-desc">Manage HR attendance (monthly) only</div>
+                {% elif radio.choice_value == 'employee_viewer' %}
+                  <strong>Employee Viewer</strong>
+                  <div class="perm-desc">View &amp; edit employee info — no salary access</div>
+                {% endif %}
+              </span>
             </label>
-            <label class="perm-row">
-              {{ form.can_manage_teachers }}
-              <span>Can Manage Teachers</span>
-            </label>
-            <label class="perm-row">
-              {{ form.can_manage_classes }}
-              <span>Can Manage Classes &amp; Subjects</span>
-            </label>
-            <label class="perm-row">
-              {{ form.can_manage_hr_attendance }}
-              <span>Can Manage HR Attendance (Monthly)</span>
-            </label>
-            <label class="perm-row">
-              {{ form.can_view_edit_employees }}
-              <span>Can View &amp; Edit Employee Info (No Salary Access)</span>
-            </label>
+            {% endfor %}
           </div>
+          {% if form.role.errors %}<div class="field-error">{{ form.role.errors }}</div>{% endif %}
         </div>
 
         <button type="submit" class="btn-submit">{{ action }} Admin Manager</button>
