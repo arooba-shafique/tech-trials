@@ -1359,7 +1359,7 @@ def monthly_attendance_summary(request):
             messages.warning(request, f'Attendance saved with {error_count} errors. {created_count} new, {updated_count} updated.')
         else:
             messages.success(request, f'Attendance saved for {month_name} {year}: {created_count} new, {updated_count} updated.')
-        return redirect('admin_console')
+        return redirect(f'/admin-console/?section=hr-attendance&month={month}&year={year}')
 
     context = {
         'employees': employees,
