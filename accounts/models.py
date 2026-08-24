@@ -49,8 +49,18 @@ class AdminManager(models.Model):
     can_manage_students = models.BooleanField(default=True)
     can_manage_teachers = models.BooleanField(default=True)
     can_manage_classes  = models.BooleanField(default=True)
+    can_manage_hr_attendance = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_attendance_only(self):
+        return (
+            self.can_manage_hr_attendance
+            and not self.can_manage_students
+            and not self.can_manage_teachers
+            and not self.can_manage_classes
+        )
 
     def __str__(self):
         return self.full_name

@@ -1,0 +1,355 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+    <style>
+        .manager-badge {
+            font-size: 9px; font-weight: 800; letter-spacing: 1px;
+            padding: 3px 8px; border-radius: 20px;
+            background: linear-gradient(135deg, #0d9488, #0f766e);
+            color: #fff; text-transform: uppercase;
+        }
+        .avd-role { background: #0d9488 !important; }
+        .readonly-notice {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 11.5px; color: #0d9488; font-weight: 600;
+            background: #f0fdfa; border: 1px solid #99f6e4;
+            padding: 4px 10px; border-radius: 20px;
+            white-space: nowrap;
+        }
+        html, body { overflow-x: hidden; max-width: 100%; }
+        .main { min-width: 0; overflow-x: hidden; }
+        .content { min-width: 0; overflow-x: hidden; }
+        .section { min-width: 0; }
+        .topbar { overflow: visible !important; }
+        .btn-primary { background:#0d9488 !important; color:#fff !important; }
+        .btn-primary:hover { background:#0f766e !important; }
+    </style>
+</head>
+<body>
+
+<button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ══════════════════════════════════════════
+     SIDEBAR — Attendance Only
+══════════════════════════════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </div>
+        <div class="brand-text">
+            <h2>Institution<br>Management</h2>
+            <span>Attendance Console</span>
+        </div>
+        <span class="manager-badge">ATT MGR</span>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-label">Overview</div>
+        <a class="nav-item active" href="#" onclick="showSection('dashboard',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Dashboard
+        </a>
+
+        <div class="nav-label">HR</div>
+        <a class="nav-item" href="#" onclick="showSection('hr-attendance',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            Monthly Attendance
+        </a>
+    </nav>
+
+    <div class="sidebar-user">
+        <div class="user-avatar" style="background:#0d9488;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+        <div class="user-info">
+            <h4>{{ request.user.get_full_name|default:request.user.username }}</h4>
+            <p>{{ request.user.email }}</p>
+        </div>
+    </div>
+</aside>
+
+<!-- ══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════ -->
+<main class="main">
+    <header class="topbar">
+        <h1 id="pageTitle">Dashboard</h1>
+        <div class="topbar-right">
+            <span id="topDate"></span>
+            <div class="avatar-wrap">
+                <div class="admin-top-avatar" id="topAvatarBtn" style="background:#0d9488;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+                <div class="avatar-dropdown" id="topAvatarDropdown">
+                    <div class="avd-profile">
+                        <div class="avd-avatar" style="background:#0d9488;">{{ request.user.get_full_name|default:request.user.username|first|upper }}</div>
+                        <div>
+                            <div class="avd-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                            <div class="avd-email">{{ request.user.email }}</div>
+                            <span class="avd-role" style="background:#0d9488;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;">ATTENDANCE MANAGER</span>
+                        </div>
+                    </div>
+                    <div class="avd-menu">
+                        <a href="#" class="avd-item" onclick="showSection('dashboard', document.querySelector('.nav-item[onclick*=\'dashboard\']')); closeAllDropdowns(); return false;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Dashboard
+                        </a>
+                        <div class="avd-divider"></div>
+                        <a href="{% url 'password_change' %}" class="avd-item">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            Change Password
+                        </a>
+                        <div class="avd-divider"></div>
+                        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+                            {% csrf_token %}
+                            <button type="submit" class="avd-item danger" style="width:100%;border:none;background:none;font-family:inherit;text-align:left;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                Log Out
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div id="toast-msg" data-section="{{ message.tags }}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- ═══════════ DASHBOARD ═══════════ -->
+        <div id="section-dashboard" class="section active">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;">
+                <p style="color:var(--text-secondary);font-size:14px;">Welcome back, <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>. You have access to Monthly Attendance only.</p>
+                <span class="readonly-notice">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Attendance Manager
+                </span>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f0fdf4;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+                    <div class="stat-info"><p>Total Staff</p><h3>{{ total_employees }}</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#f0fdfa;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div>
+                    <div class="stat-info"><p>Attendance Saved</p><h3>{{ saved_attendance_count }}</h3></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:#eff6ff;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                    <div class="stat-info"><p>Current Month</p><h3>{{ att_month_name }}</h3></div>
+                </div>
+            </div>
+            <div style="background:var(--white);border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:24px;">
+                <p style="font-size:13px;font-weight:700;margin-bottom:12px;">Quick Actions</p>
+                <div style="display:flex;flex-wrap:wrap;gap:10px;">
+                    <a href="#" onclick="showSection('hr-attendance',document.querySelector('.nav-item[onclick*=\'hr-attendance\']'));return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">Open Monthly Attendance</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════ HR: MONTHLY ATTENDANCE ═══════════ -->
+        <div id="section-hr-attendance" class="section">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+                <div>
+                    <h2 style="font-size:15px;font-weight:700;">Monthly Attendance Summary</h2>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-top:3px;">Enter absents, leaves &amp; late days — these flow into salary slips automatically.</p>
+                </div>
+            </div>
+            <div style="padding:10px 20px;background:#f0fdfa;border:1px solid #99f6e4;border-radius:10px;margin-bottom:18px;display:flex;align-items:center;gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <span style="font-size:12px;color:#0f766e;"><strong>Days Present</strong> is auto-calculated: Days in Month - Absent Days. Paid/Unpaid leaves don't reduce present days. These numbers flow directly into salary slips.</span>
+            </div>
+            <form method="get" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:18px;">
+                <input type="hidden" name="section" value="hr-attendance">
+                <label style="display:flex;flex-direction:column;gap:5px;">
+                    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
+                    <select name="month" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+                        {% for m_num, m_name in hr_months %}
+                        <option value="{{ m_num }}" {% if m_num == att_month %}selected{% endif %}>{{ m_name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label style="display:flex;flex-direction:column;gap:5px;">
+                    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Year</span>
+                    <input type="number" name="year" value="{{ att_year }}" min="2020" max="2030" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:100px;">
+                </label>
+            </form>
+            <script>
+            (function() {
+                var form = document.querySelector('#section-hr-attendance form[method="get"]');
+                if (!form) return;
+                var monthSel = form.querySelector('select[name="month"]');
+                var yearInp = form.querySelector('input[name="year"]');
+                if (monthSel) monthSel.addEventListener('change', function() { form.submit(); });
+                if (yearInp) yearInp.addEventListener('change', function() { form.submit(); });
+            })();
+            </script>
+            <form method="post" action="{% url 'hr_monthly_attendance' %}">
+                {% csrf_token %}
+                <input type="hidden" name="month" value="{{ att_month }}">
+                <input type="hidden" name="year" value="{{ att_year }}">
+                <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
+                    <div style="padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                        <div style="font-size:14px;font-weight:700;">Attendance for {{ att_month_name }} {{ att_year }} (Working Days: {{ hr_att_total_working_days }})</div>
+                        <button type="submit" class="btn btn-primary" style="padding:8px 20px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Attendance
+                        </button>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%;border-collapse:collapse;min-width:900px;">
+                            <thead>
+                                <tr style="background:#f9fafb;">
+                                    <th style="padding:10px 14px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Sr#</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Employee Name</th>
+                                    <th style="padding:10px 14px;text-align:left;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Designation</th>
+                                    <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Absent Days</th>
+                                    <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Paid Leaves</th>
+                                    <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Unpaid Leaves</th>
+                                    <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);border-bottom:2px solid var(--border);">Late Days</th>
+                                    <th style="padding:10px 14px;text-align:center;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#16a34a;border-bottom:2px solid var(--border);">Days Present</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for emp in hr_attendance_employees %}
+                                <tr style="border-bottom:1px solid #f3f4f6;">
+                                    <td style="padding:10px 14px;">{{ forloop.counter }}</td>
+                                    <td style="padding:10px 14px;">
+                                        <div style="font-weight:600;font-size:13px;">{{ emp.full_name }}</div>
+                                        <div style="font-size:11px;color:var(--text-muted);">{{ emp.employee_id|default:"-" }}</div>
+                                    </td>
+                                    <td style="padding:10px 14px;font-size:13px;">{{ emp.designation|default:"-" }}</td>
+                                    <td style="padding:10px 14px;text-align:center;">
+                                        {% for key, val in hr_att_existing.items %}
+                                            {% if key == emp.id %}
+                                        <input type="number" name="absent_{{ emp.id }}" value="{{ val.days_absent }}" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;" data-days-in-month="{{ att_days_in_month }}" data-emp="{{ emp.id }}">
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if emp.id not in hr_att_existing %}
+                                        <input type="number" name="absent_{{ emp.id }}" value="0" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;" data-days-in-month="{{ att_days_in_month }}" data-emp="{{ emp.id }}">
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding:10px 14px;text-align:center;">
+                                        {% for key, val in hr_att_existing.items %}
+                                            {% if key == emp.id %}
+                                        <input type="number" name="paid_leaves_{{ emp.id }}" value="{{ val.paid_leaves }}" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if emp.id not in hr_att_existing %}
+                                        <input type="number" name="paid_leaves_{{ emp.id }}" value="0" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding:10px 14px;text-align:center;">
+                                        {% for key, val in hr_att_existing.items %}
+                                            {% if key == emp.id %}
+                                        <input type="number" name="unpaid_leaves_{{ emp.id }}" value="{{ val.unpaid_leaves }}" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if emp.id not in hr_att_existing %}
+                                        <input type="number" name="unpaid_leaves_{{ emp.id }}" value="0" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding:10px 14px;text-align:center;">
+                                        {% for key, val in hr_att_existing.items %}
+                                            {% if key == emp.id %}
+                                        <input type="number" name="late_{{ emp.id }}" value="{{ val.late_coming_days }}" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if emp.id not in hr_att_existing %}
+                                        <input type="number" name="late_{{ emp.id }}" value="0" min="0" max="{{ hr_att_total_working_days }}" class="form-control" style="min-width:65px;text-align:center;margin:0 auto;">
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding:10px 14px;text-align:center;">
+                                        {% for key, val in hr_att_existing.items %}
+                                            {% if key == emp.id %}
+                                        <span class="badge badge-green" id="present_{{ emp.id }}" style="font-size:13px;">{{ val.days_present|default:att_days_in_month }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if emp.id not in hr_att_existing %}
+                                        <span class="badge badge-green" id="present_{{ emp.id }}" style="font-size:13px;">{{ att_days_in_month }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted);">No employees found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </form>
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('#section-hr-attendance input[type="number"][data-emp]').forEach(function(input) {
+                    input.addEventListener('input', function() {
+                        var empId = this.getAttribute('data-emp');
+                        var daysInMonth = parseInt(this.getAttribute('data-days-in-month'));
+                        var row = this.closest('tr');
+                        var absent = parseInt(row.querySelector('input[name="absent_' + empId + '"]').value) || 0;
+                        var present = Math.max(0, daysInMonth - absent);
+                        document.getElementById('present_' + empId).textContent = present;
+                    });
+                });
+            });
+            </script>
+        </div>
+
+    </div><!-- end .content -->
+</main>
+
+<script src="{% static 'js/admin_dashboard.js' %}?v=4"></script>
+<script>
+    function showSection(id, navEl) {
+        document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+        var target = document.getElementById('section-' + id);
+        if (target) target.classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+        if (navEl) navEl.classList.add('active');
+        var title = document.getElementById('pageTitle');
+        if (title) title.textContent = navEl ? navEl.textContent.trim() : 'Dashboard';
+    }
+    function closeAllDropdowns() {
+        document.querySelectorAll('.avatar-dropdown').forEach(function(d) { d.style.display = 'none'; });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        var section = new URLSearchParams(window.location.search).get('section');
+        if (section) {
+            var nav = document.querySelector('.nav-item[onclick*="' + section + '"]');
+            showSection(section, nav);
+        }
+        var topDate = document.getElementById('topDate');
+        if (topDate) {
+            var d = new Date();
+            var opts = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            topDate.textContent = d.toLocaleDateString('en-US', opts);
+        }
+        var avatarBtn = document.getElementById('topAvatarBtn');
+        if (avatarBtn) {
+            avatarBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var dd = document.getElementById('topAvatarDropdown');
+                dd.style.display = dd.style.display === 'block' ? 'none' : 'block';
+            });
+        }
+        document.addEventListener('click', function(e) {
+            var dd = document.getElementById('topAvatarDropdown');
+            if (dd && !e.target.closest('.avatar-wrap')) dd.style.display = 'none';
+        });
+    });
+</script>
+</body>
+</html>

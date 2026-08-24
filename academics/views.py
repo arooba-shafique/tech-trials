@@ -38,6 +38,58 @@ def get_user_school(user):
 
 
 # ─────────────────────────────────────────────
+# ATTENDANCE-ONLY ADMIN MANAGER DASHBOARD
+# ─────────────────────────────────────────────
+
+def _attendance_only_dashboard(request, today):
+    """Minimal dashboard for attendance-only admin managers — HR monthly attendance only."""
+    school = get_user_school(request.user)
+
+    from django.db.models import Q
+    if not request.user.is_superuser and school:
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+    else:
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+
+    import calendar
+    from hr.models import SalaryConfig, MonthlySalary
+
+    att_month = int(request.GET.get('month', today.month)) if request.GET.get('month') and request.GET.get('section') == 'hr-attendance' else today.month
+    att_year = int(request.GET.get('year', today.year)) if request.GET.get('year') and request.GET.get('section') == 'hr-attendance' else today.year
+    att_config = SalaryConfig.objects.filter(month=att_month, year=att_year).first()
+    att_working_days = att_config.default_working_days if att_config else 26
+    att_days_in_month = calendar.monthrange(att_year, att_month)[1]
+
+    hr_attendance_employees = teachers_qs.filter(is_employee_separated=False)
+    hr_att_existing = {}
+    for ms in MonthlySalary.objects.filter(month=att_month, year=att_year, employee__in=hr_attendance_employees):
+        ms.days_present = max(0, att_days_in_month - ms.days_absent)
+        hr_att_existing[ms.employee_id] = ms
+
+    hr_months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+    # Count how many employees have attendance saved this month
+    saved_count = MonthlySalary.objects.filter(month=att_month, year=att_year).exclude(days_absent=0, paid_leaves=0, unpaid_leaves=0, late_coming_days=0).count()
+
+    context = {
+        'teachers': teachers_qs,
+        'hr_attendance_employees': hr_attendance_employees,
+        'hr_att_existing': hr_att_existing,
+        'hr_att_total_working_days': att_working_days,
+        'hr_months': hr_months,
+        'att_month': att_month,
+        'att_year': att_year,
+        'att_month_name': calendar.month_name[att_month],
+        'att_days_in_month': att_days_in_month,
+        'user_role': 'admin_manager',
+        'total_employees': teachers_qs.count(),
+        'saved_attendance_count': saved_count,
+    }
+
+    return render(request, 'admin_manager_attendance_only.html', context)
+
+
+# ─────────────────────────────────────────────
 # ADMIN DASHBOARD
 # ─────────────────────────────────────────────
 
@@ -50,6 +102,19 @@ def admin_dashboard(request):
 
     school = get_user_school(request.user)
     today = timezone.now().date()
+
+    # Check if this admin_manager is attendance-only
+    is_attendance_only = False
+    if role == 'admin_manager':
+        from accounts.models import AdminManager
+        try:
+            profile = request.user.admin_manager_profile
+            is_attendance_only = profile.is_attendance_only
+        except AdminManager.DoesNotExist:
+            pass
+
+    if is_attendance_only:
+        return _attendance_only_dashboard(request, today)
 
     from django.db.models import Q
 

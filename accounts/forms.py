@@ -17,7 +17,8 @@ class AdminManagerForm(forms.ModelForm):
         model  = AdminManager
         fields = [
             'full_name', 'phone', 'employee_id',
-            'can_manage_students', 'can_manage_teachers', 'can_manage_classes'
+            'can_manage_students', 'can_manage_teachers', 'can_manage_classes',
+            'can_manage_hr_attendance',
         ]
 
     def __init__(self, *args, **kwargs):
