@@ -33,9 +33,11 @@ def employee_list(request):
         return HttpResponse("Unauthorized", status=403)
 
     school = get_user_school(request.user)
-    employees = TeacherProfile.objects.select_related('salary_detail').all()
+    from django.db.models import Q
     if school and not request.user.is_superuser:
-        employees = employees.filter(school=school)
+        employees = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False)
+    else:
+        employees = TeacherProfile.objects.filter(is_employee_separated=False)
 
     # Search
     search = request.GET.get('search', '').strip()
@@ -277,7 +279,6 @@ def left_employees(request):
         return HttpResponse("Unauthorized", status=403)
 
     school = get_user_school(request.user)
-    employees = TeacherProfile.objects.filter(is_employee_separated=True)
     if school and not request.user.is_superuser:
         employees = employees.filter(school=school)
 
@@ -1285,9 +1286,10 @@ def monthly_attendance_summary(request):
         return HttpResponse("Unauthorized", status=403)
 
     school = get_user_school(request.user)
-    employees = TeacherProfile.objects.filter(is_employee_separated=False)
     if school and not request.user.is_superuser:
-        employees = employees.filter(school=school)
+        employees = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False)
+    else:
+        employees = TeacherProfile.objects.filter(is_employee_separated=False)
 
     now = timezone.now()
     if request.method == 'POST':

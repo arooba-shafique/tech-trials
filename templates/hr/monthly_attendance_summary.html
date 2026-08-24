@@ -71,7 +71,6 @@
                 </thead>
                 <tbody>
                     {% for emp in employees %}
-                    {% with ms=existing|dictsort:"employee_id" %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>
@@ -85,7 +84,7 @@
                             <input type="number" name="absent_{{ emp.id }}" value="{{ val.days_absent }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-emp="{{ emp.id }}">
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <input type="number" name="absent_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-emp="{{ emp.id }}">
                             {% endif %}
                         </td>
@@ -95,7 +94,7 @@
                             <input type="number" name="paid_leaves_{{ emp.id }}" value="{{ val.paid_leaves }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <input type="number" name="paid_leaves_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
@@ -105,7 +104,7 @@
                             <input type="number" name="unpaid_leaves_{{ emp.id }}" value="{{ val.unpaid_leaves }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <input type="number" name="unpaid_leaves_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
@@ -115,7 +114,7 @@
                             <input type="number" name="late_{{ emp.id }}" value="{{ val.late_coming_days }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <input type="number" name="late_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
@@ -125,7 +124,7 @@
                             <span class="badge badge-green" id="present_{{ emp.id }}">{{ val.days_present|default:total_working_days }}</span>
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <span class="badge badge-green" id="present_{{ emp.id }}">{{ total_working_days }}</span>
                             {% endif %}
                         </td>
@@ -135,12 +134,11 @@
                             <input type="text" name="remarks_{{ emp.id }}" value="{{ val.remarks }}" class="form-control" placeholder="Optional" style="min-width:120px;">
                                 {% endif %}
                             {% endfor %}
-                            {% if not existing.items %}
+                            {% if emp.id not in existing %}
                             <input type="text" name="remarks_{{ emp.id }}" value="" class="form-control" placeholder="Optional" style="min-width:120px;">
                             {% endif %}
                         </td>
                     </tr>
-                    {% endwith %}
                     {% empty %}
                     <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-muted);">No employees found.</td></tr>
                     {% endfor %}
