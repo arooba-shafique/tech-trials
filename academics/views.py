@@ -591,9 +591,25 @@ def edit_teacher(request, pk):
         qs = qs.filter(school=school)
     teacher = get_object_or_404(qs, pk=pk)
     school = get_user_school(request.user)
+
+    # Check if user is an employee viewer (no salary access)
+    hide_salary = False
+    if getattr(request.user, 'role', None) == 'admin_manager':
+        try:
+            profile = request.user.admin_manager_profile
+            hide_salary = profile.is_employee_viewer
+        except Exception:
+            pass
+
+    salary_fields = ['salary', 'salary_type', 'working_days_per_week', 'bank_name', 'bank_account']
+
     if request.method == 'POST':
         form = TeacherProfileForm(request.POST, request.FILES, instance=teacher, school=school)
         if form.is_valid():
+            if hide_salary:
+                for f in salary_fields:
+                    if f in form.cleaned_data:
+                        del form.cleaned_data[f]
             form.save()
             # Handle multiple document uploads
             import base64, json, uuid
@@ -627,9 +643,13 @@ def edit_teacher(request, pk):
             initial={'email': teacher.user.email if teacher.user else ''},
             school=get_user_school(request.user)
         )
+        if hide_salary:
+            for f in salary_fields:
+                if f in form.fields:
+                    del form.fields[f]
     import json
     documents = json.loads(teacher.documents_json or '[]')
-    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher', 'edit': True, 'teacher': teacher, 'documents': documents})
+    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher', 'edit': True, 'teacher': teacher, 'documents': documents, 'hide_salary': hide_salary})
 
 
 @login_required(login_url='admin_login')
