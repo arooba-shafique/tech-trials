@@ -473,7 +473,7 @@
         });
     }
     function attachFormHandler(container, originalUrl) {
-        var form = container.querySelector('form');
+        var form = container.querySelector('form:not(.upload-form)');
         if (!form) return;
         form.addEventListener('submit', function(e) {
             e.preventDefault();
