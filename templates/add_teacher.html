@@ -30,7 +30,7 @@
 <body>
     <div class="form-container">
         <h2>{% if edit %}Edit{% else %}Add{% endif %} Staff</h2>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" action="{% if edit %}{% url 'edit_teacher' teacher.pk %}{% else %}{% url 'add_teacher' %}{% endif %}">
             {% csrf_token %}
 
             <!-- Personal Info -->

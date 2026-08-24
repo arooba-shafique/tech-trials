@@ -332,28 +332,78 @@
 
     /* ── Drawer ── */
     window.openDrawer = function(url, title) {
-        document.getElementById('drawer-title').textContent = title || 'Details';
-        document.getElementById('drawer-overlay').style.display = 'block';
-        document.getElementById('drawer').classList.add('open');
-        document.getElementById('drawer-body').innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div>';
-        fetch(url).then(function(r){ return r.text(); }).then(function(html){
-            document.getElementById('drawer-body').innerHTML = html;
-        }).catch(function(){
-            document.getElementById('drawer-body').innerHTML = '<div style="text-align:center;padding:40px;color:#dc2626;">Failed to load.</div>';
-        });
+        var overlay = document.getElementById('drawer-overlay');
+        var drawer = document.getElementById('drawer');
+        var body = document.getElementById('drawer-body');
+        var titleEl = document.getElementById('drawer-title');
+        if (!overlay || !drawer || !body) { window.location.href = url; return; }
+        titleEl.textContent = title || 'Details';
+        overlay.style.display = 'block';
+        drawer.classList.add('open');
+        body.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">Loading…</div>';
+        fetch(url, { credentials: 'same-origin' })
+            .then(function(r){ return r.text(); })
+            .then(function(html){
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+                var container = doc.querySelector('.container') || doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('form');
+                if (container) {
+                    var backLinks = container.querySelectorAll('a[href*="admin_console"], a[href*="left-employees"]');
+                    backLinks.forEach(function(l) {
+                        if (l.textContent && l.textContent.indexOf('Back') !== -1) {
+                            if (l.parentElement && l.parentElement.children.length === 1) l.parentElement.remove();
+                            else l.remove();
+                        }
+                    });
+                    body.innerHTML = container.innerHTML || container.outerHTML;
+                } else {
+                    var form = doc.querySelector('form');
+                    body.innerHTML = form ? form.outerHTML : '<p style="color:#dc2626;padding:20px;">Could not load content.</p>';
+                }
+                attachFormHandler(body, url);
+            })
+            .catch(function(){
+                body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
+            });
     };
     window.closeDrawer = function() {
         document.getElementById('drawer-overlay').style.display = 'none';
         document.getElementById('drawer').classList.remove('open');
     };
-    /* Prevent admin_dashboard.js from intercepting edit/add links into drawer */
-    document.addEventListener('click', function(e) {
-        var link = e.target.closest('a[href*="/edit/teacher"], a[href*="/add/teacher"]');
-        if (link) {
-            e.stopImmediatePropagation();
-            window.location.href = link.getAttribute('href');
-        }
-    }, true);
+    /* Handle AJAX form submissions inside drawer */
+    function attachFormHandler(container, originalUrl) {
+        var form = container.querySelector('form');
+        if (!form) return;
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(form);
+            fetch(form.action || originalUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function(r){
+                var ct = r.headers.get('content-type') || '';
+                if (ct.indexOf('application/json') !== -1) {
+                    return r.json().then(function(data){
+                        if (data.ok) { closeDrawer(); location.reload(); }
+                        else { alert('Update failed.'); }
+                    });
+                }
+                return r.text().then(function(html){
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(html, 'text/html');
+                    var c2 = doc.querySelector('.container') || doc.querySelector('.content') || doc.querySelector('main') || doc.querySelector('form');
+                    if (c2) { body.innerHTML = c2.innerHTML || c2.outerHTML; }
+                    else { var f2 = doc.querySelector('form'); body.innerHTML = f2 ? f2.outerHTML : html; }
+                    attachFormHandler(body, originalUrl);
+                    body.scrollTop = 0;
+                });
+            }).catch(function(){
+                form.submit();
+            });
+        });
+    }
 </script>
 </body>
 </html>
