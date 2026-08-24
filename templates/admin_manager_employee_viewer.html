@@ -371,6 +371,7 @@
                     body.innerHTML = form ? form.outerHTML : '<p style="color:#dc2626;padding:20px;">Could not load content.</p>';
                 }
                 attachFormHandler(body, url);
+                attachAddMoreHandler(body);
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -388,6 +389,20 @@
         document.body.style.overflow = '';
     };
     /* Handle AJAX form submissions inside drawer */
+    function attachAddMoreHandler(container) {
+        var addBtn = container.querySelector('#add-doc-row');
+        if (!addBtn || addBtn.dataset.ajaxBound) return;
+        addBtn.dataset.ajaxBound = '1';
+        addBtn.addEventListener('click', function () {
+            var docRows = container.querySelector('#doc-rows');
+            if (!docRows) return;
+            var row = docRows.querySelector('.form-row');
+            if (!row) return;
+            var newRow = row.cloneNode(true);
+            newRow.querySelectorAll('input').forEach(function (inp) { inp.value = ''; });
+            docRows.appendChild(newRow);
+        });
+    }
     function attachFormHandler(container, originalUrl) {
         var form = container.querySelector('form');
         if (!form) return;
@@ -404,7 +419,13 @@
                 if (ct.indexOf('application/json') !== -1) {
                     return r.json().then(function(data){
                         if (data.ok) { closeDrawer(); location.reload(); }
-                        else { alert('Update failed.'); }
+                        else {
+                            var errs = '';
+                            if (data.errors) {
+                                try { var parsed = JSON.parse(data.errors); for (var f in parsed) errs += f + ': ' + parsed[f].map(function(e){return e.message;}).join(', ') + '\n'; } catch(ex) { errs = JSON.stringify(data.errors); }
+                            }
+                            alert(errs || 'Update failed. Please check the form.');
+                        }
                     });
                 }
                 return r.text().then(function(html){
@@ -414,6 +435,7 @@
                     if (c2) { body.innerHTML = c2.innerHTML; }
                     else { var f2 = doc.querySelector('form'); body.innerHTML = f2 ? f2.outerHTML : html; }
                     attachFormHandler(body, originalUrl);
+                    attachAddMoreHandler(body);
                     body.scrollTop = 0;
                 });
             }).catch(function(){
