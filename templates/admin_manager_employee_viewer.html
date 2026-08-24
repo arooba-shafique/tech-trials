@@ -373,6 +373,7 @@
                 attachFormHandler(body, url);
                 attachAddMoreHandler(body);
                 attachDeleteHandlers(body);
+                attachUploadHandler(body, url);
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -435,6 +436,42 @@
             });
         });
     }
+    function attachUploadHandler(container, originalUrl) {
+        var form = container.querySelector('form.upload-form');
+        if (!form || form.dataset.ajaxBound) return;
+        form.dataset.ajaxBound = '1';
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData(form);
+            var btn = form.querySelector('[type="submit"]');
+            var origText = btn ? btn.textContent : '';
+            if (btn) { btn.textContent = 'Uploading...'; btn.disabled = true; }
+            fetch(form.action || originalUrl, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            }).then(function(r) {
+                var ct = r.headers.get('content-type') || '';
+                if (ct.indexOf('application/json') !== -1) {
+                    return r.json().then(function(data) {
+                        if (data.ok) {
+                            openDrawer(originalUrl, document.getElementById('drawer-title').textContent);
+                        } else {
+                            alert(data.msg || 'Upload failed.');
+                            if (btn) { btn.textContent = origText; btn.disabled = false; }
+                        }
+                    });
+                }
+                return r.text().then(function() {
+                    openDrawer(originalUrl, document.getElementById('drawer-title').textContent);
+                });
+            }).catch(function() {
+                if (btn) { btn.textContent = origText; btn.disabled = false; }
+                alert('Upload failed. Please try again.');
+            });
+        });
+    }
     function attachFormHandler(container, originalUrl) {
         var form = container.querySelector('form');
         if (!form) return;
@@ -469,6 +506,7 @@
                     attachFormHandler(body, originalUrl);
                     attachAddMoreHandler(body);
                     attachDeleteHandlers(body);
+                    attachUploadHandler(body, originalUrl);
                     body.scrollTop = 0;
                 });
             }).catch(function(){

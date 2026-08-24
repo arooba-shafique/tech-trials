@@ -703,6 +703,7 @@ def staff_documents(request, pk):
 @login_required(login_url='admin_login')
 def add_staff_document(request, pk):
     teacher = get_object_or_404(TeacherProfile, pk=pk)
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     if request.method == 'POST':
         titles = request.POST.getlist('titles[]')
         files = request.FILES.getlist('files[]')
@@ -711,6 +712,7 @@ def add_staff_document(request, pk):
             files = [request.FILES.get('file')]
         docs = _get_docs(teacher)
         count = 0
+        new_docs = []
         for title, f in zip(titles, files):
             title = (title or '').strip()
             if title and f:
@@ -723,12 +725,23 @@ def add_staff_document(request, pk):
                     'uploaded_at': timezone.now().strftime('%d %b %Y')
                 }
                 docs.append(doc)
+                new_docs.append(doc)
                 count += 1
         if count:
             _save_docs(teacher, docs)
+            if is_ajax:
+                import json as _json
+                safe_docs = [{k: v for k, v in d.items() if k != 'file_content'} for d in new_docs]
+                return HttpResponse(_json.dumps({'ok': True, 'count': count, 'docs': safe_docs, 'total': len(docs)}), content_type='application/json')
             messages.success(request, f'{count} document(s) uploaded successfully.')
         else:
+            if is_ajax:
+                import json as _json
+                return HttpResponse(_json.dumps({'ok': False, 'msg': 'Please provide both title and file.'}), content_type='application/json', status=400)
             messages.error(request, 'Please provide both title and file.')
+    if is_ajax:
+        import json as _json
+        return HttpResponse(_json.dumps({'ok': False, 'msg': 'No file provided.'}), content_type='application/json', status=400)
     return redirect('staff_documents', pk=pk)
 
 @login_required(login_url='admin_login')
