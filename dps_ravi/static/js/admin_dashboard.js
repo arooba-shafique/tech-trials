@@ -1019,11 +1019,12 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
             var style = document.createElement('style');
             style.id = 'staff-form-sidebar-css';
             style.textContent = '' +
-                '#drawer-body .form-sidebar{width:180px;background:#f9fafb;border-right:1px solid #f3f4f6;padding:20px 0;flex-shrink:0;position:absolute;left:0;top:0;bottom:0;z-index:1;}' +
-                '#drawer-body .form-sidebar a{display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:13px;font-weight:500;color:#6b7280;text-decoration:none;transition:all .15s;border-left:3px solid transparent;}' +
-                '#drawer-body .form-sidebar a:hover{color:#374151;background:#f3f4f6;}' +
-                '#drawer-body .form-sidebar a.active{color:#0d9488;background:#f0fdfa;border-left-color:#0d9488;font-weight:600;}' +
-                '#drawer-body .form-sidebar a .icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:14px;}' +
+                '#drawer-body .form-sidebar{width:180px;background:#0f2744;padding:16px 0;flex-shrink:0;position:absolute;left:0;top:0;bottom:0;z-index:1;border-radius:0 0 0 16px;}' +
+                '#drawer-body .form-sidebar a{display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);text-decoration:none;transition:all .15s;border-left:3px solid transparent;}' +
+                '#drawer-body .form-sidebar a:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06);}' +
+                '#drawer-body .form-sidebar a.active{color:#fff;background:rgba(20,184,166,0.15);border-left-color:#14b8a6;}' +
+                '#drawer-body .form-sidebar a .icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:14px;opacity:.6;}' +
+                '#drawer-body .form-sidebar a.active .icon{opacity:1;}' +
                 '#drawer-body .form-main{margin-left:180px;padding:0;min-width:0;overflow-y:auto;max-height:70vh;}' +
                 '#drawer-body .form-section{scroll-margin-top:10px;padding:20px 24px;}' +
                 '#drawer-body .form-section+.form-section{border-top:1px solid #f3f4f6;}' +
@@ -1035,7 +1036,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 '#drawer-body .husband-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .kids-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .section-title{font-size:13px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px;padding-bottom:6px;border-bottom:2px solid #f0fdfa;}' +
-                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid #f3f4f6;display:flex;overflow-x:auto;padding:0;position:static;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#0d9488;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}}';
+                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;overflow-x:auto;padding:0;position:static;border-radius:0;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#14b8a6;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}}';
             document.head.appendChild(style);
         }
         var links = sidebar.querySelectorAll('a[data-section]');
@@ -1543,7 +1544,15 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         if (isDrawerUrl(href)) {
             e.preventDefault();
             e.stopImmediatePropagation();
-            openDrawer(href, getTitle(href));
+            var title = getTitle(href);
+            if (title === 'Edit Staff') {
+                var card = target.closest('[style*="background:#fff"]') || target.closest('.staff-card') || target.parentElement.parentElement.parentElement;
+                if (card) {
+                    var nameEl = card.querySelector('[style*="font-weight:700"]') || card.querySelector('.staff-name');
+                    if (nameEl && nameEl.textContent.trim()) title = 'Edit Staff — ' + nameEl.textContent.trim();
+                }
+            }
+            openDrawer(href, title);
             return;
         }
     }, true);
