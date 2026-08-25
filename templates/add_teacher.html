@@ -227,7 +227,7 @@
         function toggleFields(){
             var v = statusField ? statusField.value : 'single';
             var show = v !== 'single';
-            if(husbandInfo) husbandInfo.style.display = show ? '' : 'none';
+            if(husbandInfo) husbandInfo.style.display = v === 'married' ? '' : 'none';
             if(kidsSection) kidsSection.style.display = show ? '' : 'none';
         }
         if(statusField) statusField.addEventListener('change', toggleFields);
