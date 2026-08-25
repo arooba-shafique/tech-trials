@@ -1545,7 +1545,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
             e.stopImmediatePropagation();
             var title = getTitle(href);
             if (title === 'Edit Staff') {
-                var card = target.closest('[style*="background:#fff"]') || target.closest('.staff-card') || target.parentElement.parentElement.parentElement;
+                var card = el.closest('[style*="background:#fff"]') || el.closest('.staff-card') || el.parentElement.parentElement.parentElement;
                 if (card) {
                     var nameEl = card.querySelector('[style*="font-weight:700"]') || card.querySelector('.staff-name');
                     if (nameEl && nameEl.textContent.trim()) title = 'Edit Staff — ' + nameEl.textContent.trim();
