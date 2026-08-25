@@ -376,6 +376,7 @@
                 attachUploadHandler(body, url);
                 attachMaritalStatusToggle(body);
                 attachKidsHandler(body);
+                attachSidebarScrollspy(body);
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -567,10 +568,44 @@
             renderKids();
         });
         if (addKidBtn) addKidBtn.addEventListener('click', function() {
-            kids.push({name:'', dob:'', gender:'M'});
+            kids.push({name:'', dob:'', gender:'M', relationship:'son', bform:'', school:'', class_grade:''});
             renderKids();
         });
         renderKids();
+    }
+    function attachSidebarScrollspy(root) {
+        var sidebar = root.querySelector('.form-sidebar');
+        var main = root.querySelector('.form-main') || root;
+        if (!sidebar) return;
+        var links = sidebar.querySelectorAll('a[data-section]');
+        if (!links.length) return;
+        links.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = this.getAttribute('data-section');
+                var sec = root.querySelector('#' + id);
+                if (sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+            });
+        });
+        var sections = [];
+        links.forEach(function(link) {
+            var id = link.getAttribute('data-section');
+            var sec = root.querySelector('#' + id);
+            if (sec) sections.push({el:sec, link:link});
+        });
+        function onScroll() {
+            var scrollTop = main.scrollTop;
+            var active = sections[0];
+            for (var i = 0; i < sections.length; i++) {
+                if (sections[i].el.offsetTop - main.offsetTop <= scrollTop + 60) {
+                    active = sections[i];
+                }
+            }
+            links.forEach(function(l) { l.classList.remove('active'); });
+            if (active) active.link.classList.add('active');
+        }
+        main.addEventListener('scroll', onScroll);
+        onScroll();
     }
 </script>
 </body>

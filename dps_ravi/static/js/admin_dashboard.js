@@ -1004,10 +1004,49 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
             renderKids();
         });
         if (addKidBtn) addKidBtn.addEventListener('click', function() {
-            kids.push({name:'', dob:'', gender:'M'});
+            kids.push({name:'', dob:'', gender:'M', relationship:'son', bform:'', school:'', class_grade:''});
             renderKids();
         });
         renderKids();
+    }
+
+    function attachSidebarScrollspy(root) {
+        var sidebar = root.querySelector('.form-sidebar');
+        var main = root.querySelector('.form-main') || root;
+        if (!sidebar) return;
+        var links = sidebar.querySelectorAll('a[data-section]');
+        if (!links.length) return;
+
+        links.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var id = this.getAttribute('data-section');
+                var sec = root.querySelector('#' + id);
+                if (sec) sec.scrollIntoView({behavior:'smooth', block:'start'});
+            });
+        });
+
+        var sections = [];
+        links.forEach(function(link) {
+            var id = link.getAttribute('data-section');
+            var sec = root.querySelector('#' + id);
+            if (sec) sections.push({el:sec, link:link});
+        });
+
+        function onScroll() {
+            var scrollTop = main.scrollTop;
+            var active = sections[0];
+            for (var i = 0; i < sections.length; i++) {
+                if (sections[i].el.offsetTop - main.offsetTop <= scrollTop + 60) {
+                    active = sections[i];
+                }
+            }
+            links.forEach(function(l) { l.classList.remove('active'); });
+            if (active) active.link.classList.add('active');
+        }
+
+        main.addEventListener('scroll', onScroll);
+        onScroll();
     }
 
     window.openDrawer = function (url, title) {
@@ -1064,6 +1103,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 attachAddMoreHandler(body);
                 attachMaritalStatusToggle(body);
                 attachKidsHandler(body);
+                attachSidebarScrollspy(body);
             })
             .catch(function () {
                 body.innerHTML = '<div style="text-align:center;padding:40px;">'
