@@ -102,12 +102,6 @@ class TeacherProfile(models.Model):
         ('monthly', 'Monthly'),
         ('daily', 'Daily'),
     )
-    MARITAL_STATUS_CHOICES = (
-        ('single', 'Single'),
-        ('married', 'Married'),
-        ('divorced', 'Divorced'),
-        ('widowed', 'Widowed'),
-    )
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -137,14 +131,6 @@ class TeacherProfile(models.Model):
     phone = models.CharField(max_length=15, blank=True)
     address = models.TextField(blank=True)
     email = models.EmailField(blank=True, null=True)
-
-    # Marital / Family info
-    marital_status = models.CharField(max_length=10, choices=MARITAL_STATUS_CHOICES, default='single', blank=True)
-    husband_name = models.CharField(max_length=100, blank=True, default='')
-    husband_cnic = models.CharField(max_length=20, blank=True, default='')
-    husband_address = models.TextField(blank=True, default='')
-    husband_phone = models.CharField(max_length=15, blank=True, default='')
-    kids_json = models.TextField(blank=True, default='[]', help_text='JSON array of kids: [{"name":"...","dob":"YYYY-MM-DD","gender":"M/F"}]')
 
     # Salary fields
     salary = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Basic Monthly/Daily Salary")
