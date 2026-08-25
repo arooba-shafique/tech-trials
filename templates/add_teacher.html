@@ -45,13 +45,13 @@
 <body>
     <div class="form-container">
         <div class="form-sidebar">
-            <a href="#section-personal" class="active" data-section="section-personal"><span class="icon">&#128100;</span> Personal</a>
-            <a href="#section-family" data-section="section-family"><span class="icon">&#128106;</span> Family</a>
-            <a href="#section-employment" data-section="section-employment"><span class="icon">&#128188;</span> Employment</a>
+            <a href="#section-personal" class="active" data-section="section-personal">Personal</a>
+            <a href="#section-family" data-section="section-family">Family</a>
+            <a href="#section-employment" data-section="section-employment">Employment</a>
             {% if not hide_salary %}
-            <a href="#section-salary" data-section="section-salary"><span class="icon">&#128176;</span> Salary</a>
+            <a href="#section-salary" data-section="section-salary">Salary</a>
             {% endif %}
-            <a href="#section-documents" data-section="section-documents"><span class="icon">&#128196;</span> Documents</a>
+            <a href="#section-documents" data-section="section-documents">Documents</a>
         </div>
         <div class="form-main" id="form-main">
             <form method="POST" enctype="multipart/form-data" action="{% if edit %}{% url 'edit_teacher' teacher.pk %}{% else %}{% url 'add_teacher' %}{% endif %}">

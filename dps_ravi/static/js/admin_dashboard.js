@@ -1019,12 +1019,11 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
             var style = document.createElement('style');
             style.id = 'staff-form-sidebar-css';
             style.textContent = '' +
-                '#drawer-body .form-sidebar{width:180px;background:#0f2744;padding:16px 0;flex-shrink:0;position:absolute;left:0;top:0;bottom:0;z-index:1;border-radius:0 0 0 16px;}' +
-                '#drawer-body .form-sidebar a{display:flex;align-items:center;gap:8px;padding:10px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);text-decoration:none;transition:all .15s;border-left:3px solid transparent;}' +
+                '#drawer > div:first-child{position:relative;z-index:20;}' +
+                '#drawer-body .form-sidebar{width:180px;background:#0f2744;padding:16px 0;flex-shrink:0;position:absolute;left:0;top:0;bottom:0;z-index:10;border-radius:0 0 0 16px;}' +
+                '#drawer-body .form-sidebar a{display:flex;align-items:center;padding:10px 20px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.5);text-decoration:none;transition:all .15s;border-left:3px solid transparent;}' +
                 '#drawer-body .form-sidebar a:hover{color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.06);}' +
                 '#drawer-body .form-sidebar a.active{color:#fff;background:rgba(20,184,166,0.15);border-left-color:#14b8a6;}' +
-                '#drawer-body .form-sidebar a .icon{width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:14px;opacity:.6;}' +
-                '#drawer-body .form-sidebar a.active .icon{opacity:1;}' +
                 '#drawer-body .form-main{margin-left:180px;padding:0;min-width:0;overflow-y:auto;max-height:70vh;}' +
                 '#drawer-body .form-section{scroll-margin-top:10px;padding:20px 24px;}' +
                 '#drawer-body .form-section+.form-section{border-top:1px solid #f3f4f6;}' +
