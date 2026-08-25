@@ -1011,6 +1011,13 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
     }
 
     function attachSidebarScrollspy(root) {
+        if (!document.getElementById('drawer-mobile-css')) {
+            var s = document.createElement('style');
+            s.id = 'drawer-mobile-css';
+            s.textContent = '@media(max-width:700px){#drawer-body .upload-form{flex-direction:column !important;}#drawer-body .upload-form .form-group{max-width:100% !important;flex:1 1 100% !important;}#drawer-body .form-row{grid-template-columns:1fr !important;}#drawer-body .doc-row{flex-direction:column !important;align-items:stretch !important;}#drawer-body .doc-row .form-group{min-width:0;flex:1 1 100% !important;}#drawer-body .doc-item{flex-direction:column;align-items:flex-start;gap:10px;}#drawer-body .doc-actions{width:100%;}#drawer-body .doc-actions .btn{flex:1;text-align:center;}}';
+            document.head.appendChild(s);
+        }
+
         var sidebar = root.querySelector('.form-sidebar');
         var main = root.querySelector('.form-main') || root;
         if (!sidebar) return;
@@ -1035,7 +1042,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 '#drawer-body .husband-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .kids-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .section-title{font-size:13px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px;padding-bottom:6px;border-bottom:2px solid #f0fdfa;}' +
-                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;overflow-x:auto;padding:0;position:static;border-radius:0;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#14b8a6;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}#drawer-body .upload-form{flex-direction:column !important;}#drawer-body .upload-form .form-group{max-width:100% !important;flex:1 1 100% !important;}#drawer-body .form-row{grid-template-columns:1fr !important;}#drawer-body .doc-row{flex-direction:column !important;align-items:stretch !important;}#drawer-body .doc-row .form-group{min-width:0;flex:1 1 100% !important;}#drawer-body .doc-item{flex-direction:column;align-items:flex-start;gap:10px;}#drawer-body .doc-actions{width:100%;}#drawer-body .doc-actions .btn{flex:1;text-align:center;}}';
+                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;overflow-x:auto;padding:0;position:static;border-radius:0;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#14b8a6;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}}';
             document.head.appendChild(style);
         }
         var links = sidebar.querySelectorAll('a[data-section]');
