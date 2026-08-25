@@ -964,6 +964,48 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         statusField.addEventListener('change', toggleFields);
     }
 
+    function attachKidsHandler(root) {
+        var kidsList = root.querySelector('#kids-list');
+        var kidsJson = root.querySelector('#kids_json');
+        var addKidBtn = root.querySelector('#add-kid-btn');
+        if (!kidsList || !kidsJson) return;
+        var kids = [];
+        try { kids = JSON.parse(kidsJson.value || '[]'); } catch(e) { kids = []; }
+
+        function renderKids() {
+            kidsList.innerHTML = '';
+            kids.forEach(function(kid, i) {
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;';
+                row.innerHTML =
+                    '<div class="form-group" style="flex:1;min-width:0;margin-bottom:0;"><label>Name</label><input type="text" data-kid="'+i+'" data-field="name" value="'+(kid.name||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"></div>' +
+                    '<div class="form-group" style="flex:0 0 140px;min-width:0;margin-bottom:0;"><label>DOB</label><input type="date" data-kid="'+i+'" data-field="dob" value="'+(kid.dob||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"></div>' +
+                    '<div class="form-group" style="flex:0 0 100px;min-width:0;margin-bottom:0;"><label>Gender</label><select data-kid="'+i+'" data-field="gender" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"><option value="M"'+(kid.gender==='M'?' selected':'')+'>Boy</option><option value="F"'+(kid.gender==='F'?' selected':'')+'>Girl</option></select></div>' +
+                    '<button type="button" class="remove-kid" data-idx="'+i+'" style="padding:8px 12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;flex-shrink:0;">\u2715</button>';
+                kidsList.appendChild(row);
+            });
+            kidsJson.value = JSON.stringify(kids);
+        }
+
+        kidsList.addEventListener('input', function(e) {
+            var el = e.target;
+            var i = parseInt(el.dataset.kid);
+            var f = el.dataset.field;
+            if (!isNaN(i) && f) { kids[i][f] = el.value; kidsJson.value = JSON.stringify(kids); }
+        });
+        kidsList.addEventListener('click', function(e) {
+            var btn = e.target.closest('.remove-kid');
+            if (!btn) return;
+            kids.splice(parseInt(btn.dataset.idx), 1);
+            renderKids();
+        });
+        if (addKidBtn) addKidBtn.addEventListener('click', function() {
+            kids.push({name:'', dob:'', gender:'M'});
+            renderKids();
+        });
+        renderKids();
+    }
+
     window.openDrawer = function (url, title) {
         var overlay = document.getElementById('drawer-overlay');
         var drawer  = document.getElementById('drawer');
@@ -1017,6 +1059,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 attachDeleteHandlers(body, url);
                 attachAddMoreHandler(body);
                 attachMaritalStatusToggle(body);
+                attachKidsHandler(body);
             })
             .catch(function () {
                 body.innerHTML = '<div style="text-align:center;padding:40px;">'
