@@ -1035,7 +1035,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 '#drawer-body .husband-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .kids-section .section-title{color:#9333ea;border-bottom-color:#faf5ff;}' +
                 '#drawer-body .section-title{font-size:13px;font-weight:700;color:#0d9488;text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px;padding-bottom:6px;border-bottom:2px solid #f0fdfa;}' +
-                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;overflow-x:auto;padding:0;position:static;border-radius:0;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#14b8a6;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}}';
+                '@media(max-width:700px){#drawer-body .form-sidebar{width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;overflow-x:auto;padding:0;position:static;border-radius:0;}.form-sidebar a{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:12px 16px;}.form-sidebar a.active{border-bottom-color:#14b8a6;border-left-color:transparent;}#drawer-body .form-main{margin-left:0;}#drawer-body .upload-form{flex-direction:column;}#drawer-body .upload-form .form-group{max-width:100%;flex:1 1 100%;}#drawer-body .form-row{grid-template-columns:1fr !important;}}';
             document.head.appendChild(style);
         }
         var links = sidebar.querySelectorAll('a[data-section]');
