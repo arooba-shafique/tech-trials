@@ -45,10 +45,10 @@
         .msg-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
         .msg-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
         @media (max-width: 600px) {
-            .upload-form { flex-direction: column; }
-            .upload-form .form-group { max-width: 100%; flex: 1 1 100%; }
+            .upload-form { flex-direction: column !important; }
+            .upload-form .form-group { max-width: 100% !important; flex: 1 1 100% !important; }
             .doc-row { flex-direction: column !important; align-items: stretch !important; }
-            .doc-row .form-group { min-width: 0; }
+            .doc-row .form-group { min-width: 0; flex: 1 1 100% !important; }
             .doc-item { flex-direction: column; align-items: flex-start; gap: 10px; }
             .doc-actions { width: 100%; }
             .doc-actions .btn { flex: 1; text-align: center; }
