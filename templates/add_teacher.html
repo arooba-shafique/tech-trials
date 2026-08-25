@@ -75,6 +75,44 @@
                 {{ form.profile_picture }}
             </div>
 
+            <!-- Family Info -->
+            <div class="section-title">Family Information</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Marital Status</label>
+                    {{ form.marital_status }}
+                </div>
+            </div>
+            <div id="husband-info" style="display:none;">
+                <div class="section-title" style="color:#9333ea;border-bottom-color:#faf5ff;">Husband Information</div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Husband Name</label>
+                        {{ form.husband_name }}
+                    </div>
+                    <div class="form-group">
+                        <label>Husband CNIC</label>
+                        {{ form.husband_cnic }}
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Husband Contact</label>
+                        {{ form.husband_phone }}
+                    </div>
+                    <div class="form-group">
+                        <label>Husband Address</label>
+                        {{ form.husband_address }}
+                    </div>
+                </div>
+            </div>
+            <div id="kids-section" style="display:none;">
+                <div class="section-title" style="color:#9333ea;border-bottom-color:#faf5ff;">Children</div>
+                <div id="kids-list"></div>
+                <input type="hidden" name="kids_json" id="kids_json" value="{{ form.instance.kids_json|default:'[]' }}">
+                <button type="button" id="add-kid-btn" style="width:auto;margin-top:8px;padding:8px 16px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">+ Add Child</button>
+            </div>
+
             <!-- Employment Info -->
             <div class="section-title">Employment Information</div>
             <div class="form-row">
@@ -176,5 +214,62 @@
         </form>
         <a href="javascript:history.back()" class="back-link">← Back</a>
     </div>
+    <script>
+    (function(){
+        var statusField = document.querySelector('[name="marital_status"]');
+        var husbandInfo = document.getElementById('husband-info');
+        var kidsSection = document.getElementById('kids-section');
+        var kidsList = document.getElementById('kids-list');
+        var kidsJson = document.getElementById('kids_json');
+        var addKidBtn = document.getElementById('add-kid-btn');
+        var kids = [];
+
+        function toggleFields(){
+            var v = statusField ? statusField.value : 'single';
+            var married = v === 'married';
+            if(husbandInfo) husbandInfo.style.display = married ? '' : 'none';
+            if(kidsSection) kidsSection.style.display = married ? '' : 'none';
+        }
+        if(statusField) statusField.addEventListener('change', toggleFields);
+
+        function renderKids(){
+            if(!kidsList) return;
+            kidsList.innerHTML = '';
+            kids.forEach(function(kid, i){
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex;gap:10px;align-items:flex-end;margin-bottom:10px;';
+                row.innerHTML =
+                    '<div class="form-group" style="flex:1;min-width:0;margin-bottom:0;"><label>Name</label><input type="text" data-kid="'+i+'" data-field="name" value="'+(kid.name||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"></div>' +
+                    '<div class="form-group" style="flex:0 0 140px;min-width:0;margin-bottom:0;"><label>DOB</label><input type="date" data-kid="'+i+'" data-field="dob" value="'+(kid.dob||'')+'" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"></div>' +
+                    '<div class="form-group" style="flex:0 0 100px;min-width:0;margin-bottom:0;"><label>Gender</label><select data-kid="'+i+'" data-field="gender" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;box-sizing:border-box;"><option value="M"'+(kid.gender==='M'?' selected':'')+'>Boy</option><option value="F"'+(kid.gender==='F'?' selected':'')+'>Girl</option></select></div>' +
+                    '<button type="button" class="remove-kid" data-idx="'+i+'" style="padding:8px 12px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;cursor:pointer;font-size:13px;flex-shrink:0;">✕</button>';
+                kidsList.appendChild(row);
+            });
+            kidsJson.value = JSON.stringify(kids);
+        }
+
+        kidsList.addEventListener('input', function(e){
+            var el = e.target;
+            var i = parseInt(el.dataset.kid);
+            var f = el.dataset.field;
+            if(!isNaN(i) && f){ kids[i][f] = el.value; kidsJson.value = JSON.stringify(kids); }
+        });
+        kidsList.addEventListener('click', function(e){
+            var btn = e.target.closest('.remove-kid');
+            if(!btn) return;
+            kids.splice(parseInt(btn.dataset.idx), 1);
+            renderKids();
+        });
+
+        if(addKidBtn) addKidBtn.addEventListener('click', function(){
+            kids.push({name:'', dob:'', gender:'M'});
+            renderKids();
+        });
+
+        try { kids = JSON.parse(kidsJson.value || '[]'); } catch(e){ kids = []; }
+        renderKids();
+        toggleFields();
+    })();
+    </script>
 </body>
 </html>
