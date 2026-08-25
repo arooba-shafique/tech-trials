@@ -83,7 +83,7 @@
                     {{ form.marital_status }}
                 </div>
             </div>
-            <div id="husband-info" style="display:none;">
+            <div id="husband-info" {% if form.instance.marital_status != 'married' %}style="display:none;"{% endif %}>
                 <div class="section-title" style="color:#9333ea;border-bottom-color:#faf5ff;">Husband Information</div>
                 <div class="form-row">
                     <div class="form-group">
@@ -106,7 +106,7 @@
                     </div>
                 </div>
             </div>
-            <div id="kids-section" style="display:none;">
+            <div id="kids-section" {% if form.instance.marital_status == 'single' or not form.instance.marital_status %}style="display:none;"{% endif %}>
                 <div class="section-title" style="color:#9333ea;border-bottom-color:#faf5ff;">Children</div>
                 <div id="kids-list"></div>
                 <input type="hidden" name="kids_json" id="kids_json" value="{{ form.instance.kids_json|default:'[]' }}">

@@ -950,6 +950,20 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
         return false;
     }
 
+    function attachMaritalStatusToggle(root) {
+        var statusField = root.querySelector('[name="marital_status"]');
+        var husbandInfo = root.querySelector('#husband-info');
+        var kidsSection = root.querySelector('#kids-section');
+        if (!statusField) return;
+        function toggleFields() {
+            var v = statusField.value;
+            if (husbandInfo) husbandInfo.style.display = v === 'married' ? '' : 'none';
+            if (kidsSection) kidsSection.style.display = v !== 'single' ? '' : 'none';
+        }
+        toggleFields();
+        statusField.addEventListener('change', toggleFields);
+    }
+
     window.openDrawer = function (url, title) {
         var overlay = document.getElementById('drawer-overlay');
         var drawer  = document.getElementById('drawer');
@@ -1002,6 +1016,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 attachFormHandler(body, url);
                 attachDeleteHandlers(body, url);
                 attachAddMoreHandler(body);
+                attachMaritalStatusToggle(body);
             })
             .catch(function () {
                 body.innerHTML = '<div style="text-align:center;padding:40px;">'

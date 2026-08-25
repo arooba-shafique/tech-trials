@@ -374,6 +374,7 @@
                 attachAddMoreHandler(body);
                 attachDeleteHandlers(body);
                 attachUploadHandler(body, url);
+                attachMaritalStatusToggle(body);
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -513,6 +514,19 @@
                 form.submit();
             });
         });
+    }
+    function attachMaritalStatusToggle(root) {
+        var statusField = root.querySelector('[name="marital_status"]');
+        var husbandInfo = root.querySelector('#husband-info');
+        var kidsSection = root.querySelector('#kids-section');
+        if (!statusField) return;
+        function toggleFields() {
+            var v = statusField.value;
+            if (husbandInfo) husbandInfo.style.display = v === 'married' ? '' : 'none';
+            if (kidsSection) kidsSection.style.display = v !== 'single' ? '' : 'none';
+        }
+        toggleFields();
+        statusField.addEventListener('change', toggleFields);
     }
 </script>
 </body>
