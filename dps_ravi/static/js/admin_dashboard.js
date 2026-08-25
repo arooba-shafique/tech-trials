@@ -1101,7 +1101,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                 var parser = new DOMParser();
                 var doc    = parser.parseFromString(html, 'text/html');
 
-                var container = doc.querySelector('.container') || doc.querySelector('.hr-main') || doc.querySelector('.content') || doc.querySelector('main');
+                var container = doc.querySelector('.container') || doc.querySelector('.form-container') || doc.querySelector('.hr-main') || doc.querySelector('.content') || doc.querySelector('main');
                 if (container) {
                     var backLinks = container.querySelectorAll('a[href*="admin_console"], a[href*="left-employees"]');
                     backLinks.forEach(function(l) {

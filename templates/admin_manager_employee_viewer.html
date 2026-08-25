@@ -356,7 +356,7 @@
             .then(function(html){
                 var parser = new DOMParser();
                 var doc = parser.parseFromString(html, 'text/html');
-                var container = doc.querySelector('.container') || doc.querySelector('.content') || doc.querySelector('main');
+                var container = doc.querySelector('.container') || doc.querySelector('.form-container') || doc.querySelector('.content') || doc.querySelector('main');
                 if (container) {
                     var backLinks = container.querySelectorAll('a[href*="admin_console"], a[href*="left-employees"]');
                     backLinks.forEach(function(l) {
@@ -503,7 +503,7 @@
                 return r.text().then(function(html){
                     var parser = new DOMParser();
                     var doc = parser.parseFromString(html, 'text/html');
-                    var c2 = doc.querySelector('.container') || doc.querySelector('.content') || doc.querySelector('main');
+                    var c2 = doc.querySelector('.container') || doc.querySelector('.form-container') || doc.querySelector('.content') || doc.querySelector('main');
                     if (c2) { body.innerHTML = c2.innerHTML; }
                     else { var f2 = doc.querySelector('form'); body.innerHTML = f2 ? f2.outerHTML : html; }
                     attachFormHandler(body, originalUrl);
