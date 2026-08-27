@@ -1861,3 +1861,80 @@ def generate_credentials(request):
 def parent_logout(request):
     logout(request)
     return redirect('/')
+
+
+# ─────────────────────────────────────────────
+# DATA IMPORT / EXPORT
+# ─────────────────────────────────────────────
+
+from django.http import HttpResponse
+from .data_handlers import (
+    export_to_csv, export_to_excel,
+    IMPORTERS, EXPORTERS,
+)
+
+ALLOWED_EXPORT_TYPES = list(EXPORTERS.keys())
+ALLOWED_IMPORT_TYPES = list(IMPORTERS.keys())
+
+
+@login_required(login_url='admin_login')
+def export_data(request):
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_authenticated and role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse('Unauthorized', status=403)
+
+    data_type = request.GET.get('type', '')
+    fmt = request.GET.get('format', 'csv')
+
+    if data_type not in ALLOWED_EXPORT_TYPES:
+        messages.error(request, f'Invalid export type: {data_type}', extra_tags='import-export')
+        return redirect('admin_console')
+
+    school = get_user_school(request.user)
+
+    if fmt == 'xlsx':
+        content = export_to_excel(data_type, school)
+        content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        ext = 'xlsx'
+    else:
+        content = export_to_csv(data_type, school)
+        content_type = 'text/csv'
+        ext = 'csv'
+
+    response = HttpResponse(content, content_type=content_type)
+    response['Content-Disposition'] = f'attachment; filename="{data_type}_export.{ext}"'
+    return response
+
+
+@login_required(login_url='admin_login')
+def import_data(request):
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_authenticated and role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse('Unauthorized', status=403)
+
+    if request.method != 'POST':
+        return redirect('admin_console')
+
+    data_type = request.POST.get('type', '')
+    uploaded_file = request.FILES.get('file')
+
+    if data_type not in ALLOWED_IMPORT_TYPES:
+        messages.error(request, f'Invalid import type: {data_type}', extra_tags='import-export')
+        return redirect('admin_console')
+
+    if not uploaded_file:
+        messages.error(request, 'Please select a file to import.', extra_tags='import-export')
+        return redirect('admin_console')
+
+    school = get_user_school(request.user)
+    handler = IMPORTERS[data_type]
+    result = handler(uploaded_file, school)
+
+    if result['errors']:
+        error_preview = result['errors'][:5]
+        error_msg = f"Imported {result['success']} record(s). {len(result['errors'])} error(s): " + '; '.join(error_preview)
+        messages.warning(request, error_msg, extra_tags='import-export')
+    else:
+        messages.success(request, f'Successfully imported {result["success"]} {data_type} record(s).', extra_tags='import-export')
+
+    return redirect('admin_console')

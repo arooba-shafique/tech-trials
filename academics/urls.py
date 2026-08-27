@@ -71,4 +71,8 @@ path('student_dashboard/',           views.student_dashboard, name='student_dash
 path('credentials/generate/', views.generate_credentials, name='generate_credentials'),
 
 path('credentials/generate/', views.generate_credentials, name='generate_credentials'),
+
+    # ─────────── DATA IMPORT / EXPORT ───────────
+    path('data/export/', views.export_data, name='data_export'),
+    path('data/import/', views.import_data, name='data_import'),
 ]
