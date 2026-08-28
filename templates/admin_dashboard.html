@@ -264,9 +264,22 @@
 
         <!-- ═══════════ STUDENTS ═══════════ -->
         <div id="section-students" class="section">
-            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-                <h2 style="font-size:15px;font-weight:700;">Students ({{ students|length }})</h2>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                <h2 style="font-size:15px;font-weight:700;">Students (<span id="stuCount">{{ students|length }}</span>)</h2>
                 <a href="{% url 'add_student' %}" class="btn btn-blue"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student</a>
+            </div>
+            <!-- Search + Class Filter -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                <input type="text" id="stuSearch" placeholder="Search by name, roll no, admission no..." oninput="filterStudents()" style="flex:1;min-width:200px;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color 0.15s;">
+                <select id="stuClassFilter" onchange="filterStudents()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;min-width:150px;">
+                    <option value="">All Classes</option>
+                    {% for cls in classes %}<option value="{{ cls }}">{{ cls }}</option>{% endfor %}
+                </select>
+                <select id="stuGenderFilter" onchange="filterStudents()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;min-width:120px;">
+                    <option value="">All Genders</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
             </div>
             {% if students %}
             <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
@@ -275,9 +288,9 @@
                         <thead><tr>
                             <th>Roll No</th><th>Name</th><th>Class</th><th>Guardian</th><th>Gender</th><th>Phone</th><th>Admission Date</th><th style="text-align:center;">Actions</th>
                         </tr></thead>
-                        <tbody>
+                        <tbody id="stuTableBody">
                             {% for student in students %}
-                            <tr>
+                            <tr data-name="{{ student.full_name|lower }}" data-roll="{{ student.roll_number|default:''|lower }}" data-adm="{{ student.admission_number|default:''|lower }}" data-class="{{ student.student_class|default:'' }}" data-gender="{{ student.gender }}">
                                 <td>{{ student.roll_number|default:"-" }}</td>
                                 <td>
                                     <div style="font-weight:600;font-size:13px;">{{ student.full_name }}</div>
@@ -297,11 +310,72 @@
                         </tbody>
                     </table>
                 </div>
+                <!-- Pagination -->
+                <div id="stuPagination" style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid #f3f4f6;flex-wrap:wrap;gap:8px;">
+                    <span id="stuPageInfo" style="font-size:12px;color:var(--text-muted);"></span>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="stuPagePrev()" id="stuPrevBtn" style="padding:6px 14px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;">Prev</button>
+                        <button onclick="stuPageNext()" id="stuNextBtn" style="padding:6px 14px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;font-size:12px;cursor:pointer;font-family:inherit;">Next</button>
+                    </div>
+                </div>
             </div>
             {% else %}
             <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:48px;background:var(--white);border-radius:12px;">No students found.</div>
             {% endif %}
         </div>
+
+        <script>
+        (function(){
+            var PAGE_SIZE = 50;
+            var stuPage = 0;
+            var filteredRows = [];
+
+            function filterStudents(){
+                var q = (document.getElementById('stuSearch').value||'').toLowerCase();
+                var cls = document.getElementById('stuClassFilter').value;
+                var gen = document.getElementById('stuGenderFilter').value;
+                var rows = document.querySelectorAll('#stuTableBody tr');
+                filteredRows = [];
+                rows.forEach(function(r){
+                    var name = r.getAttribute('data-name')||'';
+                    var roll = r.getAttribute('data-roll')||'';
+                    var adm = r.getAttribute('data-adm')||'';
+                    var rcls = r.getAttribute('data-class')||'';
+                    var rgen = r.getAttribute('data-gender')||'';
+                    var matchQ = !q || name.indexOf(q)!==-1 || roll.indexOf(q)!==-1 || adm.indexOf(q)!==-1;
+                    var matchC = !cls || rcls===cls;
+                    var matchG = !gen || rgen===gen;
+                    if(matchQ && matchC && matchG){ filteredRows.push(r); r.style.display=''; }
+                    else { r.style.display='none'; }
+                });
+                stuPage = 0;
+                renderStuPage();
+            }
+
+            function renderStuPage(){
+                var total = filteredRows.length;
+                var pages = Math.ceil(total/PAGE_SIZE)||1;
+                if(stuPage>=pages) stuPage=pages-1;
+                if(stuPage<0) stuPage=0;
+                var start = stuPage*PAGE_SIZE;
+                var end = start+PAGE_SIZE;
+                filteredRows.forEach(function(r,i){
+                    r.style.display = (i>=start && i<end) ? '' : 'none';
+                });
+                document.getElementById('stuCount').textContent = total;
+                document.getElementById('stuPageInfo').textContent = 'Showing '+(start+1)+'-'+Math.min(end,total)+' of '+total;
+                document.getElementById('stuPrevBtn').disabled = stuPage===0;
+                document.getElementById('stuNextBtn').disabled = stuPage>=pages-1;
+            }
+
+            window.filterStudents = filterStudents;
+            window.stuPagePrev = function(){ stuPage--; renderStuPage(); };
+            window.stuPageNext = function(){ stuPage++; renderStuPage(); };
+
+            // init
+            filterStudents();
+        })();
+        </script>
 
         <!-- ═══════════ STAFF ═══════════ -->
         <div id="section-staff" class="section">
