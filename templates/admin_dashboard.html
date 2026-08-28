@@ -265,59 +265,42 @@
         <!-- ═══════════ STUDENTS ═══════════ -->
         <div id="section-students" class="section">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
-                <h2 style="font-size:15px;font-weight:700;">Students</h2>
+                <h2 style="font-size:15px;font-weight:700;">Students ({{ students|length }})</h2>
                 <a href="{% url 'add_student' %}" class="btn btn-blue"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student</a>
             </div>
-            {% for cls in classes %}
-            <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden;">
-                <div onclick="toggleStudents('stu-{{ cls.id }}')" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <div style="width:38px;height:38px;border-radius:8px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        </div>
-                        <div style="font-size:14px;font-weight:700;">{{ cls }}</div>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
-                        <div style="display:flex;flex-direction:column;align-items:center;padding:4px 10px;border-radius:8px;background:#eff6ff;">
-                            <span style="font-size:16px;font-weight:700;color:#2563eb;line-height:1;">{{ cls.total_students }}</span>
-                            <span style="font-size:9px;font-weight:600;color:#2563eb;text-transform:uppercase;letter-spacing:.4px;">Students</span>
-                        </div>
-                        <svg id="chevron-stu-{{ cls.id }}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-muted);transition:transform 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>
-                    </div>
-                </div>
-                <div id="stu-{{ cls.id }}" style="display:none;border-top:1px solid #f3f4f6;">
-                    <div class="table-scroll">
-                        <table>
-                            <thead><tr>
-                                <th>Roll No</th><th>Name</th><th>Guardian</th><th>Gender</th><th>Phone</th><th>Admission Date</th><th style="text-align:center;">Actions</th>
-                            </tr></thead>
-                            <tbody>
-                                {% for student in students %}
-                                {% if student.student_class.id == cls.id %}
-                                <tr>
-                                    <td>{{ student.roll_number|default:"-" }}</td>
-                                    <td>
-                                        <div style="font-weight:600;font-size:13px;">{{ student.full_name }}</div>
-                                        <div style="font-size:11px;color:var(--text-muted);">{{ student.admission_number|default:"-" }}</div>
-                                    </td>
-                                    <td>{{ student.guardian_name }}</td>
-                                    <td>{{ student.get_gender_display }}</td>
-                                    <td>{{ student.phone|default:"-" }}</td>
-                                    <td>{{ student.admission_date }}</td>
-                                    <td style="text-align:center;white-space:nowrap;">
-                                        <a href="{% url 'edit_student' student.pk %}" class="btn btn-yellow" style="padding:4px 10px;font-size:11px;">Edit</a>
-                                       <a href="{% url 'delete_student' student.pk %}" class="btn btn-red" style="padding:4px 10px;font-size:11px;">Delete</a>
-                                    </td>
-                                </tr>
-                                {% endif %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+            {% if students %}
+            <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
+                <div class="table-scroll">
+                    <table>
+                        <thead><tr>
+                            <th>Roll No</th><th>Name</th><th>Class</th><th>Guardian</th><th>Gender</th><th>Phone</th><th>Admission Date</th><th style="text-align:center;">Actions</th>
+                        </tr></thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.roll_number|default:"-" }}</td>
+                                <td>
+                                    <div style="font-weight:600;font-size:13px;">{{ student.full_name }}</div>
+                                    <div style="font-size:11px;color:var(--text-muted);">{{ student.admission_number|default:"-" }}</div>
+                                </td>
+                                <td>{{ student.student_class|default:"-" }}</td>
+                                <td>{{ student.guardian_name }}</td>
+                                <td>{{ student.get_gender_display }}</td>
+                                <td>{{ student.phone|default:"-" }}</td>
+                                <td>{{ student.admission_date }}</td>
+                                <td style="text-align:center;white-space:nowrap;">
+                                    <a href="{% url 'edit_student' student.pk %}" class="btn btn-yellow" style="padding:4px 10px;font-size:11px;">Edit</a>
+                                    <a href="{% url 'delete_student' student.pk %}" class="btn btn-red" style="padding:4px 10px;font-size:11px;">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            {% endfor %}
-            {% if not students %}<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:48px;background:var(--white);border-radius:12px;">No students found.</div>{% endif %}
+            {% else %}
+            <div style="text-align:center;color:var(--text-muted);font-size:13px;padding:48px;background:var(--white);border-radius:12px;">No students found.</div>
+            {% endif %}
         </div>
 
         <!-- ═══════════ STAFF ═══════════ -->
