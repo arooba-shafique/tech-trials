@@ -174,7 +174,7 @@
                 <input type="hidden" name="type" id="ieImportType" value="students">
                 <select id="ieImportTypeSelect" class="ie-type-select">
                     <option value="students">Students</option>
-                    <option value="teachers">Teachers</option>
+                <option value="teachers">Staff (Teachers, Coordinators, VP, etc.)</option>
                     <option value="parents">Parents</option>
                     <option value="results">Results / Marks</option>
                 </select>
@@ -211,7 +211,7 @@
     var importTypeInput = document.getElementById('ieImportType');
     var hints = {
         students: 'Headers: full_name, guardian_name, date_of_birth, gender, roll_number, admission_number, class_name, class_section, phone, address, email',
-        teachers: 'Headers: full_name, father_name, date_of_birth, gender, employee_id, cnic, designation, employment_type, phone, email, salary, bank_name, bank_account',
+        teachers: 'Headers: full_name, father_name, date_of_birth, gender, employee_id, cnic, designation (teacher/coordinator/manager/vp/group_head), employment_type (permanent/contract/daily_wager), phone, email, salary, bank_name, bank_account',
         parents: 'Headers: full_name, relation, phone, email, student_admission_numbers (comma-separated)',
         results: 'Headers: student_name, admission_number, exam_name, subject_code, class_name, class_section, total_marks, passing_marks, marks_obtained'
     };
