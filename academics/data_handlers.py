@@ -170,6 +170,36 @@ def _safe_decimal(val):
         return Decimal('0')
 
 
+def _read_file_rows(file_obj):
+    """Read CSV or Excel file and return list of dicts (each dict = one row)."""
+    filename = getattr(file_obj, 'name', '')
+    if filename.lower().endswith(('.xlsx', '.xls')):
+        from openpyxl import load_workbook
+        wb = load_workbook(file_obj, read_only=True, data_only=True)
+        ws = wb.active
+        rows = list(ws.iter_rows(values_only=True))
+        wb.close()
+        if not rows:
+            return []
+        headers = [str(h).strip() if h else '' for h in rows[0]]
+        result = []
+        for row in rows[1:]:
+            if all(c is None for c in row):
+                continue
+            row_dict = {}
+            for i, h in enumerate(headers):
+                if not h:
+                    continue
+                val = row[i] if i < len(row) else None
+                row_dict[h] = str(val).strip() if val is not None else ''
+            result.append(row_dict)
+        return result
+    else:
+        decoded = file_obj.read().decode('utf-8-sig')
+        reader = csv.DictReader(io.StringIO(decoded))
+        return [row for row in reader]
+
+
 def _get_or_create_school_user(username, email, role, school=None):
     user = User.objects.filter(username=username).first()
     if user:
@@ -205,12 +235,11 @@ def _resolve_exam(name, subject_code, class_name, class_section):
 
 
 def import_students(file_obj, school=None):
-    decoded = file_obj.read().decode('utf-8-sig')
-    reader = csv.DictReader(io.StringIO(decoded))
+    rows = _read_file_rows(file_obj)
     success = 0
     errors = []
 
-    for i, row in enumerate(reader, start=2):
+    for i, row in enumerate(rows, start=2):
         try:
             full_name = row.get('full_name', '').strip()
             if not full_name:
@@ -251,8 +280,7 @@ def import_students(file_obj, school=None):
 
 
 def import_teachers(file_obj, school=None):
-    decoded = file_obj.read().decode('utf-8-sig')
-    reader = csv.DictReader(io.StringIO(decoded))
+    rows = _read_file_rows(file_obj)
     success = 0
     errors = []
 
@@ -260,7 +288,7 @@ def import_teachers(file_obj, school=None):
                        'manager': 'manager', 'vp': 'vp', 'group head': 'group_head'}
     EMPLOYMENT_MAP = {'permanent': 'permanent', 'contract': 'contract', 'daily wager': 'daily_wager'}
 
-    for i, row in enumerate(reader, start=2):
+    for i, row in enumerate(rows, start=2):
         try:
             full_name = row.get('full_name', '').strip()
             if not full_name:
@@ -305,14 +333,13 @@ def import_teachers(file_obj, school=None):
 
 
 def import_parents(file_obj, school=None):
-    decoded = file_obj.read().decode('utf-8-sig')
-    reader = csv.DictReader(io.StringIO(decoded))
+    rows = _read_file_rows(file_obj)
     success = 0
     errors = []
 
     RELATION_MAP = {'father': 'father', 'mother': 'mother', 'guardian': 'guardian'}
 
-    for i, row in enumerate(reader, start=2):
+    for i, row in enumerate(rows, start=2):
         try:
             full_name = row.get('full_name', '').strip()
             if not full_name:
@@ -357,12 +384,11 @@ def import_parents(file_obj, school=None):
 
 
 def import_results(file_obj, school=None):
-    decoded = file_obj.read().decode('utf-8-sig')
-    reader = csv.DictReader(io.StringIO(decoded))
+    rows = _read_file_rows(file_obj)
     success = 0
     errors = []
 
-    for i, row in enumerate(reader, start=2):
+    for i, row in enumerate(rows, start=2):
         try:
             admission_number = row.get('admission_number', '').strip()
             if not admission_number:
