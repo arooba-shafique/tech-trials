@@ -199,6 +199,21 @@ def employee_separation(request, employee_id):
         if form.is_valid():
             record = form.save(commit=False)
             record.employee = employee
+            # Calculate accumulated deductions from all salary history
+            salary_totals = MonthlySalary.objects.filter(employee=employee).aggregate(
+                t_pf=Sum('provident_fund'),
+                t_security=Sum('security_deduction'),
+                t_tax=Sum('tax_deduction'),
+                t_van_child=Sum('van_child_deduction'),
+                t_other=Sum('other_deduction'),
+                t_total=Sum('total_deductions'),
+            )
+            record.total_pf = salary_totals['t_pf'] or 0
+            record.total_security = salary_totals['t_security'] or 0
+            record.total_tax = salary_totals['t_tax'] or 0
+            record.total_van_child = salary_totals['t_van_child'] or 0
+            record.total_other = salary_totals['t_other'] or 0
+            record.total_deductions = salary_totals['t_total'] or 0
             record.save()
             employee.is_employee_separated = True
             employee.save()
@@ -301,6 +316,20 @@ def left_employees(request):
     for emp in employees:
         sep = getattr(emp, 'separation_record', None)
         if sep:
+            # Backfill accumulated totals for existing records that have 0
+            if not sep.total_deductions:
+                totals = MonthlySalary.objects.filter(employee=emp).aggregate(
+                    tp=Sum('provident_fund'), ts=Sum('security_deduction'),
+                    tt=Sum('tax_deduction'), tv=Sum('van_child_deduction'),
+                    to=Sum('other_deduction'), td=Sum('total_deductions'),
+                )
+                sep.total_pf = totals['tp'] or 0
+                sep.total_security = totals['ts'] or 0
+                sep.total_tax = totals['tt'] or 0
+                sep.total_van_child = totals['tv'] or 0
+                sep.total_other = totals['to'] or 0
+                sep.total_deductions = totals['td'] or 0
+                sep.save()
             if sep.clearance_status == 'completed':
                 completed_count += 1
             else:
@@ -383,12 +412,12 @@ def clearance_form(request, employee_id):
             if record.clearance_status == 'completed' and not record.clearance_date:
                 record.clearance_date = timezone.now().date()
             # Save accumulated totals from salary history
-            record.total_pf = salary_totals.get('total_pf', 0)
-            record.total_security = salary_totals.get('total_security', 0)
-            record.total_tax = salary_totals.get('total_tax', 0)
-            record.total_van_child = salary_totals.get('total_van_child', 0)
-            record.total_other = salary_totals.get('total_other', 0)
-            record.total_deductions = salary_totals.get('total_deductions', 0)
+            record.total_pf = salary_totals['total_pf']
+            record.total_security = salary_totals['total_security']
+            record.total_tax = salary_totals['total_tax']
+            record.total_van_child = salary_totals['total_van_child']
+            record.total_other = salary_totals['total_other']
+            record.total_deductions = salary_totals['total_deductions']
             record.save()
             messages.success(request, f'Clearance form saved for {employee.full_name}.')
             return redirect('/admin-console/?section=left-employees')

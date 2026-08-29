@@ -178,7 +178,7 @@ def admin_dashboard(request):
 
     User = get_user_model()
 
-    from django.db.models import Q as Q2
+    from django.db.models import Q as Q2, Sum
     from hr.models import MonthlySalary, SeparationRecord
     left_employees = TeacherProfile.objects.filter(is_employee_separated=True)
     if school and not request.user.is_superuser:
@@ -199,6 +199,20 @@ def admin_dashboard(request):
     for emp in left_employees:
         sep = SeparationRecord.objects.filter(employee=emp).first()
         if sep:
+            # Backfill accumulated totals for existing records that have 0
+            if not sep.total_deductions:
+                totals = MonthlySalary.objects.filter(employee=emp).aggregate(
+                    tp=Sum('provident_fund'), ts=Sum('security_deduction'),
+                    tt=Sum('tax_deduction'), tv=Sum('van_child_deduction'),
+                    to=Sum('other_deduction'), td=Sum('total_deductions'),
+                )
+                sep.total_pf = totals['tp'] or 0
+                sep.total_security = totals['ts'] or 0
+                sep.total_tax = totals['tt'] or 0
+                sep.total_van_child = totals['tv'] or 0
+                sep.total_other = totals['to'] or 0
+                sep.total_deductions = totals['td'] or 0
+                sep.save()
             if sep.clearance_status == 'completed':
                 left_completed_count += 1
             else:
