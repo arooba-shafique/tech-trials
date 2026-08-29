@@ -107,11 +107,6 @@
             Attendance
         </a>
 
-        <div class="nav-label">Tools</div>
-        <a class="nav-item" href="#" onclick="showSection('import-export',this);return false;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Import / Export
-        </a>
     </nav>
 
     <div class="sidebar-user">
@@ -266,7 +261,20 @@
         <div id="section-students" class="section">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
                 <h2 style="font-size:15px;font-weight:700;">Students (<span id="stuCount">{{ students|length }}</span>)</h2>
-                <a href="{% url 'add_student' %}" class="btn btn-blue"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student</a>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'data_export' %}?type=students&format=csv" style="font-size:11px;padding:5px 10px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:6px;text-decoration:none;font-weight:600;" download>Export CSV</a>
+                    <a href="{% url 'data_export' %}?type=students&format=xlsx" style="font-size:11px;padding:5px 10px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:6px;text-decoration:none;font-weight:600;" download>Export Excel</a>
+                    <form method="POST" action="{% url 'data_import' %}" enctype="multipart/form-data" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="type" value="students">
+                        <label style="font-size:11px;padding:5px 10px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import
+                            <input type="file" name="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                    <a href="{% url 'add_student' %}" class="btn btn-blue"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Student</a>
+                </div>
             </div>
             <!-- Search + Class Filter -->
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
@@ -381,7 +389,20 @@
         <div id="section-staff" class="section">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
                 <h2 style="font-size:15px;font-weight:700;">All Staff</h2>
-                <a href="{% url 'add_teacher' %}" class="btn btn-green"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Staff</a>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'data_export' %}?type=teachers&format=csv" style="font-size:11px;padding:5px 10px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:6px;text-decoration:none;font-weight:600;" download>Export CSV</a>
+                    <a href="{% url 'data_export' %}?type=teachers&format=xlsx" style="font-size:11px;padding:5px 10px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:6px;text-decoration:none;font-weight:600;" download>Export Excel</a>
+                    <form method="POST" action="{% url 'data_import' %}" enctype="multipart/form-data" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="type" value="teachers">
+                        <label style="font-size:11px;padding:5px 10px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import
+                            <input type="file" name="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                    <a href="{% url 'add_teacher' %}" class="btn btn-green"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Staff</a>
+                </div>
             </div>
             <!-- Designation filter pills -->
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
@@ -438,7 +459,20 @@
         <div id="section-parents" class="section">
             <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
                 <h2 style="font-size:15px;font-weight:700;">All Parents</h2>
-                <a href="{% url 'add_parent' %}" class="btn btn-purple"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Parent</a>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'data_export' %}?type=parents&format=csv" style="font-size:11px;padding:5px 10px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:6px;text-decoration:none;font-weight:600;" download>Export CSV</a>
+                    <a href="{% url 'data_export' %}?type=parents&format=xlsx" style="font-size:11px;padding:5px 10px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:6px;text-decoration:none;font-weight:600;" download>Export Excel</a>
+                    <form method="POST" action="{% url 'data_import' %}" enctype="multipart/form-data" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="type" value="parents">
+                        <label style="font-size:11px;padding:5px 10px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import
+                            <input type="file" name="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                    <a href="{% url 'add_parent' %}" class="btn btn-purple"><svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Parent</a>
+                </div>
             </div>
             <div class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;">
                 {% for parent in parents %}
@@ -889,7 +923,20 @@
         <div id="section-results" class="section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
                 <h2 style="font-size:15px;font-weight:700;">Grades &amp; Results</h2>
-                <span style="font-size:12px;color:var(--text-muted);font-weight:500;">View Only — managed by teachers</span>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <a href="{% url 'data_export' %}?type=results&format=csv" style="font-size:11px;padding:5px 10px;background:#ecfdf5;color:#047857;border:1px solid #a7f3d0;border-radius:6px;text-decoration:none;font-weight:600;" download>Export CSV</a>
+                    <a href="{% url 'data_export' %}?type=results&format=xlsx" style="font-size:11px;padding:5px 10px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;border-radius:6px;text-decoration:none;font-weight:600;" download>Export Excel</a>
+                    <form method="POST" action="{% url 'data_import' %}" enctype="multipart/form-data" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="type" value="results">
+                        <label style="font-size:11px;padding:5px 10px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:6px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Import
+                            <input type="file" name="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="this.form.submit()">
+                        </label>
+                    </form>
+                    <span style="font-size:12px;color:var(--text-muted);font-weight:500;">View Only — managed by teachers</span>
+                </div>
             </div>
             {% for cls in classes %}
             <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden;">
@@ -1055,11 +1102,6 @@
     </div>
 </div>
     </div><!-- end .content -->
-
-    <!-- ═══════════ IMPORT / EXPORT ═══════════ -->
-    <div id="section-import-export" class="section">
-        {% include 'partials/import_export_section.html' %}
-    </div>
 </main>
 
 <!-- Dashboard JS (loaded at end of body) -->
