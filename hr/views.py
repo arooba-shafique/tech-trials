@@ -1589,9 +1589,9 @@ def export_clearance_excel(request):
 
 @login_required(login_url='admin_login')
 def import_clearance_excel(request):
-    """Import clearance data from Excel to update existing SeparationRecords."""
-    import io as _io
+    """Import clearance data from Excel. Creates SeparationRecords for employees that don't have one."""
     from openpyxl import load_workbook
+    from django.utils.dateparse import parse_date as _parse_date
 
     role = getattr(request.user, 'role', None)
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
@@ -1645,9 +1645,14 @@ def import_clearance_excel(request):
         'notes': header_map.get('notes'),
     }
 
+    left_date_col = header_map.get('last working date') or header_map.get('left date')
+    reason_col = header_map.get('separation reason')
+    name_col = header_map.get('employee name')
+
     updated = 0
+    created = 0
     skipped = 0
-    errors = 0
+    not_found = 0
 
     for row in ws.iter_rows(min_row=2, values_only=True):
         emp_id = row[emp_id_col - 1] if emp_id_col <= len(row) else None
@@ -1659,13 +1664,26 @@ def import_clearance_excel(request):
         try:
             emp = TeacherProfile.objects.get(employee_id=emp_id_str)
         except TeacherProfile.DoesNotExist:
-            errors += 1
+            not_found += 1
             continue
 
         sep = SeparationRecord.objects.filter(employee=emp).first()
+
+        left_date = None
+        if left_date_col and left_date_col <= len(row) and row[left_date_col - 1]:
+            left_date = _parse_date(str(row[left_date_col - 1]).strip()) if not isinstance(row[left_date_col - 1], __import__('datetime').date) else row[left_date_col - 1]
+
         if not sep:
-            errors += 1
-            continue
+            if not left_date:
+                left_date = timezone.now().date()
+            sep = SeparationRecord.objects.create(
+                employee=emp,
+                last_working_date=left_date,
+                separation_reason='other',
+            )
+            emp.is_employee_separated = True
+            emp.save()
+            created += 1
 
         for field, col_idx in field_columns.items():
             if not col_idx or col_idx > len(row):
@@ -1691,8 +1709,7 @@ def import_clearance_excel(request):
                 else:
                     continue
             elif field == 'clearance_date':
-                from django.utils.dateparse import parse_date
-                parsed = parse_date(str(value).strip()) if not isinstance(value, __import__('datetime').date) else value
+                parsed = _parse_date(str(value).strip()) if not isinstance(value, __import__('datetime').date) else value
                 if parsed:
                     value = parsed
                 else:
@@ -1702,13 +1719,24 @@ def import_clearance_excel(request):
 
             setattr(sep, field, value)
 
+        if reason_col and reason_col <= len(row) and row[reason_col - 1]:
+            reason_val = str(row[reason_col - 1]).strip().lower()
+            valid_reasons = ['resignation', 'termination', 'contract_end', 'retirement', 'other']
+            if reason_val in valid_reasons:
+                sep.separation_reason = reason_val
+
         sep.save()
         updated += 1
 
+    msg_parts = []
     if updated:
-        messages.success(request, f'Clearance data imported: {updated} record(s) updated.')
-    if errors:
-        messages.warning(request, f'{errors} row(s) skipped (employee not found or no clearance record).')
+        msg_parts.append(f'{updated} record(s) updated')
+    if created:
+        msg_parts.append(f'{created} new record(s) created')
+    if msg_parts:
+        messages.success(request, f'Import complete: {", ".join(msg_parts)}.')
+    if not_found:
+        messages.warning(request, f'{not_found} employee ID(s) not found in system.')
     if skipped:
         messages.info(request, f'{skipped} empty row(s) skipped.')
 
