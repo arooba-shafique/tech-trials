@@ -423,6 +423,7 @@ def salary_config(request):
         config.default_working_days = int(request.POST.get('default_working_days', 26))
         config.max_allowed_leaves = int(request.POST.get('max_allowed_leaves', 0))
         config.late_deduction_per = int(request.POST.get('late_deduction_per', 3))
+        config.config_mode = request.POST.get('config_mode', 'percentage')
         config.tax_percentage = float(request.POST.get('tax_percentage', 0))
         config.provident_fund_pct = float(request.POST.get('provident_fund_pct', 0))
         config.security_pct = float(request.POST.get('security_pct', 0))
@@ -504,6 +505,8 @@ def save_employee_overrides(request):
     if not config:
         config = SalaryConfig.objects.create(month=month, year=year)
 
+    config_mode = request.POST.get('config_mode', config.config_mode)
+
     school = get_user_school(request.user)
     employees = TeacherProfile.objects.filter(is_employee_separated=False)
     if school and not request.user.is_superuser:
@@ -536,6 +539,7 @@ def save_employee_overrides(request):
         ms.cfg_bonus_per_day = float(request.POST.get(f'custom_bonus_per_day_{emp_id}', 0))
         ms.cfg_bonus_pct = float(request.POST.get(f'custom_bonus_pct_{emp_id}', 0))
         ms.transaction_type = request.POST.get(f'custom_transaction_type_{emp_id}', 'bank_islami')
+        ms.cfg_mode = config_mode
         ms.has_custom_config = True
         ms.save()
         return True

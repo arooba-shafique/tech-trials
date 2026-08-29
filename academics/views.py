@@ -282,6 +282,7 @@ def admin_dashboard(request):
                     van_child_pct = 0
                     bonus_per_day = 0
                     bonus_percentage = 0
+                    config_mode = 'percentage'
                 hr_config = _DefaultConfig()
 
             hr_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')

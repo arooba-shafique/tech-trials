@@ -7,37 +7,44 @@ import calendar
 
 class SalaryConfig(models.Model):
     """Global salary configuration per school — all criteria manually set."""
+    CONFIG_MODE_CHOICES = (
+        ('percentage', 'Percentage'),
+        ('amount', 'Fixed Amount'),
+    )
     school = models.OneToOneField('accounts.School', on_delete=models.CASCADE, related_name='salary_config', null=True, blank=True)
-    
+
     # Month/Year
     month = models.PositiveIntegerField(default=1, help_text="Month (1-12)")
     year = models.PositiveIntegerField(default=2026, help_text="Year")
-    
+
     # Basic settings
     default_working_days = models.PositiveIntegerField(default=26, help_text="Default working days per month")
-    
+
+    # Global config mode: percentage or fixed amount
+    config_mode = models.CharField(max_length=10, choices=CONFIG_MODE_CHOICES, default='percentage', help_text="All salary fields use percentage or fixed amount")
+
     # Tax
     tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Tax % deducted from gross")
-    
-    # Allowances (percentage of basic salary)
+
+    # Allowances (percentage of basic salary OR fixed amount based on config_mode)
     housing_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Housing allowance % of basic")
     medical_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Medical allowance % of basic")
     transport_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Transport allowance % of basic")
-    
+
     # Bonus
     bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Bonus amount per day if 0 leaves in month")
     bonus_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Or bonus as % of basic (if per_day=0)")
-    
+
     # Deductions
     provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
     security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic (normal, from 3rd month)")
     van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
     new_employee_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=50, help_text="Security deduction % of basic for first 2 months after joining")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
-    
+
     # Late deduction
     late_deduction_per = models.PositiveIntegerField(default=3, help_text="Late days count as 1 half-day deduct")
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -45,28 +52,36 @@ class SalaryConfig(models.Model):
         return f"Salary Config - {self.school}"
 
     @property
+    def is_amount_mode(self):
+        return self.config_mode == 'amount'
+
+    @property
     def housing_allowance_amount(self):
-        """Calculate housing allowance from first employee's salary for display."""
         return self.housing_allowance_pct
-    
+
+    def _apply(self, value, basic):
+        if self.config_mode == 'amount':
+            return float(value)
+        return float(basic) * (float(value) / 100)
+
     def get_housing(self, basic):
-        return basic * (self.housing_allowance_pct / 100)
+        return self._apply(self.housing_allowance_pct, basic)
     def get_medical(self, basic):
-        return basic * (self.medical_allowance_pct / 100)
+        return self._apply(self.medical_allowance_pct, basic)
     def get_transport(self, basic):
-        return basic * (self.transport_allowance_pct / 100)
+        return self._apply(self.transport_allowance_pct, basic)
     def get_pf(self, basic):
-        return basic * (self.provident_fund_pct / 100)
+        return self._apply(self.provident_fund_pct, basic)
     def get_security(self, basic):
-        return basic * (self.security_pct / 100)
+        return self._apply(self.security_pct, basic)
     def get_van_child(self, basic):
-        return basic * (self.van_child_pct / 100)
+        return self._apply(self.van_child_pct, basic)
     def get_tax(self, gross):
-        return gross * (self.tax_percentage / 100)
+        return self._apply(self.tax_percentage, gross)
     def get_bonus(self, basic):
         if self.bonus_per_day > 0:
-            return 0  # Will be calculated per day in monthly salary
-        return basic * (self.bonus_percentage / 100)
+            return 0
+        return self._apply(self.bonus_percentage, basic)
 
 
 class EmployeeSalary(models.Model):
@@ -161,6 +176,7 @@ class MonthlySalary(models.Model):
     )
     transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPE_CHOICES, default='bank_islami')
     has_custom_config = models.BooleanField(default=False, help_text="True if per-month overrides were saved via salary config")
+    cfg_mode = models.CharField(max_length=10, choices=SalaryConfig.CONFIG_MODE_CHOICES, default='percentage', help_text="Mode used when this record was saved: percentage or amount")
 
     # Overtime
     overtime_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="Overtime hours this month")
@@ -239,11 +255,16 @@ class MonthlySalary(models.Model):
             if months_since_joining < 2:
                 is_new_employee = True
 
-        # Allowances — use stored percentages if set, else global config
+        # Allowances — use stored values if custom config, else global config
         if has_cfg:
-            self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
-            self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
-            self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
+            if self.cfg_mode == 'amount':
+                self.housing_allowance = float(self.cfg_housing_pct)
+                self.medical_allowance = float(self.cfg_medical_pct)
+                self.transport_allowance = float(self.cfg_transport_pct)
+            else:
+                self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
+                self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
+                self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
@@ -271,8 +292,14 @@ class MonthlySalary(models.Model):
             lates_for_deduct = self.late_coming_days // config.late_deduction_per if config.late_deduction_per > 0 else 0
             self.late_coming_deduction = lates_for_deduct * self.per_day_salary
 
-            # Security deduction (new employee percentage)
-            self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
+            # Security deduction (new employee)
+            if has_cfg:
+                if self.cfg_mode == 'amount':
+                    self.security_deduction = float(config.new_employee_security_pct)
+                else:
+                    self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
+            else:
+                self.security_deduction = config._apply(config.new_employee_security_pct, basic)
 
             # Only PF and Van/Child are dead for new employees
             self.provident_fund = 0
@@ -293,7 +320,10 @@ class MonthlySalary(models.Model):
 
             # Tax deduction
             if has_cfg:
-                self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
+                if self.cfg_mode == 'amount':
+                    self.tax_deduction = float(self.cfg_tax_pct)
+                else:
+                    self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
             else:
                 self.tax_deduction = config.get_tax(self.gross_salary)
 
@@ -323,14 +353,21 @@ class MonthlySalary(models.Model):
 
             # Provident fund
             if has_cfg:
-                self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
+                if self.cfg_mode == 'amount':
+                    self.provident_fund = float(self.cfg_pf_pct)
+                else:
+                    self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
             else:
                 self.provident_fund = config.get_pf(basic)
 
             # Security & Van/Child
             if has_cfg:
-                self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
-                self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
+                if self.cfg_mode == 'amount':
+                    self.security_deduction = float(self.cfg_security_pct)
+                    self.van_child_deduction = float(self.cfg_van_child_pct)
+                else:
+                    self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
+                    self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
             else:
                 self.security_deduction = config.get_security(basic)
                 self.van_child_deduction = config.get_van_child(basic)
@@ -344,7 +381,10 @@ class MonthlySalary(models.Model):
 
             # Tax
             if has_cfg:
-                self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
+                if self.cfg_mode == 'amount':
+                    self.tax_deduction = float(self.cfg_tax_pct)
+                else:
+                    self.tax_deduction = float(self.gross_salary) * float(self.cfg_tax_pct) / 100
             else:
                 self.tax_deduction = config.get_tax(self.gross_salary)
 

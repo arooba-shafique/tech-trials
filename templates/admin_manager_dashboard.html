@@ -1191,6 +1191,15 @@
                             <input type="number" id="cfg-year" value="{{ hr_config.year }}" min="2020" max="2030" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:100px;">
                         </label>
                         <button type="button" class="btn btn-primary" style="padding:8px 20px;font-size:12px;" onclick="loadSalaryConfig()">Load</button>
+
+                        <!-- Global Config Mode Toggle -->
+                        <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Config Mode</span>
+                            <div id="config-mode-toggle" style="display:flex;background:#f3f4f6;border-radius:8px;border:1.5px solid var(--border);overflow:hidden;">
+                                <button type="button" id="mode-pct-btn" onclick="setConfigMode('percentage')" style="padding:7px 16px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all 0.2s;">%</button>
+                                <button type="button" id="mode-amt-btn" onclick="setConfigMode('amount')" style="padding:7px 16px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all 0.2s;">PKR</button>
+                            </div>
+                        </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
@@ -1200,23 +1209,24 @@
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('manager',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Managers</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('group_head',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Group Heads</button>
                     </div>
-                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set salary configuration for each employee individually. Leave all fields at 0 to use default values.</p>
+                    <p id="config-mode-desc" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set salary configuration for each employee individually. Leave all fields at 0 to use default values.</p>
                     <form method="post" action="{% url 'hr_save_employee_overrides' %}">
                         {% csrf_token %}
                         <input type="hidden" name="month" id="hidden-month" value="{{ hr_config.month }}">
                         <input type="hidden" name="year" id="hidden-year" value="{{ hr_config.year }}">
+                        <input type="hidden" name="config_mode" id="hidden-config-mode" value="{{ hr_config.config_mode }}">
                         <div class="table-scroll">
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Employee</th>
-                                        <th>Housing %</th>
-                                        <th>Medical %</th>
-                                        <th>Transport %</th>
-                                        <th>Tax %</th>
-                                        <th>PF %</th>
-                                        <th>Security %</th>
-                                        <th>Van/Child %</th>
+                                        <th class="cfg-col-housing">Housing <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-medical">Medical <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-transport">Transport <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-tax">Tax <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-pf">PF <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-security">Security <span class="cfg-unit-label"></span></th>
+                                        <th class="cfg-col-van">Van/Child <span class="cfg-unit-label"></span></th>
                                         <th>Transaction Type</th>
                                     </tr>
                                 </thead>
@@ -1228,13 +1238,13 @@
                                             <div style="font-size:11px;color:var(--text-muted);">{{ teacher.employee_id|default:"-" }}</div>
                                             {% if teacher.is_new_employee %}<span style="font-size:10px;background:#fef3c7;color:#b45309;padding:1px 6px;border-radius:8px;font-weight:600;">NEW</span>{% endif %}
                                         </td>
-                                        <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ teacher.ov_housing }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ teacher.ov_medical }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ teacher.ov_transport }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ teacher.ov_tax }}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"></td>
-                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_pf }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
-                                        <td><input type="number" name="custom_security_{{ teacher.id }}" value="{% if not teacher.is_new_employee %}0{% else %}{{ teacher.ov_security }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if not teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if not teacher.is_new_employee %}disabled readonly title="Only applies for new employees (first 2 months)"{% endif %}></td>
-                                        <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_van_child }}{% endif %}" step="0.01" min="0" max="100" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
+                                        <td><input type="number" name="custom_housing_{{ teacher.id }}" value="{{ teacher.ov_housing }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
+                                        <td><input type="number" name="custom_medical_{{ teacher.id }}" value="{{ teacher.ov_medical }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
+                                        <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ teacher.ov_transport }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
+                                        <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ teacher.ov_tax }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
+                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_pf }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
+                                        <td><input type="number" name="custom_security_{{ teacher.id }}" value="{% if not teacher.is_new_employee %}0{% else %}{{ teacher.ov_security }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if not teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if not teacher.is_new_employee %}disabled readonly title="Only applies for new employees (first 2 months)"{% endif %}></td>
+                                        <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_van_child }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
                                         <td><select name="custom_transaction_type_{{ teacher.id }}" style="width:120px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="bank_islami" {% if teacher.ov_transaction_type == 'bank_islami' %}selected{% endif %}>Bank Islami</option><option value="ubl" {% if teacher.ov_transaction_type == 'ubl' %}selected{% endif %}>UBL</option><option value="cash" {% if teacher.ov_transaction_type == 'cash' %}selected{% endif %}>Cash in Hand</option><option value="personal" {% if teacher.ov_transaction_type == 'personal' %}selected{% endif %}>Personal Account</option></select></td>
                                     </tr>
                                     {% endfor %}
@@ -1269,6 +1279,40 @@
                 row.style.display = (designation === 'all' || desig === designation) ? '' : 'none';
             });
         }
+
+        /* ── Global Config Mode Toggle ── */
+        var currentConfigMode = '{{ hr_config.config_mode|default:"percentage" }}';
+
+        function setConfigMode(mode) {
+            currentConfigMode = mode;
+            document.getElementById('hidden-config-mode').value = mode;
+
+            var pctBtn = document.getElementById('mode-pct-btn');
+            var amtBtn = document.getElementById('mode-amt-btn');
+            var desc = document.getElementById('config-mode-desc');
+            var unitLabels = document.querySelectorAll('.cfg-unit-label');
+
+            if (mode === 'percentage') {
+                pctBtn.style.background = '#0d9488';
+                pctBtn.style.color = '#fff';
+                amtBtn.style.background = 'transparent';
+                amtBtn.style.color = '#374151';
+                desc.textContent = 'Values are treated as percentages of basic salary.';
+                unitLabels.forEach(function(el) { el.textContent = '%'; });
+            } else {
+                amtBtn.style.background = '#0d9488';
+                amtBtn.style.color = '#fff';
+                pctBtn.style.background = 'transparent';
+                pctBtn.style.color = '#374151';
+                desc.textContent = 'Values are treated as fixed PKR amounts.';
+                unitLabels.forEach(function(el) { el.textContent = '(PKR)'; });
+            }
+        }
+
+        // Initialize toggle on page load
+        (function() {
+            setConfigMode(currentConfigMode);
+        })();
         </script>
 
         <!-- ═══════════ HR: GENERATE SALARY ═══════════ -->
