@@ -270,13 +270,12 @@ class MonthlySalary(models.Model):
             self.medical_allowance = config.get_medical(basic)
             self.transport_allowance = config.get_transport(basic)
 
-        # Calculate per day salary
-        working = self.total_working_days if self.total_working_days > 0 else config.default_working_days
-        if working > 0:
-            self.per_day_salary = basic / working
+        # Calculate per day salary = basic / calendar days in month
+        days_in_month = calendar.monthrange(self.year, self.month)[1]
+        if days_in_month > 0:
+            self.per_day_salary = basic / days_in_month
 
         # Calculate days_present from natural calendar days - absent only (leaves don't reduce present)
-        days_in_month = calendar.monthrange(self.year, self.month)[1]
         self.days_present = max(0, days_in_month - self.days_absent)
 
         # Set allowed leaves from config
@@ -314,9 +313,9 @@ class MonthlySalary(models.Model):
             # Overtime still applies
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary = per_day_salary * present_days + all allowances (excluding kid_fee)
+            # Gross salary = per_day_salary * present_days + all allowances + bonus
             total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
-            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
+            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow + float(self.bonus_amount)
 
             # Tax deduction
             if has_cfg:
@@ -375,9 +374,9 @@ class MonthlySalary(models.Model):
             # Overtime
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
-            # Gross salary = per_day_salary * present_days + all allowances (excluding kid_fee)
+            # Gross salary = per_day_salary * present_days + all allowances + bonus
             total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
-            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow
+            self.gross_salary = (self.per_day_salary * self.days_present) + total_allow + float(self.bonus_amount)
 
             # Tax
             if has_cfg:
