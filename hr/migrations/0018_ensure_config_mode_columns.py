@@ -1,4 +1,6 @@
-# Migration 0017: Add config_mode and cfg_mode fields
+# Migration 0018: Safety net — ensure config_mode/cfg_mode columns exist on Vercel DB.
+# Uses PostgreSQL IF NOT EXISTS so it's idempotent.
+# This handles the case where 0017 was marked as applied but its RunPython failed silently.
 
 from django.db import migrations
 
@@ -6,7 +8,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('hr', '0016_remove_employeesalary_custom_kid_fee_pct_and_more'),
+        ('hr', '0017_monthlysalary_cfg_kid_fee_pct_monthlysalary_cfg_mode_and_more'),
     ]
 
     operations = [
