@@ -75,11 +75,15 @@
                     <th>#</th>
                     <th>Employee</th>
                     <th>ID</th>
-                    <th>Designation</th>
-                    <th>Joining Date</th>
                     <th>Left Date</th>
-                    <th>Reason</th>
-                    <th>Salary</th>
+                    <th>PF</th>
+                    <th>Security</th>
+                    <th>Tax</th>
+                    <th>Van/Child</th>
+                    <th>Other</th>
+                    <th>Total Ded.</th>
+                    <th>Exit Ded.</th>
+                    <th>Status</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -99,18 +103,25 @@
                         </div>
                     </td>
                     <td>{{ item.employee.employee_id|default:"-" }}</td>
-                    <td>{{ item.employee.get_designation_display|default:item.employee.designation|default:"-" }}</td>
-                    <td>{{ item.employee.joining_date|default:"-" }}</td>
                     <td>{{ item.separation.last_working_date|default:"-" }}</td>
-                    <td>{{ item.separation.get_separation_reason_display|default:"-" }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_pf|floatformat:0 }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_security|floatformat:0 }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_tax|floatformat:0 }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_van_child|floatformat:0 }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_other|floatformat:0 }}</td>
+                    <td style="font-size:12px;font-weight:600;color:#dc2626;">{{ item.separation.total_deductions|floatformat:0 }}</td>
+                    <td style="font-size:12px;">{{ item.separation.total_exit_deductions|floatformat:0 }}</td>
                     <td>
-                        {% if item.last_salary %}
-                        <a href="{% url 'hr_salary_slip' item.last_salary.pk %}" class="btn btn-sm" style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;text-decoration:none;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            PKR {{ item.last_salary.net_salary|floatformat:0 }}
-                        </a>
+                        {% if item.separation.clearance_status == 'completed' %}
+                        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;border-radius:20px;font-size:11px;font-weight:600;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            Cleared
+                        </span>
                         {% else %}
-                        <span style="color:var(--text-muted);font-size:12px;">No salary record</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;font-size:11px;font-weight:600;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            Pending
+                        </span>
                         {% endif %}
                     </td>
                     <td style="white-space:nowrap;">
@@ -135,7 +146,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" style="text-align:center;color:var(--text-muted);padding:40px;">No left employees found.</td>
+                    <td colspan="13" style="text-align:center;color:var(--text-muted);padding:40px;">No left employees found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

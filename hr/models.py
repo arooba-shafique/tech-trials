@@ -482,6 +482,14 @@ class SeparationRecord(models.Model):
     additional_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Any other deductions on exit")
     deduction_reason = models.TextField(blank=True, default='', help_text="Reason for additional deductions")
 
+    # Accumulated totals (from salary history — stored for import/export)
+    total_pf = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total provident fund deducted")
+    total_security = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total security deducted")
+    total_tax = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total tax deducted")
+    total_van_child = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total van/child deducted")
+    total_other = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Total other deductions")
+    total_deductions = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Grand total accumulated deductions")
+
     # Clearance status
     clearance_status = models.CharField(max_length=10, choices=CLEARANCE_STATUS_CHOICES, default='pending')
     clearance_date = models.DateField(null=True, blank=True)

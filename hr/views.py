@@ -382,6 +382,13 @@ def clearance_form(request, employee_id):
             record = form.save(commit=False)
             if record.clearance_status == 'completed' and not record.clearance_date:
                 record.clearance_date = timezone.now().date()
+            # Save accumulated totals from salary history
+            record.total_pf = salary_totals.get('total_pf', 0)
+            record.total_security = salary_totals.get('total_security', 0)
+            record.total_tax = salary_totals.get('total_tax', 0)
+            record.total_van_child = salary_totals.get('total_van_child', 0)
+            record.total_other = salary_totals.get('total_other', 0)
+            record.total_deductions = salary_totals.get('total_deductions', 0)
             record.save()
             messages.success(request, f'Clearance form saved for {employee.full_name}.')
             return redirect('/admin-console/?section=left-employees')
@@ -1422,8 +1429,9 @@ def export_clearance_csv(request):
     writer = csv.writer(response)
     writer.writerow([
         'Employee Name', 'Employee ID', 'Designation', 'Joining Date',
-        'Last Working Date', 'Separation Reason', 'Security Deduction',
-        'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
+        'Last Working Date', 'Separation Reason',
+        'Total PF', 'Total Security', 'Total Tax', 'Total Van/Child', 'Total Other', 'Total Deductions',
+        'Security Deduction', 'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
         'Deduction Reason', 'Clearance Status', 'Clearance Date', 'Notes',
     ])
     for item in data:
@@ -1436,6 +1444,12 @@ def export_clearance_csv(request):
             emp.joining_date or '',
             sep.last_working_date or '',
             sep.get_separation_reason_display() or '',
+            sep.total_pf or 0,
+            sep.total_security or 0,
+            sep.total_tax or 0,
+            sep.total_van_child or 0,
+            sep.total_other or 0,
+            sep.total_deductions or 0,
             sep.security_deduction or 0,
             'Yes' if sep.last_salary_withheld else 'No',
             sep.last_salary_amount or 0,
@@ -1478,8 +1492,9 @@ def export_clearance_excel(request):
 
     headers = [
         'Sr#', 'Employee Name', 'Employee ID', 'Designation', 'Joining Date',
-        'Last Working Date', 'Separation Reason', 'Security Deduction',
-        'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
+        'Last Working Date', 'Separation Reason',
+        'Total PF', 'Total Security', 'Total Tax', 'Total Van/Child', 'Total Other', 'Total Deductions',
+        'Security Deduction', 'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
         'Deduction Reason', 'Clearance Status', 'Clearance Date', 'Notes',
     ]
 
@@ -1504,6 +1519,12 @@ def export_clearance_excel(request):
             str(emp.joining_date) if emp.joining_date else '',
             str(sep.last_working_date) if sep.last_working_date else '',
             sep.get_separation_reason_display() or '',
+            float(sep.total_pf or 0),
+            float(sep.total_security or 0),
+            float(sep.total_tax or 0),
+            float(sep.total_van_child or 0),
+            float(sep.total_other or 0),
+            float(sep.total_deductions or 0),
             float(sep.security_deduction or 0),
             'Yes' if sep.last_salary_withheld else 'No',
             float(sep.last_salary_amount or 0),
@@ -1517,11 +1538,11 @@ def export_clearance_excel(request):
             cell = ws.cell(row=row_num, column=col_num, value=value)
             cell.font = data_font
             cell.border = thin_border
-            if col_num in (8, 10, 11):
+            if col_num in (8, 9, 10, 11, 12, 13, 14, 16, 17):
                 cell.font = amount_font
                 cell.number_format = '#,##0.00'
 
-    col_widths = [6, 24, 14, 16, 14, 16, 16, 16, 18, 18, 20, 24, 16, 14, 28]
+    col_widths = [6, 24, 14, 16, 14, 16, 16, 12, 14, 12, 14, 12, 16, 16, 18, 18, 20, 24, 16, 14, 28]
     for i, w in enumerate(col_widths, 1):
         ws.column_dimensions[ws.cell(row=1, column=i).column_letter].width = w
 
@@ -1579,6 +1600,12 @@ def import_clearance_excel(request):
         return redirect(_get_redirect())
 
     field_columns = {
+        'total_pf': header_map.get('total pf'),
+        'total_security': header_map.get('total security'),
+        'total_tax': header_map.get('total tax'),
+        'total_van_child': header_map.get('total van/child'),
+        'total_other': header_map.get('total other'),
+        'total_deductions': header_map.get('total deductions'),
         'security_deduction': header_map.get('security deduction'),
         'last_salary_withheld': header_map.get('last salary withheld'),
         'last_salary_amount': header_map.get('last salary amount'),
@@ -1618,7 +1645,8 @@ def import_clearance_excel(request):
             if value is None or (isinstance(value, str) and value.strip() == ''):
                 continue
 
-            if field == 'security_deduction' or field == 'last_salary_amount' or field == 'additional_deductions':
+            if field in ('security_deduction', 'last_salary_amount', 'additional_deductions',
+                         'total_pf', 'total_security', 'total_tax', 'total_van_child', 'total_other', 'total_deductions'):
                 try:
                     value = float(value)
                 except (ValueError, TypeError):
