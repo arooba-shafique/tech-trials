@@ -334,7 +334,7 @@ def admin_dashboard(request):
                 if ms:
                     try:
                         has_cfg = any([ms.cfg_housing_pct, ms.cfg_medical_pct, ms.cfg_transport_pct,
-                                      ms.cfg_fuel_pct, ms.cfg_tax_pct, ms.cfg_pf_pct,
+                                      ms.cfg_kid_fee_pct, ms.cfg_tax_pct, ms.cfg_pf_pct,
                                       ms.cfg_security_pct, ms.cfg_van_child_pct,
                                       ms.cfg_bonus_per_day, ms.cfg_bonus_pct])
                     except Exception:
