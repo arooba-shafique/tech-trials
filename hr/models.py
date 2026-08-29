@@ -302,11 +302,14 @@ class MonthlySalary(models.Model):
             # Security deduction (new employee)
             if has_cfg:
                 if self.cfg_mode == 'amount':
-                    self.security_deduction = float(config.new_employee_security_pct)
+                    self.security_deduction = float(config.new_employee_security_pct) / 2
                 else:
                     self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
             else:
-                self.security_deduction = config._apply(config.new_employee_security_pct, basic)
+                if config.config_mode == 'amount':
+                    self.security_deduction = float(config.new_employee_security_pct) / 2
+                else:
+                    self.security_deduction = config._apply(config.new_employee_security_pct, basic)
 
             # Only PF and Van/Child are dead for new employees
             self.provident_fund = 0
@@ -370,13 +373,16 @@ class MonthlySalary(models.Model):
             # Security & Van/Child
             if has_cfg:
                 if self.cfg_mode == 'amount':
-                    self.security_deduction = float(self.cfg_security_pct)
+                    self.security_deduction = float(self.cfg_security_pct) / 2
                     self.van_child_deduction = float(self.cfg_van_child_pct)
                 else:
                     self.security_deduction = float(basic) * float(self.cfg_security_pct) / 100
                     self.van_child_deduction = float(basic) * float(self.cfg_van_child_pct) / 100
             else:
-                self.security_deduction = config.get_security(basic)
+                if config.config_mode == 'amount':
+                    self.security_deduction = float(config.security_pct) / 2
+                else:
+                    self.security_deduction = config.get_security(basic)
                 self.van_child_deduction = config.get_van_child(basic)
 
             # Overtime
