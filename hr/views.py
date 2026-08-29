@@ -432,6 +432,7 @@ def salary_config(request):
         config.housing_allowance_pct = float(request.POST.get('housing_allowance_pct', 0))
         config.medical_allowance_pct = float(request.POST.get('medical_allowance_pct', 0))
         config.transport_allowance_pct = float(request.POST.get('transport_allowance_pct', 0))
+        config.kids_education_pct = float(request.POST.get('kids_education_pct', 0))
         config.bonus_per_day = float(request.POST.get('bonus_per_day', 0))
         config.bonus_percentage = float(request.POST.get('bonus_percentage', 0))
         config.save()
@@ -532,6 +533,7 @@ def save_employee_overrides(request):
         ms.cfg_housing_pct = float(request.POST.get(f'custom_housing_{emp_id}', 0))
         ms.cfg_medical_pct = float(request.POST.get(f'custom_medical_{emp_id}', 0))
         ms.cfg_transport_pct = float(request.POST.get(f'custom_transport_{emp_id}', 0))
+        ms.cfg_kids_education_pct = float(request.POST.get(f'custom_kids_education_{emp_id}', 0))
         ms.cfg_tax_pct = float(request.POST.get(f'custom_tax_{emp_id}', 0))
         ms.cfg_pf_pct = float(request.POST.get(f'custom_pf_{emp_id}', 0))
         ms.cfg_security_pct = float(request.POST.get(f'custom_security_{emp_id}', 0))
@@ -801,6 +803,7 @@ def edit_monthly_salary(request, pk):
         salary.housing_allowance = float(request.POST.get('housing_allowance', salary.housing_allowance))
         salary.medical_allowance = float(request.POST.get('medical_allowance', salary.medical_allowance))
         salary.transport_allowance = float(request.POST.get('transport_allowance', salary.transport_allowance))
+        salary.kids_education_allowance = float(request.POST.get('kids_education_allowance', salary.kids_education_allowance))
         salary.other_allowance = float(request.POST.get('other_allowance', salary.other_allowance))
         salary.advance_deduction = float(request.POST.get('advance_deduction', salary.advance_deduction))
         salary.provident_fund = float(request.POST.get('provident_fund', salary.provident_fund))
@@ -921,7 +924,7 @@ def export_salary_excel(request):
     headers = [
         'Sr#', 'Employee Name', 'Employee ID', 'Designation',
         'Basic Salary', 'Housing Allowance', 'Medical Allowance', 'Transport Allowance',
-        'Fuel Allowance', 'Bonus', 'Gross Salary',
+        'Kids Edu Allowance', 'Bonus', 'Gross Salary',
         'Tax Deduction', 'Provident Fund', 'Security Deduction', 'Van/Child Deduction',
         'Leave Deduction', 'Late Deduction',
         'Total Deductions', 'Net Salary', 'Transaction Type',
@@ -952,6 +955,7 @@ def export_salary_excel(request):
             float(s.housing_allowance),
             float(s.medical_allowance),
             float(s.transport_allowance),
+            float(s.kids_education_allowance),
             float(s.bonus_amount),
             float(s.gross_salary),
             float(s.tax_deduction),
@@ -975,8 +979,8 @@ def export_salary_excel(request):
             else:
                 cell.font = data_font
 
-        ws.cell(row=row_num, column=18).font = green_font
-        ws.cell(row=row_num, column=17).font = red_font
+        ws.cell(row=row_num, column=19).font = green_font
+        ws.cell(row=row_num, column=18).font = red_font
 
     if salaries:
         total_row = len(salaries) + 2
@@ -985,11 +989,11 @@ def export_salary_excel(request):
 
         total_fields = {
             5: 'basic_salary', 6: 'housing_allowance', 7: 'medical_allowance',
-            8: 'transport_allowance',
-            9: 'bonus_amount', 10: 'gross_salary', 11: 'tax_deduction',
-            12: 'provident_fund', 13: 'security_deduction', 14: 'van_child_deduction',
-            15: 'leave_deduction', 16: 'late_coming_deduction',
-            17: 'total_deductions', 18: 'net_salary',
+            8: 'transport_allowance', 9: 'kids_education_allowance',
+            10: 'bonus_amount', 11: 'gross_salary', 12: 'tax_deduction',
+            13: 'provident_fund', 14: 'security_deduction', 15: 'van_child_deduction',
+            16: 'leave_deduction', 17: 'late_coming_deduction',
+            18: 'total_deductions', 19: 'net_salary',
         }
         for col_num, field in total_fields.items():
             total_val = sum(getattr(s, field) for s in salaries)
@@ -999,7 +1003,7 @@ def export_salary_excel(request):
             cell.number_format = '#,##0'
             cell.border = thin_border
 
-    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 12, 10, 14, 12, 12, 14, 14, 12, 12, 14, 14, 16]
+    col_widths = [5, 22, 14, 18, 14, 14, 14, 14, 14, 10, 14, 12, 12, 14, 14, 12, 12, 14, 14, 16]
     for i, width in enumerate(col_widths, 1):
         ws.column_dimensions[chr(64 + i)].width = width
 

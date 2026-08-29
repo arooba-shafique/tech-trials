@@ -275,6 +275,7 @@ def admin_dashboard(request):
                     housing_allowance_pct = 0
                     medical_allowance_pct = 0
                     transport_allowance_pct = 0
+                    kids_education_pct = 0
                     fuel_allowance_pct = 0
                     tax_percentage = 0
                     provident_fund_pct = 0
@@ -334,7 +335,7 @@ def admin_dashboard(request):
                 if ms:
                     try:
                         has_cfg = any([ms.cfg_housing_pct, ms.cfg_medical_pct, ms.cfg_transport_pct,
-                                      ms.cfg_kid_fee_pct, ms.cfg_tax_pct, ms.cfg_pf_pct,
+                                      ms.cfg_kids_education_pct, ms.cfg_tax_pct, ms.cfg_pf_pct,
                                       ms.cfg_security_pct, ms.cfg_van_child_pct,
                                       ms.cfg_bonus_per_day, ms.cfg_bonus_pct])
                     except Exception:
@@ -344,7 +345,7 @@ def admin_dashboard(request):
                         teacher.ov_housing = float(ms.cfg_housing_pct)
                         teacher.ov_medical = float(ms.cfg_medical_pct)
                         teacher.ov_transport = float(ms.cfg_transport_pct)
-                        teacher.ov_kid_fee = float(ms.cfg_kid_fee_pct)
+                        teacher.ov_kids_education = float(ms.cfg_kids_education_pct)
                         teacher.ov_tax = float(ms.cfg_tax_pct)
                         teacher.ov_pf = float(ms.cfg_pf_pct)
                         teacher.ov_security = float(ms.cfg_security_pct)
@@ -357,7 +358,7 @@ def admin_dashboard(request):
                         teacher.ov_housing = 0
                         teacher.ov_medical = 0
                         teacher.ov_transport = 0
-                        teacher.ov_kid_fee = 0
+                        teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
                         teacher.ov_pf = 0
                         teacher.ov_security = 0
@@ -370,7 +371,7 @@ def admin_dashboard(request):
                     teacher.ov_housing = 0
                     teacher.ov_medical = 0
                     teacher.ov_transport = 0
-                    teacher.ov_kid_fee = 0
+                    teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
                     teacher.ov_pf = 0
                     teacher.ov_security = 0

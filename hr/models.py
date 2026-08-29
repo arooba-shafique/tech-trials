@@ -30,6 +30,7 @@ class SalaryConfig(models.Model):
     housing_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Housing allowance % of basic")
     medical_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Medical allowance % of basic")
     transport_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Transport allowance % of basic")
+    kids_education_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Kids education allowance % of basic")
 
     # Bonus
     bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Bonus amount per day if 0 leaves in month")
@@ -70,6 +71,8 @@ class SalaryConfig(models.Model):
         return self._apply(self.medical_allowance_pct, basic)
     def get_transport(self, basic):
         return self._apply(self.transport_allowance_pct, basic)
+    def get_kids_education(self, basic):
+        return self._apply(self.kids_education_pct, basic)
     def get_pf(self, basic):
         return self._apply(self.provident_fund_pct, basic)
     def get_security(self, basic):
@@ -160,6 +163,7 @@ class MonthlySalary(models.Model):
     cfg_housing_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_medical_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_transport_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_kids_education_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_tax_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_pf_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -191,6 +195,7 @@ class MonthlySalary(models.Model):
     housing_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     medical_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     transport_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    kids_education_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     other_allowance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # Deductions
@@ -261,14 +266,17 @@ class MonthlySalary(models.Model):
                 self.housing_allowance = float(self.cfg_housing_pct)
                 self.medical_allowance = float(self.cfg_medical_pct)
                 self.transport_allowance = float(self.cfg_transport_pct)
+                self.kids_education_allowance = float(self.cfg_kids_education_pct)
             else:
                 self.housing_allowance = float(basic) * float(self.cfg_housing_pct) / 100
                 self.medical_allowance = float(basic) * float(self.cfg_medical_pct) / 100
                 self.transport_allowance = float(basic) * float(self.cfg_transport_pct) / 100
+                self.kids_education_allowance = float(basic) * float(self.cfg_kids_education_pct) / 100
         else:
             self.housing_allowance = config.get_housing(basic)
             self.medical_allowance = config.get_medical(basic)
             self.transport_allowance = config.get_transport(basic)
+            self.kids_education_allowance = config.get_kids_education(basic)
 
         # Calculate per day salary = basic / calendar days in month
         days_in_month = calendar.monthrange(self.year, self.month)[1]
@@ -314,7 +322,7 @@ class MonthlySalary(models.Model):
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
             # Gross salary = per_day_salary * present_days + all allowances + bonus
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kids_education_allowance) + float(self.other_allowance)
             self.gross_salary = (self.per_day_salary * self.days_present) + total_allow + float(self.bonus_amount)
 
             # Tax deduction
@@ -375,7 +383,7 @@ class MonthlySalary(models.Model):
             overtime_pay = float(self.overtime_hours * self.overtime_rate) if self.overtime_hours > 0 and self.overtime_rate > 0 else 0
 
             # Gross salary = per_day_salary * present_days + all allowances + bonus
-            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.other_allowance)
+            total_allow = float(self.housing_allowance) + float(self.medical_allowance) + float(self.transport_allowance) + float(self.kids_education_allowance) + float(self.other_allowance)
             self.gross_salary = (self.per_day_salary * self.days_present) + total_allow + float(self.bonus_amount)
 
             # Tax
@@ -407,7 +415,8 @@ class MonthlySalary(models.Model):
     @property
     def total_allowances(self):
         return (self.housing_allowance + self.medical_allowance +
-                self.transport_allowance + self.other_allowance)
+                self.transport_allowance + self.kids_education_allowance +
+                self.other_allowance)
 
     @property
     def days_in_month(self):

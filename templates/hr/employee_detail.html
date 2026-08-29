@@ -132,6 +132,10 @@
             <div style="font-size:14px;" class="amount">PKR {{ emp_salary.transport_allowance|floatformat:0 }}</div>
         </div>
         <div>
+            <div style="font-size:11px;color:var(--text-muted);">Kids Edu Allowance</div>
+            <div style="font-size:14px;" class="amount">PKR {{ emp_salary.kids_education_allowance|floatformat:0 }}</div>
+        </div>
+        <div>
             <div style="font-size:11px;color:var(--text-muted);">Bank Name</div>
             <div style="font-size:14px;">{{ emp_salary.bank_name|default:"-" }}</div>
         </div>
