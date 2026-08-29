@@ -578,7 +578,8 @@
                         </div>
                         <div style="width:1px;height:22px;background:#e5e7eb;"></div>
                         <div style="position:relative;">
-                            <button type="button" onclick="var p=document.getElementById('dashImportPanel');p.style.display=p.style.display==='none'?'block':'none'" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                            <input type="file" id="dashClearanceFileInput" name="file" accept=".xlsx,.xls" style="display:none;" onchange="document.getElementById('dashFileName').textContent=this.files[0]?this.files[0].name:''">
+                            <button type="button" onclick="event.stopPropagation();document.getElementById('dashClearanceFileInput').click();" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                                 Import
                             </button>

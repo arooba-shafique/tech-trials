@@ -54,7 +54,8 @@
             </div>
             <div style="width:1px;height:24px;background:#e5e7eb;"></div>
             <div id="ieImportWrapper" style="position:relative;">
-                <button type="button" onclick="document.getElementById('ieImportPanel').style.display=document.getElementById('ieImportPanel').style.display==='none'?'block':'none'" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                <input type="file" id="hrClearanceFileInput" name="file" accept=".xlsx,.xls" style="display:none;">
+                <button type="button" onclick="event.stopPropagation();document.getElementById('hrClearanceFileInput').click();" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Import Excel
                 </button>
