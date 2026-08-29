@@ -1547,20 +1547,26 @@ def import_clearance_excel(request):
     if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
         return HttpResponse("Unauthorized", status=403)
 
+    def _get_redirect():
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'admin-console' in referer:
+            return '/admin-console/?section=left-employees'
+        return '/hr/left-employees/'
+
     if request.method != 'POST':
-        return redirect('hr_left_employees')
+        return redirect(_get_redirect())
 
     file = request.FILES.get('file')
     if not file:
         messages.error(request, 'No file uploaded.')
-        return redirect('hr_left_employees')
+        return redirect(_get_redirect())
 
     try:
         wb = load_workbook(file, read_only=True)
         ws = wb.active
     except Exception:
         messages.error(request, 'Invalid Excel file. Please upload a valid .xlsx file.')
-        return redirect('hr_left_employees')
+        return redirect(_get_redirect())
 
     header_map = {}
     for col_idx, cell in enumerate(next(ws.iter_rows(min_row=1, max_row=1, values_only=True)), 1):
@@ -1570,7 +1576,7 @@ def import_clearance_excel(request):
     emp_id_col = header_map.get('employee id')
     if not emp_id_col:
         messages.error(request, 'Missing "Employee ID" column in the Excel file.')
-        return redirect('hr_left_employees')
+        return redirect(_get_redirect())
 
     field_columns = {
         'security_deduction': header_map.get('security deduction'),
@@ -1649,4 +1655,4 @@ def import_clearance_excel(request):
     if skipped:
         messages.info(request, f'{skipped} empty row(s) skipped.')
 
-    return redirect('hr_left_employees')
+    return redirect(_get_redirect())
