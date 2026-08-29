@@ -27,4 +27,7 @@ urlpatterns = [
     path('separation/<int:employee_id>/edit/', views.edit_separation, name='hr_edit_separation'),
     path('move-back/<int:employee_id>/', views.employee_move_back, name='hr_employee_move_back'),
     path('clearance/<int:employee_id>/', views.clearance_form, name='hr_clearance_form'),
+    path('clearance/export/csv/', views.export_clearance_csv, name='hr_export_clearance_csv'),
+    path('clearance/export/excel/', views.export_clearance_excel, name='hr_export_clearance_excel'),
+    path('clearance/import/excel/', views.import_clearance_excel, name='hr_import_clearance_excel'),
 ]

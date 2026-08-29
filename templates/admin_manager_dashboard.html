@@ -750,11 +750,47 @@
             <div style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
                 <div style="padding:16px 20px;border-bottom:1px solid #f3f4f6;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
                     <h2 style="font-size:15px;font-weight:700;">All Left Employees</h2>
-                    <form method="get" style="display:flex;gap:8px;margin:0;">
-                        <input type="hidden" name="section" value="left-employees">
-                        <input type="text" name="search" placeholder="Search name, ID..." class="form-control" style="width:220px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;" value="{{ left_search }}">
-                        <button type="submit" class="btn btn-primary" style="padding:7px 16px;font-size:12px;">Search</button>
-                    </form>
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <a href="{% url 'hr_export_clearance_csv' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#ecfdf5;color:#047857;border:1.5px solid #a7f3d0;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                CSV
+                            </a>
+                            <a href="{% url 'hr_export_clearance_excel' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                Excel
+                            </a>
+                        </div>
+                        <div style="width:1px;height:22px;background:#e5e7eb;"></div>
+                        <div style="position:relative;">
+                            <button type="button" onclick="var p=document.getElementById('mgrImportPanel');p.style.display=p.style.display==='none'?'block':'none'" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;white-space:nowrap;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                Import
+                            </button>
+                            <div id="mgrImportPanel" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:280px;">
+                                <div style="font-size:13px;font-weight:700;color:#1a1d23;margin-bottom:10px;">Import Clearance Data</div>
+                                <form method="post" action="{% url 'hr_import_clearance_excel' %}" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px;">
+                                    {% csrf_token %}
+                                    <label style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;border:1.5px dashed #d1d5db;border-radius:8px;font-size:12px;font-weight:500;color:#6b7280;cursor:pointer;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                        Choose .xlsx file
+                                        <input type="file" name="file" accept=".xlsx,.xls" style="display:none;" onchange="this.closest('div').querySelector('div:last-child').textContent=this.files[0]?this.files[0].name:''">
+                                    </label>
+                                    <div style="font-size:12px;color:#0d9488;font-weight:600;min-height:16px;"></div>
+                                    <div style="font-size:11px;color:#9ca3af;line-height:1.5;">Headers must match export format. Updates existing records by Employee ID.</div>
+                                    <button type="submit" style="padding:8px 16px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                        Import File
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <form method="get" style="display:flex;gap:8px;margin:0;">
+                            <input type="hidden" name="section" value="left-employees">
+                            <input type="text" name="search" placeholder="Search name, ID..." class="form-control" style="width:220px;padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12.5px;font-family:inherit;" value="{{ left_search }}">
+                            <button type="submit" class="btn btn-primary" style="padding:7px 16px;font-size:12px;">Search</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="table-scroll">

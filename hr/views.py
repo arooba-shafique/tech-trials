@@ -1,5 +1,6 @@
 import calendar
 import csv
+import io
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -279,6 +280,7 @@ def left_employees(request):
         return HttpResponse("Unauthorized", status=403)
 
     school = get_user_school(request.user)
+    employees = TeacherProfile.objects.filter(is_employee_separated=True)
     if school and not request.user.is_superuser:
         employees = employees.filter(school=school)
 
@@ -1381,3 +1383,270 @@ def monthly_attendance_summary(request):
         'section': 'attendance',
     }
     return render(request, 'hr/monthly_attendance_summary.html', context)
+
+
+# ─────────────────────────────────────────────
+# CLEARANCE EXPORT / IMPORT
+# ─────────────────────────────────────────────
+
+def _get_clearance_rows(school=None):
+    """Build rows for clearance export."""
+    qs = TeacherProfile.objects.filter(is_employee_separated=True).select_related('user')
+    if school:
+        qs = qs.filter(school=school)
+    rows = []
+    for emp in qs:
+        sep = SeparationRecord.objects.filter(employee=emp).first()
+        if not sep:
+            continue
+        rows.append({
+            'employee': emp,
+            'separation': sep,
+        })
+    return rows
+
+
+@login_required(login_url='admin_login')
+def export_clearance_csv(request):
+    """Export clearance sheets as CSV."""
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    school = get_user_school(request.user)
+    data = _get_clearance_rows(school)
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Clearance_Sheets.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Employee Name', 'Employee ID', 'Designation', 'Joining Date',
+        'Last Working Date', 'Separation Reason', 'Security Deduction',
+        'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
+        'Deduction Reason', 'Clearance Status', 'Clearance Date', 'Notes',
+    ])
+    for item in data:
+        emp = item['employee']
+        sep = item['separation']
+        writer.writerow([
+            emp.full_name,
+            emp.employee_id or '',
+            emp.get_designation_display() or emp.designation or '',
+            emp.joining_date or '',
+            sep.last_working_date or '',
+            sep.get_separation_reason_display() or '',
+            sep.security_deduction or 0,
+            'Yes' if sep.last_salary_withheld else 'No',
+            sep.last_salary_amount or 0,
+            sep.additional_deductions or 0,
+            sep.deduction_reason or '',
+            sep.get_clearance_status_display() or '',
+            sep.clearance_date or '',
+            sep.notes or '',
+        ])
+
+    return response
+
+
+@login_required(login_url='admin_login')
+def export_clearance_excel(request):
+    """Export clearance sheets as Excel."""
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    school = get_user_school(request.user)
+    data = _get_clearance_rows(school)
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Clearance Sheets"
+
+    header_font = Font(name='Calibri', bold=True, color='FFFFFF', size=11)
+    header_fill = PatternFill(start_color='0D9488', end_color='0D9488', fill_type='solid')
+    header_alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+    thin_border = Border(
+        left=Side(style='thin', color='D1D5DB'),
+        right=Side(style='thin', color='D1D5DB'),
+        top=Side(style='thin', color='D1D5DB'),
+        bottom=Side(style='thin', color='D1D5DB'),
+    )
+
+    headers = [
+        'Sr#', 'Employee Name', 'Employee ID', 'Designation', 'Joining Date',
+        'Last Working Date', 'Separation Reason', 'Security Deduction',
+        'Last Salary Withheld', 'Last Salary Amount', 'Additional Deductions',
+        'Deduction Reason', 'Clearance Status', 'Clearance Date', 'Notes',
+    ]
+
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num, value=header)
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = header_alignment
+        cell.border = thin_border
+
+    data_font = Font(name='Calibri', size=10)
+    amount_font = Font(name='Calibri', size=10, bold=True)
+
+    for row_num, item in enumerate(data, 2):
+        emp = item['employee']
+        sep = item['separation']
+        row_data = [
+            row_num - 1,
+            emp.full_name,
+            emp.employee_id or '',
+            emp.get_designation_display() or emp.designation or '',
+            str(emp.joining_date) if emp.joining_date else '',
+            str(sep.last_working_date) if sep.last_working_date else '',
+            sep.get_separation_reason_display() or '',
+            float(sep.security_deduction or 0),
+            'Yes' if sep.last_salary_withheld else 'No',
+            float(sep.last_salary_amount or 0),
+            float(sep.additional_deductions or 0),
+            sep.deduction_reason or '',
+            sep.get_clearance_status_display() or '',
+            str(sep.clearance_date) if sep.clearance_date else '',
+            sep.notes or '',
+        ]
+        for col_num, value in enumerate(row_data, 1):
+            cell = ws.cell(row=row_num, column=col_num, value=value)
+            cell.font = data_font
+            cell.border = thin_border
+            if col_num in (8, 10, 11):
+                cell.font = amount_font
+                cell.number_format = '#,##0.00'
+
+    col_widths = [6, 24, 14, 16, 14, 16, 16, 16, 18, 18, 20, 24, 16, 14, 28]
+    for i, w in enumerate(col_widths, 1):
+        ws.column_dimensions[ws.cell(row=1, column=i).column_letter].width = w
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="Clearance_Sheets.xlsx"'
+    return response
+
+
+@login_required(login_url='admin_login')
+def import_clearance_excel(request):
+    """Import clearance data from Excel to update existing SeparationRecords."""
+    import io as _io
+    from openpyxl import load_workbook
+
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return HttpResponse("Unauthorized", status=403)
+
+    if request.method != 'POST':
+        return redirect('hr_left_employees')
+
+    file = request.FILES.get('file')
+    if not file:
+        messages.error(request, 'No file uploaded.')
+        return redirect('hr_left_employees')
+
+    try:
+        wb = load_workbook(file, read_only=True)
+        ws = wb.active
+    except Exception:
+        messages.error(request, 'Invalid Excel file. Please upload a valid .xlsx file.')
+        return redirect('hr_left_employees')
+
+    header_map = {}
+    for col_idx, cell in enumerate(next(ws.iter_rows(min_row=1, max_row=1, values_only=True)), 1):
+        if cell:
+            header_map[str(cell).strip().lower()] = col_idx
+
+    emp_id_col = header_map.get('employee id')
+    if not emp_id_col:
+        messages.error(request, 'Missing "Employee ID" column in the Excel file.')
+        return redirect('hr_left_employees')
+
+    field_columns = {
+        'security_deduction': header_map.get('security deduction'),
+        'last_salary_withheld': header_map.get('last salary withheld'),
+        'last_salary_amount': header_map.get('last salary amount'),
+        'additional_deductions': header_map.get('additional deductions'),
+        'deduction_reason': header_map.get('deduction reason'),
+        'clearance_status': header_map.get('clearance status'),
+        'clearance_date': header_map.get('clearance date'),
+        'notes': header_map.get('notes'),
+    }
+
+    updated = 0
+    skipped = 0
+    errors = 0
+
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        emp_id = row[emp_id_col - 1] if emp_id_col <= len(row) else None
+        if not emp_id:
+            skipped += 1
+            continue
+
+        emp_id_str = str(emp_id).strip()
+        try:
+            emp = TeacherProfile.objects.get(employee_id=emp_id_str)
+        except TeacherProfile.DoesNotExist:
+            errors += 1
+            continue
+
+        sep = SeparationRecord.objects.filter(employee=emp).first()
+        if not sep:
+            errors += 1
+            continue
+
+        for field, col_idx in field_columns.items():
+            if not col_idx or col_idx > len(row):
+                continue
+            value = row[col_idx - 1]
+            if value is None or (isinstance(value, str) and value.strip() == ''):
+                continue
+
+            if field == 'security_deduction' or field == 'last_salary_amount' or field == 'additional_deductions':
+                try:
+                    value = float(value)
+                except (ValueError, TypeError):
+                    continue
+            elif field == 'last_salary_withheld':
+                value = str(value).strip().lower() in ('yes', 'true', '1', 'on')
+            elif field == 'clearance_status':
+                val_str = str(value).strip().lower()
+                if val_str in ('completed', 'cleared', 'complete'):
+                    value = 'completed'
+                elif val_str in ('pending', 'incomplete'):
+                    value = 'pending'
+                else:
+                    continue
+            elif field == 'clearance_date':
+                from django.utils.dateparse import parse_date
+                parsed = parse_date(str(value).strip()) if not isinstance(value, __import__('datetime').date) else value
+                if parsed:
+                    value = parsed
+                else:
+                    continue
+            elif field in ('deduction_reason', 'notes'):
+                value = str(value).strip()
+
+            setattr(sep, field, value)
+
+        sep.save()
+        updated += 1
+
+    if updated:
+        messages.success(request, f'Clearance data imported: {updated} record(s) updated.')
+    if errors:
+        messages.warning(request, f'{errors} row(s) skipped (employee not found or no clearance record).')
+    if skipped:
+        messages.info(request, f'{skipped} empty row(s) skipped.')
+
+    return redirect('hr_left_employees')
