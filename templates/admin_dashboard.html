@@ -567,11 +567,11 @@
                     <h2 style="font-size:15px;font-weight:700;">All Left Employees</h2>
                     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
                         <div style="display:flex;gap:6px;align-items:center;">
-                            <a href="{% url 'hr_export_clearance_csv' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#ecfdf5;color:#047857;border:1.5px solid #a7f3d0;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
+                            <a href="{% url 'hr_export_clearance_csv' %}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#ecfdf5;color:#047857;border:1.5px solid #a7f3d0;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 CSV
                             </a>
-                            <a href="{% url 'hr_export_clearance_excel' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
+                            <a href="{% url 'hr_export_clearance_excel' %}" onclick="event.stopPropagation()" style="display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:#eff6ff;color:#1d4ed8;border:1.5px solid #bfdbfe;border-radius:8px;font-size:11.5px;font-weight:600;text-decoration:none;white-space:nowrap;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                 Excel
                             </a>
