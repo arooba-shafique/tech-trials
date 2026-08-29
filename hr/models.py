@@ -24,22 +24,22 @@ class SalaryConfig(models.Model):
     config_mode = models.CharField(max_length=10, choices=CONFIG_MODE_CHOICES, default='percentage', help_text="All salary fields use percentage or fixed amount")
 
     # Tax
-    tax_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Tax % deducted from gross")
+    tax_percentage = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Tax % deducted from gross")
 
     # Allowances (percentage of basic salary OR fixed amount based on config_mode)
-    housing_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Housing allowance % of basic")
-    medical_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Medical allowance % of basic")
-    transport_allowance_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Transport allowance % of basic")
+    housing_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Housing allowance % of basic")
+    medical_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Medical allowance % of basic")
+    transport_allowance_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Transport allowance % of basic")
 
     # Bonus
     bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Bonus amount per day if 0 leaves in month")
-    bonus_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Or bonus as % of basic (if per_day=0)")
+    bonus_percentage = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Or bonus as % of basic (if per_day=0)")
 
     # Deductions
-    provident_fund_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="PF % of basic")
-    security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Security deduction % of basic (normal, from 3rd month)")
-    van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
-    new_employee_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=50, help_text="Security deduction % of basic for first 2 months after joining")
+    provident_fund_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="PF % of basic")
+    security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Security deduction % of basic (normal, from 3rd month)")
+    van_child_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
+    new_employee_security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=50, help_text="Security deduction % of basic for first 2 months after joining")
     max_allowed_leaves = models.PositiveIntegerField(default=0, help_text="Max paid leaves per month")
 
     # Late deduction
@@ -112,15 +112,15 @@ class EmployeeSalary(models.Model):
 
     # Per-employee salary config override (overrides global SalaryConfig when enabled)
     use_custom_config = models.BooleanField(default=False)
-    custom_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    custom_van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    custom_housing_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_medical_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_transport_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_tax_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_pf_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    custom_van_child_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     custom_bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    custom_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    custom_bonus_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -157,16 +157,16 @@ class MonthlySalary(models.Model):
     late_coming_days = models.PositiveIntegerField(default=0)
 
     # Month-specific salary config percentages (stored per-month for edit/update)
-    cfg_housing_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_medical_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_transport_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_tax_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_pf_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_security_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_van_child_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    cfg_kid_fee_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_housing_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_medical_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_transport_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_tax_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_pf_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_van_child_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    cfg_kid_fee_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     cfg_bonus_per_day = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    cfg_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    cfg_bonus_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     TRANSACTION_TYPE_CHOICES = (
         ('bank_islami', 'Bank Islami'),
