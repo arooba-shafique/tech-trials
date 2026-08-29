@@ -1661,19 +1661,24 @@ def import_clearance_excel(request):
             continue
 
         emp_id_str = str(emp_id).strip()
-        try:
-            emp = TeacherProfile.objects.get(employee_id=emp_id_str)
-        except TeacherProfile.DoesNotExist:
-            not_found += 1
-            continue
-
-        sep = SeparationRecord.objects.filter(employee=emp).first()
+        emp = TeacherProfile.objects.filter(employee_id=emp_id_str).first()
 
         left_date = None
         if left_date_col and left_date_col <= len(row) and row[left_date_col - 1]:
             left_date = _parse_date(str(row[left_date_col - 1]).strip()) if not isinstance(row[left_date_col - 1], __import__('datetime').date) else row[left_date_col - 1]
 
-        if not sep:
+        emp_name = ''
+        if name_col and name_col <= len(row) and row[name_col - 1]:
+            emp_name = str(row[name_col - 1]).strip()
+
+        if not emp:
+            if not emp_name:
+                emp_name = emp_id_str
+            emp = TeacherProfile.objects.create(
+                employee_id=emp_id_str,
+                full_name=emp_name,
+                is_employee_separated=True,
+            )
             if not left_date:
                 left_date = timezone.now().date()
             sep = SeparationRecord.objects.create(
@@ -1681,9 +1686,20 @@ def import_clearance_excel(request):
                 last_working_date=left_date,
                 separation_reason='other',
             )
-            emp.is_employee_separated = True
-            emp.save()
             created += 1
+        else:
+            sep = SeparationRecord.objects.filter(employee=emp).first()
+            if not sep:
+                emp.is_employee_separated = True
+                emp.save()
+                if not left_date:
+                    left_date = timezone.now().date()
+                sep = SeparationRecord.objects.create(
+                    employee=emp,
+                    last_working_date=left_date,
+                    separation_reason='other',
+                )
+                created += 1
 
         for field, col_idx in field_columns.items():
             if not col_idx or col_idx > len(row):
@@ -1730,13 +1746,11 @@ def import_clearance_excel(request):
 
     msg_parts = []
     if updated:
-        msg_parts.append(f'{updated} record(s) updated')
+        msg_parts.append(f'{updated} existing record(s) updated')
     if created:
-        msg_parts.append(f'{created} new record(s) created')
+        msg_parts.append(f'{created} new employee(s) created and added to left employees')
     if msg_parts:
         messages.success(request, f'Import complete: {", ".join(msg_parts)}.')
-    if not_found:
-        messages.warning(request, f'{not_found} employee ID(s) not found in system.')
     if skipped:
         messages.info(request, f'{skipped} empty row(s) skipped.')
 
