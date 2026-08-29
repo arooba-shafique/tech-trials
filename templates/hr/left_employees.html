@@ -53,30 +53,14 @@
                 </a>
             </div>
             <div style="width:1px;height:24px;background:#e5e7eb;"></div>
-            <div id="ieImportWrapper" style="position:relative;">
-                <input type="file" id="hrClearanceFileInput" name="file" accept=".xlsx,.xls" style="display:none;">
-                <button type="button" onclick="event.stopPropagation();document.getElementById('hrClearanceFileInput').click();" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
+            <form id="hrImportForm" method="post" action="{% url 'hr_import_clearance_excel' %}" enctype="multipart/form-data" style="display:inline;">
+                {% csrf_token %}
+                <input type="file" id="hrClearanceFileInput" name="file" accept=".xlsx,.xls" style="display:none;" onchange="if(this.files[0]){document.getElementById('hrImportBtn').textContent='Importing...';this.form.submit();}">
+                <button type="button" id="hrImportBtn" onclick="event.stopPropagation();document.getElementById('hrClearanceFileInput').click();" style="display:inline-flex;align-items:center;gap:5px;padding:7px 14px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Import Excel
                 </button>
-                <div id="ieImportPanel" style="display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1.5px solid #e5e7eb;border-radius:10px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:100;min-width:300px;">
-                    <div style="font-size:13px;font-weight:700;color:#1a1d23;margin-bottom:10px;">Import Clearance Data</div>
-                    <form method="post" action="{% url 'hr_import_clearance_excel' %}" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:10px;">
-                        {% csrf_token %}
-                        <label style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;border:1.5px dashed #d1d5db;border-radius:8px;font-size:12px;font-weight:500;color:#6b7280;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#0d9488';this.style.color='#0d9488'" onmouseout="this.style.borderColor='#d1d5db';this.style.color='#6b7280'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            Choose .xlsx file
-                            <input type="file" name="file" accept=".xlsx,.xls" style="display:none;" onchange="document.getElementById('ieFileNameDisplay').textContent=this.files[0]?this.files[0].name:''">
-                        </label>
-                        <div id="ieFileNameDisplay" style="font-size:12px;color:#0d9488;font-weight:600;min-height:16px;"></div>
-                        <div style="font-size:11px;color:#9ca3af;line-height:1.5;">Headers must match export format. Only rows with matching Employee IDs will be updated.</div>
-                        <button type="submit" style="padding:8px 16px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;" onmouseover="this.style.background='#0f766e'" onmouseout="this.style.background='#0d9488'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            Import File
-                        </button>
-                    </form>
-                </div>
-            </div>
+            </form>
             <form method="get" style="display:flex;gap:8px;">
                 <input type="text" name="search" placeholder="Search name, ID..." class="form-control" style="width:220px;" value="{{ search }}">
                 <button type="submit" class="btn btn-primary btn-sm">Search</button>
