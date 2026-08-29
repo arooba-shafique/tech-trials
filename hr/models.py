@@ -302,7 +302,7 @@ class MonthlySalary(models.Model):
             # Security deduction (new employee)
             if has_cfg:
                 if self.cfg_mode == 'amount':
-                    self.security_deduction = float(config.new_employee_security_pct)
+                    self.security_deduction = float(self.cfg_security_pct)
                 else:
                     self.security_deduction = float(basic) * float(config.new_employee_security_pct) / 100
             else:
