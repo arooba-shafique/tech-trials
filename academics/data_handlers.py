@@ -291,8 +291,19 @@ def import_teachers(file_obj, school=None):
     errors = []
 
     DESIGNATION_MAP = {'teacher': 'teacher', 'coordinator': 'coordinator',
-                       'manager': 'manager', 'vp': 'vp', 'group head': 'group_head'}
+                       'manager': 'manager', 'vp': 'vp', 'group head': 'group_head',
+                       'section head': 'section_head', 'assistant manager': 'assistant_manager',
+                       'a.coordinator': 'a_coordinator', 'a coordinator': 'a_coordinator',
+                       'accountant': 'accountant', 'team leader': 'team_lead', 'team lead': 'team_lead',
+                       'f.d.c': 'fdc', 'compositer': 'compositer',
+                       'aya': 'aya', 'photocopier': 'photocopier',
+                       'office boy': 'office_boy', 'sweeper': 'sweeper'}
     EMPLOYMENT_MAP = {'permanent': 'permanent', 'contract': 'contract', 'daily wager': 'daily_wager'}
+    MARITAL_MAP = {'single': 'single', 'married': 'married', 'divorced': 'divorced',
+                   'widowed': 'widowed', 'single parent': 'single_parent',
+                   'un married': 'single', 'unmarried': 'single',
+                   'marrid': 'married', 'maried': 'married', 'married': 'married',
+                   'sepration': 'divorced', 'singel': 'single', 'singal': 'single'}
 
     for i, row in enumerate(rows, start=2):
         try:
@@ -328,7 +339,7 @@ def import_teachers(file_obj, school=None):
                     'email': email,
                     'joining_date': _safe_date(row.get('joining_date') or row.get('hire_date')),
                     'address': row.get('permanent_address') or row.get('address') or '',
-                    'marital_status': row.get('marital_status', '').strip(),
+                    'marital_status': MARITAL_MAP.get(row.get('marital_status', '').strip().lower(), row.get('marital_status', '').strip()[:20]),
                     'husband_name': row.get('husband_name') or row.get('Husband_name') or '',
                     'husband_cnic': row.get('husband_cnic') or row.get('Husband-CNIC') or '',
                     'salary': _safe_decimal(row.get('salary', '0')),

@@ -86,6 +86,17 @@ class TeacherProfile(models.Model):
         ('manager', 'Manager'),
         ('vp', 'VP'),
         ('group_head', 'Group Head'),
+        ('section_head', 'Section Head'),
+        ('assistant_manager', 'Assistant Manager'),
+        ('a_coordinator', 'A. Coordinator'),
+        ('accountant', 'Accountant'),
+        ('team_lead', 'Team Leader'),
+        ('fdc', 'F.D.C'),
+        ('compositer', 'Compositer'),
+        ('aya', 'Aya'),
+        ('photocopier', 'Photocopier'),
+        ('office_boy', 'Office Boy'),
+        ('sweeper', 'Sweeper'),
     )
     EMPLOYMENT_TYPE_CHOICES = (
         ('permanent', 'Permanent'),
@@ -107,6 +118,7 @@ class TeacherProfile(models.Model):
         ('married', 'Married'),
         ('divorced', 'Divorced'),
         ('widowed', 'Widowed'),
+        ('single_parent', 'Single Parent'),
     )
 
     user = models.OneToOneField(
@@ -139,7 +151,7 @@ class TeacherProfile(models.Model):
     email = models.EmailField(blank=True, null=True)
 
     # Marital / Family info
-    marital_status = models.CharField(max_length=10, choices=MARITAL_STATUS_CHOICES, default='single', blank=True)
+    marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, default='single', blank=True)
     husband_name = models.CharField(max_length=100, blank=True, default='')
     husband_cnic = models.CharField(max_length=20, blank=True, default='')
     husband_address = models.TextField(blank=True, default='')
