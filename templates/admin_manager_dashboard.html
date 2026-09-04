@@ -610,7 +610,7 @@
                         <span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span>
                     </div>
                     <div style="padding:10px 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text-secondary);border-bottom:1px solid #f3f4f6;">
-                        <div><span style="color:var(--text-muted);">Father:</span> {{ teacher.father_name|default:"-" }}</div>
+                        <div><span style="color:var(--text-muted);">{% if teacher.marital_status == 'married' and teacher.gender == 'F' %}Husband{% else %}Father{% endif %}:</span> {% if teacher.marital_status == 'married' and teacher.gender == 'F' %}{{ teacher.husband_name|default:teacher.father_name|default:"-" }}{% else %}{{ teacher.father_name|default:"-" }}{% endif %}</div>
                         <div><span style="color:var(--text-muted);">CNIC:</span> {{ teacher.cnic|default:"-" }}</div>
                         <div><span style="color:var(--text-muted);">Desig:</span> {{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</div>
                         <div><span style="color:var(--text-muted);">Type:</span> {{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</div>
