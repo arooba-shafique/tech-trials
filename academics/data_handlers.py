@@ -157,7 +157,13 @@ def export_to_excel(data_type, school=None):
 def _safe_date(val):
     if not val:
         return None
-    d = parse_date(str(val).strip())
+    s = str(val).strip()
+    d = parse_date(s)
+    if not d:
+        from django.utils.dateparse import parse_datetime
+        dt = parse_datetime(s)
+        if dt:
+            d = dt.date()
     return d
 
 
@@ -318,7 +324,7 @@ def import_teachers(file_obj, school=None):
                     'cnic': row.get('cnic', '').strip(),
                     'designation': designation,
                     'employment_type': employment_type,
-                    'phone': row.get('phone', '').strip(),
+                    'phone': row.get('phone') or row.get('mobile no') or '',
                     'email': email,
                     'joining_date': _safe_date(row.get('joining_date') or row.get('hire_date')),
                     'address': row.get('permanent_address') or row.get('address') or '',
