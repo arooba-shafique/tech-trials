@@ -222,9 +222,12 @@
                 <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                 {% endfor %}
             </div>
+            <div style="margin-bottom:14px;">
+                <input type="text" id="staff-search" placeholder="Search by name, ID, phone..." oninput="searchStaff(this.value)" style="width:100%;max-width:360px;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            </div>
             <div id="staff-cards-grid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
                 {% for teacher in teachers %}
-                <div class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
+                <div class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" data-search="{{ teacher.full_name }} {{ teacher.employee_id|default:'' }} {{ teacher.phone|default:'' }} {{ teacher.get_designation_display|default:'' }}" style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
                     <div style="padding:18px 18px 14px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #f3f4f6;">
                         <div style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;background:#7c3aed;">{{ teacher.full_name|first|upper }}</div>
                         <div style="flex:1;min-width:0;">
@@ -318,21 +321,34 @@
         });
     });
 
-    /* ── Staff filter ── */
+    /* ── Staff filter + search ── */
+    var activeStaffSearch = '';
     function filterStaff(desig, btn) {
-        document.querySelectorAll('.staff-filter-btn').forEach(function(b) {
-            b.style.background = '#fff'; b.style.color = '#374151';
-        });
-        btn.style.background = '#7c3aed'; btn.style.color = '#fff';
+        if (desig !== undefined) {
+            document.querySelectorAll('.staff-filter-btn').forEach(function(b) {
+                b.style.background = '#fff'; b.style.color = '#374151';
+            });
+            btn.style.background = '#7c3aed'; btn.style.color = '#fff';
+            window._activeStaffDesig = desig;
+        }
+        var d = window._activeStaffDesig || 'all';
+        var q = activeStaffSearch.toLowerCase();
         var cards = document.querySelectorAll('.staff-card');
         var visible = 0;
         cards.forEach(function(card) {
-            var match = desig === 'all' || card.getAttribute('data-designation') === desig;
+            var matchDesig = d === 'all' || card.getAttribute('data-designation') === d;
+            var text = (card.getAttribute('data-search') || card.textContent || '').toLowerCase();
+            var matchSearch = !q || text.indexOf(q) !== -1;
+            var match = matchDesig && matchSearch;
             card.style.display = match ? '' : 'none';
             if (match) visible++;
         });
         var noResults = document.getElementById('staff-no-results');
         if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+    function searchStaff(query) {
+        activeStaffSearch = query;
+        filterStaff();
     }
 
     /* ── Drawer ── */

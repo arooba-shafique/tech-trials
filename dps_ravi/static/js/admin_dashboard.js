@@ -202,12 +202,13 @@ function filterAttendance(clsId, status, btn) {
 }
 
 // ════════════════════════════════════════════
-// STAFF DESIGNATION FILTER
+// STAFF DESIGNATION FILTER + SEARCH
 // ════════════════════════════════════════════
 var activeStaffDesignation = 'all';
+var activeStaffSearch = '';
 
 function filterStaff(designation, btn) {
-    activeStaffDesignation = designation;
+    if (designation !== undefined) activeStaffDesignation = designation;
     document.querySelectorAll('.staff-filter-btn').forEach(function (b) {
         b.style.background = '#fff';
         b.style.color      = 'var(--text-secondary)';
@@ -216,16 +217,25 @@ function filterStaff(designation, btn) {
         btn.style.background = '#1a1d23';
         btn.style.color      = '#fff';
     }
+    var q = activeStaffSearch.toLowerCase();
     var cards   = document.querySelectorAll('.staff-card');
     var visible = 0;
     cards.forEach(function (card) {
         var desig = card.dataset.designation || 'teacher';
-        var show  = designation === 'all' || desig === designation;
+        var text  = (card.dataset.search || card.textContent || '').toLowerCase();
+        var showDesig = activeStaffDesignation === 'all' || desig === activeStaffDesignation;
+        var showSearch = !q || text.indexOf(q) !== -1;
+        var show = showDesig && showSearch;
         card.style.display = show ? '' : 'none';
         if (show) visible++;
     });
     var noResults = document.getElementById('staff-no-results');
     if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+}
+
+function searchStaff(query) {
+    activeStaffSearch = query;
+    filterStaff();
 }
 
 // ════════════════════════════════════════════
