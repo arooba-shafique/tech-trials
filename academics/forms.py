@@ -58,6 +58,7 @@ class TeacherProfileForm(forms.ModelForm):
             'husband_address',
             'husband_phone',
             'kids_json',
+            'num_children',
             'salary',
             'salary_type',
             'working_days_per_week',

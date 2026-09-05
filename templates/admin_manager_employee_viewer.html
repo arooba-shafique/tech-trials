@@ -517,16 +517,22 @@
     }
     function attachMaritalStatusToggle(root) {
         var statusField = root.querySelector('[name="marital_status"]');
+        var genderField = root.querySelector('[name="gender"]');
         var husbandInfo = root.querySelector('#husband-info');
         var kidsSection = root.querySelector('#kids-section');
+        var numChildrenRow = root.querySelector('#num-children-row');
         if (!statusField) return;
         function toggleFields() {
             var v = statusField.value;
+            var g = genderField ? genderField.value : 'M';
+            var show = v !== 'single';
             if (husbandInfo) husbandInfo.style.display = v === 'married' ? '' : 'none';
-            if (kidsSection) kidsSection.style.display = v !== 'single' ? '' : 'none';
+            if (kidsSection) kidsSection.style.display = show ? '' : 'none';
+            if (numChildrenRow) numChildrenRow.style.display = (g === 'F' && show) ? '' : 'none';
         }
         toggleFields();
         statusField.addEventListener('change', toggleFields);
+        if (genderField) genderField.addEventListener('change', toggleFields);
     }
     function attachKidsHandler(root) {
         var kidsList = root.querySelector('#kids-list');

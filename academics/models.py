@@ -156,6 +156,7 @@ class TeacherProfile(models.Model):
     husband_cnic = models.CharField(max_length=20, blank=True, default='')
     husband_address = models.TextField(blank=True, default='')
     husband_phone = models.CharField(max_length=15, blank=True, default='')
+    num_children = models.PositiveIntegerField(default=0, blank=True, help_text="Number of children (for non-single females)")
     kids_json = models.TextField(blank=True, default='[]', help_text='JSON array of kids: [{"name":"...","dob":"YYYY-MM-DD","gender":"M/F"}]')
 
     # Salary fields

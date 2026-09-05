@@ -110,6 +110,12 @@
                             {{ form.marital_status }}
                         </div>
                     </div>
+                    <div id="num-children-row" class="form-row" style="display:none;">
+                        <div class="form-group">
+                            <label>Number of Children</label>
+                            {{ form.num_children }}
+                        </div>
+                    </div>
                     <div id="husband-info" class="husband-section" {% if form.instance.marital_status != 'married' %}style="display:none;"{% endif %}>
                         <div class="section-title">Husband Information</div>
                         <div class="form-row">
@@ -254,8 +260,10 @@
     <script>
     (function(){
         var statusField = document.querySelector('[name="marital_status"]');
+        var genderField = document.querySelector('[name="gender"]');
         var husbandInfo = document.getElementById('husband-info');
         var kidsSection = document.getElementById('kids-section');
+        var numChildrenRow = document.getElementById('num-children-row');
         var kidsList = document.getElementById('kids-list');
         var kidsJson = document.getElementById('kids_json');
         var addKidBtn = document.getElementById('add-kid-btn');
@@ -263,11 +271,14 @@
 
         function toggleFields(){
             var v = statusField ? statusField.value : 'single';
+            var g = genderField ? genderField.value : 'M';
             var show = v !== 'single';
             if(husbandInfo) husbandInfo.style.display = v === 'married' ? '' : 'none';
             if(kidsSection) kidsSection.style.display = show ? '' : 'none';
+            if(numChildrenRow) numChildrenRow.style.display = (g === 'F' && show) ? '' : 'none';
         }
         if(statusField) statusField.addEventListener('change', toggleFields);
+        if(genderField) genderField.addEventListener('change', toggleFields);
 
         function renderKids(){
             if(!kidsList) return;
