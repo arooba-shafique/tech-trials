@@ -47,6 +47,7 @@ class TeacherProfileForm(forms.ModelForm):
             'designation',
             'employment_type',
             'skill_level',
+            'qualification',
             'subjects',
             'joining_date',
             'phone',

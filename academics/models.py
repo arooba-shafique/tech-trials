@@ -143,6 +143,7 @@ class TeacherProfile(models.Model):
     designation = models.CharField(max_length=25, choices=DESIGNATION_CHOICES, default='teacher', blank=True)
     employment_type = models.CharField(max_length=15, choices=EMPLOYMENT_TYPE_CHOICES, default='permanent', blank=True)
     skill_level = models.CharField(max_length=25, choices=SKILL_LEVEL_CHOICES, default='permanent_professional', blank=True)
+    qualification = models.CharField(max_length=100, blank=True, default='')
     subjects = models.ManyToManyField('Subject', blank=True, related_name='teachers')
     joining_date = models.DateField(null=True, blank=True)
 
