@@ -103,9 +103,17 @@ def _employee_viewer_dashboard(request, today):
     else:
         teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
 
+    designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
+    raw_desiginations = teachers_qs.values_list('designation', flat=True).distinct()
+    designation_choices = sorted(
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d],
+        key=lambda x: x[1]
+    )
+
     context = {
         'teachers': teachers_qs,
         'user_role': 'admin_manager',
+        'designation_choices': designation_choices,
     }
 
     return render(request, 'admin_manager_employee_viewer.html', context)
@@ -244,6 +252,14 @@ def admin_dashboard(request):
             'last_salary': last_salary,
         })
 
+    # Fetch distinct designations dynamically from the database
+    designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
+    raw_desiginations = teachers_qs.values_list('designation', flat=True).distinct()
+    designation_choices = sorted(
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d],
+        key=lambda x: x[1]
+    )
+
     context = {
         'students':      students_qs,
         'teachers':      teachers_qs,
@@ -264,6 +280,7 @@ def admin_dashboard(request):
         'left_completed_count': left_completed_count,
         'left_search': left_search,
         'pending_clearance_alerts': pending_clearance_alerts,
+        'designation_choices': designation_choices,
     }
 
     # Add HR data for admin_manager
