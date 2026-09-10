@@ -1135,8 +1135,27 @@
                 var yearInp = form.querySelector('input[name="year"]');
                 if (monthSel) monthSel.addEventListener('change', function() { form.submit(); });
                 if (yearInp) yearInp.addEventListener('change', function() { form.submit(); });
-            })();
-            </script>
+                    })();
+                    </script>
+                    <script>
+                    var SAL_SHEET_CATS = {
+                        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+                        'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+                        'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer']
+                    };
+                    function filterSalarySheet(designation, btn) {
+                        document.querySelectorAll('.sheet-filter-btn').forEach(function(b) {
+                            b.style.background = '#fff'; b.style.color = '#374151';
+                        });
+                        if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                        var cats = SAL_SHEET_CATS[designation] || null;
+                        document.querySelectorAll('#section-salary-sheet tbody tr').forEach(function(row) {
+                            var desig = row.dataset.designation || 'teacher';
+                            var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                            row.style.display = show ? '' : 'none';
+                        });
+                    }
+                    </script>
             <form method="post" action="{% url 'hr_monthly_attendance' %}">
                 {% csrf_token %}
                 <input type="hidden" name="month" value="{{ att_month }}">
@@ -1148,6 +1167,13 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             Save Attendance
                         </button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 20px 14px;">
+                        <button class="att-cat-btn" onclick="filterAttCategory('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
                     </div>
                     <div style="overflow-x:auto;">
                         <table style="width:100%;border-collapse:collapse;min-width:900px;">
@@ -1166,7 +1192,7 @@
                             <tbody>
                                 {% for emp in hr_attendance_employees %}
                                 {% with emp_data=hr_att_existing|dictsort:"employee_id" %}
-                                <tr style="border-bottom:1px solid #f3f4f6;">
+                                <tr style="border-bottom:1px solid #f3f4f6;" data-designation="{{ emp.designation|default:'teacher' }}">
                                     <td style="padding:10px 14px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 14px;">
                                         <div style="font-weight:600;font-size:13px;">{{ emp.full_name }}</div>
@@ -1246,6 +1272,18 @@
                     });
                 });
             });
+            function filterAttCategory(designation, btn) {
+                document.querySelectorAll('.att-cat-btn').forEach(function(b) {
+                    b.style.background = '#fff'; b.style.color = '#374151';
+                });
+                if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                var cats = SAL_SHEET_CATS[designation] || null;
+                document.querySelectorAll('#section-hr-attendance tbody tr').forEach(function(row) {
+                    var desig = row.dataset.designation || 'teacher';
+                    var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                    row.style.display = show ? '' : 'none';
+                });
+            }
             </script>
         </div>
 
@@ -1515,6 +1553,13 @@
                         <input type="file" name="excel_file" id="import-excel-input" accept=".xlsx,.xls" style="display:none;" onchange="if(this.files.length){this.form.submit();}">
                     </form>
                     </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                    </div>
                     <script>
                     (function() {
                         var form = document.querySelector('#section-salary-sheet form[method="get"]');
@@ -1572,7 +1617,7 @@
                             </thead>
                             <tbody>
                                 {% for s in hr_salaries %}
-                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                <tr style="border-bottom:1px solid #f1f5f9;" data-designation="{{ s.employee.designation|default:'teacher' }}">
                                     <td style="padding:10px 12px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 12px;font-weight:600;">{{ s.employee.full_name }}<div style="font-size:11px;color:var(--text-muted);">{{ s.employee.employee_id|default:"-" }}</div></td>
                                     <td style="padding:10px 12px;text-align:right;">PKR {{ s.basic_salary|floatformat:0 }}</td>
@@ -1639,6 +1684,13 @@
                             <input type="text" id="slip-emp-search" placeholder="Type employee name…" autocomplete="off" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:220px;">
                         </label>
                     </form>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                    </div>
                     <script>
                     (function() {
                         var form = document.getElementById('slip-filter-form');
@@ -1660,7 +1712,20 @@
                         }
                     })();
                     </script>
-
+                    <script>
+                    function filterSalarySlip(designation, btn) {
+                        document.querySelectorAll('.slip-filter-btn').forEach(function(b) {
+                            b.style.background = '#fff'; b.style.color = '#374151';
+                        });
+                        if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                        var cats = SAL_SHEET_CATS[designation] || null;
+                        document.querySelectorAll('#section-salary-slips tbody tr').forEach(function(row) {
+                            var desig = row.dataset.designation || 'teacher';
+                            var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                            row.style.display = show ? '' : 'none';
+                        });
+                    }
+                    </script>
                     <div style="font-size:14px;font-weight:700;margin-bottom:14px;">{{ hr_month_name }} {{ hr_year }}</div>
                     {% if slip_salaries %}
                     <div style="overflow-x:auto;">
@@ -1679,7 +1744,7 @@
                             </thead>
                             <tbody>
                                 {% for s in slip_salaries %}
-                                <tr style="border-bottom:1px solid #f1f5f9;" class="slip-row">
+                                <tr style="border-bottom:1px solid #f1f5f9;" class="slip-row" data-designation="{{ s.employee.designation|default:'teacher' }}">
                                     <td style="padding:10px 12px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 12px;font-weight:600;">{{ s.employee.full_name }}<div style="font-size:11px;color:var(--text-muted);">{{ s.employee.employee_id|default:"-" }}</div></td>
                                     <td style="padding:10px 12px;color:var(--text-muted);">{{ s.employee.designation|default:"-" }}</td>
