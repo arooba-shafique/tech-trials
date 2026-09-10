@@ -1280,6 +1280,9 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         {% for value, label in designation_choices %}
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                         {% endfor %}
@@ -1342,6 +1345,11 @@
             document.getElementById('hidden-year').value = y;
             window.location.href = '{% url "admin_console" %}?section=salary-config&month=' + m + '&year=' + y;
         }
+        var SAL_CFG_CATEGORIES = {
+            'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+            'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+            'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer']
+        };
         function filterSalaryConfig(designation, btn) {
             document.querySelectorAll('.cfg-filter-btn').forEach(function(b) {
                 b.style.background = '#fff';
@@ -1351,9 +1359,11 @@
                 btn.style.background = '#0d9488';
                 btn.style.color = '#fff';
             }
+            var categoryDesignations = SAL_CFG_CATEGORIES[designation] || null;
             document.querySelectorAll('#employee-overrides-section tbody tr').forEach(function(row) {
                 var desig = row.dataset.designation || 'teacher';
-                row.style.display = (designation === 'all' || desig === designation) ? '' : 'none';
+                var show = designation === 'all' || desig === designation || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
+                row.style.display = show ? '' : 'none';
             });
         }
 
