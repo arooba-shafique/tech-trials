@@ -209,7 +209,8 @@ var activeStaffSearch = '';
 
 var STAFF_CATEGORIES = {
     'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
-    'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc']
+    'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+    'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper']
 };
 
 function filterStaff(designation, btn) {
