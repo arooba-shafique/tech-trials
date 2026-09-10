@@ -105,8 +105,9 @@ def _employee_viewer_dashboard(request, today):
 
     designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
     raw_desiginations = teachers_qs.values_list('designation', flat=True).distinct()
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc'}
     designation_choices = sorted(
-        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d],
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d not in _category_desig],
         key=lambda x: x[1]
     )
 
@@ -255,8 +256,10 @@ def admin_dashboard(request):
     # Fetch distinct designations dynamically from the database
     designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
     raw_desiginations = teachers_qs.values_list('designation', flat=True).distinct()
+    # Designations already grouped under category pills — hide from individual pills
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc'}
     designation_choices = sorted(
-        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d],
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d not in _category_desig],
         key=lambda x: x[1]
     )
 
