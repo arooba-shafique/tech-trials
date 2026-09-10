@@ -207,6 +207,10 @@ function filterAttendance(clsId, status, btn) {
 var activeStaffDesignation = 'all';
 var activeStaffSearch = '';
 
+var STAFF_CATEGORIES = {
+    'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics']
+};
+
 function filterStaff(designation, btn) {
     if (designation !== undefined) activeStaffDesignation = designation;
     document.querySelectorAll('.staff-filter-btn').forEach(function (b) {
@@ -220,10 +224,11 @@ function filterStaff(designation, btn) {
     var q = activeStaffSearch.toLowerCase();
     var cards   = document.querySelectorAll('.staff-card');
     var visible = 0;
+    var categoryDesignations = STAFF_CATEGORIES[activeStaffDesignation] || null;
     cards.forEach(function (card) {
         var desig = card.dataset.designation || 'teacher';
         var text  = (card.dataset.search || card.textContent || '').toLowerCase();
-        var showDesig = activeStaffDesignation === 'all' || desig === activeStaffDesignation;
+        var showDesig = activeStaffDesignation === 'all' || desig === activeStaffDesignation || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
         var showSearch = !q || text.indexOf(q) !== -1;
         var show = showDesig && showSearch;
         card.style.display = show ? '' : 'none';

@@ -218,6 +218,7 @@
             <!-- Designation filter pills -->
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                 <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#7c3aed;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                <button class="staff-filter-btn" onclick="filterStaff('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                 {% for value, label in designation_choices %}
                 <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                 {% endfor %}
@@ -323,6 +324,9 @@
 
     /* ── Staff filter + search ── */
     var activeStaffSearch = '';
+    var STAFF_CATEGORIES = {
+        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics']
+    };
     function filterStaff(desig, btn) {
         if (desig !== undefined) {
             document.querySelectorAll('.staff-filter-btn').forEach(function(b) {
@@ -335,8 +339,10 @@
         var q = activeStaffSearch.toLowerCase();
         var cards = document.querySelectorAll('.staff-card');
         var visible = 0;
+        var categoryDesignations = STAFF_CATEGORIES[d] || null;
         cards.forEach(function(card) {
-            var matchDesig = d === 'all' || card.getAttribute('data-designation') === d;
+            var desigVal = card.getAttribute('data-designation') || 'teacher';
+            var matchDesig = d === 'all' || desigVal === d || (categoryDesignations && categoryDesignations.indexOf(desigVal) !== -1);
             var text = (card.getAttribute('data-search') || card.textContent || '').toLowerCase();
             var matchSearch = !q || text.indexOf(q) !== -1;
             var match = matchDesig && matchSearch;

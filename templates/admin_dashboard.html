@@ -407,6 +407,7 @@
             <!-- Designation filter pills -->
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                 <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#1a1d23;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                <button class="staff-filter-btn" onclick="filterStaff('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                 {% for value, label in designation_choices %}
                 <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--text-secondary);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                 {% endfor %}
