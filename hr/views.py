@@ -148,6 +148,7 @@ def employee_edit(request, employee_id):
     context = {
         'employee': employee,
         'section': 'employees',
+        'designation_choices': TeacherProfile.DESIGNATION_CHOICES,
     }
     return render(request, 'hr/employee_edit.html', context)
 
