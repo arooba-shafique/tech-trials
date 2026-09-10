@@ -219,6 +219,7 @@
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                 <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#7c3aed;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                 <button class="staff-filter-btn" onclick="filterStaff('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                <button class="staff-filter-btn" onclick="filterStaff('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
                 {% for value, label in designation_choices %}
                 <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                 {% endfor %}
@@ -325,7 +326,8 @@
     /* ── Staff filter + search ── */
     var activeStaffSearch = '';
     var STAFF_CATEGORIES = {
-        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics']
+        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+        'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc']
     };
     function filterStaff(desig, btn) {
         if (desig !== undefined) {
