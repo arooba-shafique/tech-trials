@@ -1292,7 +1292,8 @@
 
 /* Staff table responsive */
 @media (max-width: 900px) {
-    .staff-table-wrap table { min-width: 0 !important; }
+    .staff-table-wrap { overflow-x: hidden !important; }
+    .staff-table-wrap table { min-width: 0 !important; width: 100% !important; }
     .staff-table-wrap thead { display: none; }
     .staff-table-wrap tbody tr {
         display: grid;
@@ -1309,6 +1310,9 @@
         padding: 3px 0;
         border: none;
         font-size: 12px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .staff-table-wrap tbody td::before {
         content: attr(data-label);
@@ -1320,6 +1324,8 @@
         color: var(--text-muted);
         margin-bottom: 2px;
     }
+    .staff-table-wrap tbody td[data-label="Salary"] { display: none; }
+    .staff-table-wrap tbody td[data-label="Address"] { grid-column: 1 / -1; }
     .staff-table-wrap tbody td:last-child {
         grid-column: 1 / -1;
         display: flex;
