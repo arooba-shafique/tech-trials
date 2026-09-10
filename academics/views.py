@@ -47,9 +47,9 @@ def _attendance_only_dashboard(request, today):
 
     from django.db.models import Q
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
 
     import calendar
     from hr.models import SalaryConfig, MonthlySalary
@@ -99,9 +99,9 @@ def _employee_viewer_dashboard(request, today):
 
     from django.db.models import Q
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
 
     designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
     raw_desiginations = teachers_qs.values_list('designation', flat=True).distinct()
@@ -160,9 +160,9 @@ def admin_dashboard(request):
 
     students_qs = StudentProfile.objects.filter(**school_filter)
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     parents_qs = ParentProfile.objects.filter(**school_filter)
     classes_qs = Class.objects.filter(**school_filter)
     subjects_qs = Subject.objects.filter(**school_filter)
