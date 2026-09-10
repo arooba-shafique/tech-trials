@@ -144,7 +144,7 @@ class TeacherProfile(models.Model):
 
     employee_id = models.CharField(max_length=30, unique=True, null=True, blank=True)
     cnic = models.CharField(max_length=20, blank=True, default='')
-    designation = models.CharField(max_length=30, choices=DESIGNATION_CHOICES, default='teacher', blank=True)
+    designation = models.CharField(max_length=50, choices=DESIGNATION_CHOICES, default='teacher', blank=True)
     employment_type = models.CharField(max_length=15, choices=EMPLOYMENT_TYPE_CHOICES, default='permanent', blank=True)
     skill_level = models.CharField(max_length=25, choices=SKILL_LEVEL_CHOICES, default='permanent_professional', blank=True)
     qualification = models.CharField(max_length=100, blank=True, default='')
