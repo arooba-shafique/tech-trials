@@ -603,51 +603,51 @@
                 <input type="text" id="staff-search" placeholder="Search by name, ID, phone..." oninput="searchStaff(this.value)" style="width:100%;max-width:360px;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
             </div>
             <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1100px;">
+                <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1050px;">
                     <thead>
                         <tr style="background:#f8fafc;">
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Employee</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Gender</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Father / Husband</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">CNIC</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Designation</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Type</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Phone</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Joined</th>
-                            <th style="padding:10px 12px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Subjects</th>
-                            <th style="padding:10px 12px;text-align:center;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Actions</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:200px;">Employee</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:60px;">Gender</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:160px;">Father / Husband</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:130px;">CNIC</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:120px;">Designation</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:80px;">Type</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:110px;">Phone</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:90px;">Joined</th>
+                            <th style="padding:10px 14px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Subjects</th>
+                            <th style="padding:10px 14px;text-align:center;border-bottom:2px solid #e2e8f0;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);width:180px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for teacher in teachers %}
                         <tr class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" data-search="{{ teacher.full_name }} {{ teacher.employee_id|default:'' }} {{ teacher.phone|default:'' }} {{ teacher.get_designation_display|default:'' }}" style="border-bottom:1px solid #f1f5f9;">
-                            <td style="padding:10px 12px;">
+                            <td style="padding:10px 14px;">
                                 <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;background:#16a34a;">{{ teacher.full_name|first|upper }}</div>
-                                    <div>
-                                        <div style="font-weight:600;font-size:13px;">{{ teacher.full_name }}</div>
+                                    <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;background:#16a34a;">{{ teacher.full_name|first|upper }}</div>
+                                    <div style="min-width:0;">
+                                        <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ teacher.full_name }}</div>
                                         <div style="font-size:11px;color:var(--text-muted);">{{ teacher.employee_id|default:"-" }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td style="padding:10px 12px;"><span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span></td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.father_name|default:teacher.husband_name|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.cnic|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.phone|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">{{ teacher.joining_date|default:"-" }}</td>
-                            <td style="padding:10px 12px;font-size:12px;">
+                            <td style="padding:10px 14px;"><span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span></td>
+                            <td style="padding:10px 14px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ teacher.father_name|default:teacher.husband_name|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;white-space:nowrap;">{{ teacher.cnic|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;">{{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;">{{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;white-space:nowrap;">{{ teacher.phone|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;white-space:nowrap;">{{ teacher.joining_date|default:"-" }}</td>
+                            <td style="padding:10px 14px;font-size:12px;">
                                 {% for ts in teacher.assignments.all %}
-                                <div style="font-size:11px;">{{ ts.subject.name }} <span style="color:var(--text-muted);">({{ ts.assigned_class }})</span></div>
+                                <div style="font-size:11px;white-space:nowrap;">{{ ts.subject.name }} <span style="color:var(--text-muted);">({{ ts.assigned_class }})</span></div>
                                 {% empty %}<span style="color:var(--text-muted);">-</span>{% endfor %}
                             </td>
-                            <td style="padding:10px 12px;text-align:center;white-space:nowrap;">
-                                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
-                                    <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:4px 10px;font-size:11px;">Docs</a>
-                                    <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:4px 10px;font-size:11px;">Edit</a>
-                                    <a href="#" onclick="openDrawer('{% url 'hr_employee_separation' teacher.id %}','Mark as Left — {{ teacher.full_name|escapejs }}');return false;" class="btn" style="padding:4px 10px;font-size:11px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;cursor:pointer;">Left</a>
-                                    <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-danger" style="padding:4px 10px;font-size:11px;" onclick="return confirm('Delete?')">Del</a>
+                            <td style="padding:10px 14px;text-align:center;">
+                                <div style="display:inline-flex;gap:5px;align-items:center;flex-wrap:nowrap;">
+                                    <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:4px 9px;font-size:10.5px;white-space:nowrap;">Docs</a>
+                                    <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:4px 9px;font-size:10.5px;white-space:nowrap;">Edit</a>
+                                    <a href="#" onclick="openDrawer('{% url 'hr_employee_separation' teacher.id %}','Mark as Left — {{ teacher.full_name|escapejs }}');return false;" class="btn" style="padding:4px 9px;font-size:10.5px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;cursor:pointer;white-space:nowrap;">Left</a>
+                                    <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-red" style="padding:4px 9px;font-size:10.5px;white-space:nowrap;" onclick="return confirm('Delete this teacher?');">Del</a>
                                 </div>
                             </td>
                         </tr>
