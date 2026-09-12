@@ -1153,7 +1153,8 @@
                     var SAL_SHEET_CATS = {
                         'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
                         'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
-                        'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer']
+                        'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+                        'teacher': ['teacher']
                     };
                     function filterSalarySheet(designation, btn) {
                         document.querySelectorAll('.sheet-filter-btn').forEach(function(b) {
@@ -1333,6 +1334,7 @@
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
                         {% for value, label in designation_choices %}
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                         {% endfor %}
@@ -1398,7 +1400,8 @@
         var SAL_CFG_CATEGORIES = {
             'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
             'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
-            'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer']
+            'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+            'teacher': ['teacher']
         };
         function filterSalaryConfig(designation, btn) {
             document.querySelectorAll('.cfg-filter-btn').forEach(function(b) {
