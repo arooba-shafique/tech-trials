@@ -431,7 +431,7 @@ def admin_dashboard(request):
                         teacher.ov_transport = 0
                         teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
-                        teacher.ov_pf = 0
+                        teacher.ov_pf = 7.5 if (teacher.designation or '').strip().lower() == 'teacher' else 0
                         teacher.ov_security = 0
                         teacher.ov_van_child = 0
                         teacher.ov_bonus_per_day = 0
@@ -444,7 +444,7 @@ def admin_dashboard(request):
                     teacher.ov_transport = 0
                     teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
-                    teacher.ov_pf = 0
+                    teacher.ov_pf = 7.5 if (teacher.designation or '').strip().lower() == 'teacher' else 0
                     teacher.ov_security = 0
                     teacher.ov_van_child = 0
                     teacher.ov_bonus_per_day = 0
