@@ -1302,46 +1302,6 @@
 
         <!-- ═══════════ HR: SALARY CONFIG ═══════════ -->
         <div id="section-salary-config" class="section">
-            <!-- Provident Fund Criteria (per staff category) -->
-            <div class="table-card" style="margin-bottom:18px;">
-                <div class="table-card-header" style="padding:16px 22px 0;">
-                    <h2>Provident Fund Criteria</h2>
-                </div>
-                <div style="padding:14px 22px 22px;">
-                    <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
-                        Provident Fund % of basic salary applied to every employee in the category. Editable — changes are applied to the salary sheet for the selected month.
-                    </p>
-                    <form method="post" action="{% url 'hr_save_pf_criteria' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="month" value="{{ hr_config.month }}">
-                        <input type="hidden" name="year" value="{{ hr_config.year }}">
-                        <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end;">
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Management Staff</span>
-                                <input type="number" name="pf_management_pct" value="{{ hr_config.pf_management_pct|default_if_none:'5' }}" step="0.01" min="0" max="100" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Administration</span>
-                                <input type="number" name="pf_administration_pct" value="{{ hr_config.pf_administration_pct|default_if_none:'5' }}" step="0.01" min="0" max="100" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Teachers</span>
-                                <input type="number" name="pf_teacher_pct" value="{{ hr_config.pf_teacher_pct|default_if_none:'7.5' }}" step="0.01" min="0" max="100" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Janitorial</span>
-                                <input type="number" name="pf_janitorial_pct" value="{{ hr_config.pf_janitorial_pct|default_if_none:'0' }}" step="0.01" min="0" max="100" style="width:120px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
-                            </label>
-                            <label style="display:flex;flex-direction:column;gap:5px;">
-                                <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month / Year</span>
-                                <span style="font-size:13px;font-weight:600;padding:8px 0;">{{ hr_config.month|stringformat:"02d" }}/{{ hr_config.year }}</span>
-                            </label>
-                            <button type="submit" class="btn btn-primary" style="padding:9px 24px;font-size:12px;">Save PF Criteria</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
             <!-- Per-Employee Salary Overrides -->
             <div id="employee-overrides-section" class="table-card">
                 <div style="padding:22px;">

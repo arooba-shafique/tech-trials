@@ -465,10 +465,6 @@ def salary_config(request):
         config.config_mode = request.POST.get('config_mode', 'percentage')
         config.tax_percentage = float(request.POST.get('tax_percentage', 0))
         config.provident_fund_pct = float(request.POST.get('provident_fund_pct', 0))
-        config.pf_management_pct = float(request.POST.get('pf_management_pct', config.pf_management_pct))
-        config.pf_administration_pct = float(request.POST.get('pf_administration_pct', config.pf_administration_pct))
-        config.pf_janitorial_pct = float(request.POST.get('pf_janitorial_pct', config.pf_janitorial_pct))
-        config.pf_teacher_pct = float(request.POST.get('pf_teacher_pct', config.pf_teacher_pct))
         config.security_pct = float(request.POST.get('security_pct', 0))
         config.van_child_pct = float(request.POST.get('van_child_pct', 0))
         config.new_employee_security_pct = float(request.POST.get('new_employee_security_pct', 50))
@@ -501,7 +497,7 @@ def salary_config(request):
                 emp_salary.custom_medical_pct = config.medical_allowance_pct
                 emp_salary.custom_transport_pct = config.transport_allowance_pct
                 emp_salary.custom_tax_pct = config.tax_percentage
-                emp_salary.custom_pf_pct = config.get_pf_pct(emp.designation)
+                emp_salary.custom_pf_pct = config.provident_fund_pct
                 emp_salary.custom_security_pct = config.security_pct
                 emp_salary.custom_van_child_pct = config.van_child_pct
                 emp_salary.custom_bonus_per_day = config.bonus_per_day
@@ -616,66 +612,6 @@ def save_employee_overrides(request):
     if error_msgs:
         messages.warning(request, f'Errors for {len(error_msgs)} employees: {"; ".join(error_msgs[:3])}')
     messages.success(request, f'Salary config saved for {saved_count} employees.')
-    return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
-
-
-# ─────────────────────────────────────────────
-# PROVIDENT FUND CRITERIA (by staff category)
-# ─────────────────────────────────────────────
-
-PF_CRITERIA_FIELDS = (
-    ('pf_management_pct', 'pf_management_pct', 5),
-    ('pf_administration_pct', 'pf_administration_pct', 5),
-    ('pf_janitorial_pct', 'pf_janitorial_pct', 0),
-    ('pf_teacher_pct', 'pf_teacher_pct', 7.5),
-)
-
-
-@login_required(login_url='admin_login')
-def save_pf_criteria(request):
-    """Save the Provident Fund criteria (per staff category) for a month/year.
-
-    Existing MonthlySalary rows are re-synced: records that already carry
-    per-month overrides get the new category % written into cfg_pf_pct, and
-    records that use the global config are simply recalculated.
-    """
-    role = getattr(request.user, 'role', None)
-    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
-        return HttpResponse("Unauthorized", status=403)
-
-    if request.method != 'POST':
-        return redirect('admin_console')
-
-    month = int(request.POST.get('month', timezone.now().month))
-    year = int(request.POST.get('year', timezone.now().year))
-
-    config = SalaryConfig.objects.filter(month=month, year=year).first()
-    if not config:
-        config = SalaryConfig.objects.create(month=month, year=year)
-
-    for field, post_name, default in PF_CRITERIA_FIELDS:
-        raw = request.POST.get(post_name, '')
-        try:
-            value = float(raw) if raw != '' else float(getattr(config, field, default))
-        except (TypeError, ValueError):
-            value = float(getattr(config, field, default))
-        setattr(config, field, value)
-    config.save()
-
-    updated = 0
-    for ms in MonthlySalary.objects.filter(month=month, year=year).select_related('employee'):
-        if ms.has_custom_config:
-            ms.cfg_pf_pct = config.get_pf_pct(ms.employee.designation)
-        ms.save()
-        updated += 1
-
-    messages.success(
-        request,
-        f'Provident Fund criteria saved for {month:02d}-{year}. '
-        f'Management {config.pf_management_pct}%, Administration {config.pf_administration_pct}%, '
-        f'Teachers {config.pf_teacher_pct}%, Janitorial {config.pf_janitorial_pct}%. '
-        f'{updated} salary sheets updated.',
-    )
     return redirect(f'/admin-console/?section=salary-config&month={month}&year={year}')
 
 

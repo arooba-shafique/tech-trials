@@ -38,17 +38,34 @@ def get_user_school(user):
 
 
 # ─────────────────────────────────────────────
-# STAFF ORDER — shared category groups / PF criteria (see academics.staff_groups)
+# STAFF ORDER — mirrors STAFF_CATEGORIES in dps_ravi/static/js/admin_dashboard.js
 # ─────────────────────────────────────────────
 
-from .staff_groups import (  # noqa: E402
-    STAFF_CATEGORY_ORDER,
-    STAFF_CATEGORY_DESIGNATIONS,
-    staff_order_key,
-    pf_category,
-    default_pf_pct,
-    DEFAULT_PF_PCT,
-)
+STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'janitorial', 'teacher')
+
+STAFF_CATEGORY_DESIGNATIONS = {
+    'management_staff': {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'},
+    'administration': {'vp', 'coordinator', 'team_lead', 'accountant', 'fdc'},
+    'janitorial': {'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'},
+    'teacher': {'teacher'},
+}
+
+_DESIGNATION_RANK = {
+    designation: rank
+    for rank, category in enumerate(STAFF_CATEGORY_ORDER)
+    for designation in STAFF_CATEGORY_DESIGNATIONS[category]
+}
+
+
+def staff_order_key(item):
+    """Order like the Staff table: category (Management → Administration →
+    Janitorial → Teacher) first, then Employee ID numerically within each."""
+    employee = getattr(item, 'employee', None)
+    designation = ((getattr(employee, 'designation', None) or '').strip().lower())
+    rank = _DESIGNATION_RANK.get(designation, len(STAFF_CATEGORY_ORDER))
+    employee_id = (getattr(employee, 'employee_id', None) or '')
+    digits = ''.join(ch for ch in employee_id if ch.isdigit())
+    return (rank, int(digits) if digits else 0, employee_id.lower())
 
 
 # ─────────────────────────────────────────────
@@ -327,10 +344,6 @@ def admin_dashboard(request):
                     fuel_allowance_pct = 0
                     tax_percentage = 0
                     provident_fund_pct = 0
-                    pf_management_pct = DEFAULT_PF_PCT['management_staff']
-                    pf_administration_pct = DEFAULT_PF_PCT['administration']
-                    pf_janitorial_pct = DEFAULT_PF_PCT['janitorial']
-                    pf_teacher_pct = DEFAULT_PF_PCT['teacher']
                     security_pct = 0
                     van_child_pct = 0
                     bonus_per_day = 0
@@ -418,7 +431,7 @@ def admin_dashboard(request):
                         teacher.ov_transport = 0
                         teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
-                        teacher.ov_pf = float(default_pf_pct(teacher.designation))
+                        teacher.ov_pf = 0
                         teacher.ov_security = 0
                         teacher.ov_van_child = 0
                         teacher.ov_bonus_per_day = 0
@@ -431,7 +444,7 @@ def admin_dashboard(request):
                     teacher.ov_transport = 0
                     teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
-                    teacher.ov_pf = float(default_pf_pct(teacher.designation))
+                    teacher.ov_pf = 0
                     teacher.ov_security = 0
                     teacher.ov_van_child = 0
                     teacher.ov_bonus_per_day = 0
