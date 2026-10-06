@@ -69,6 +69,31 @@ def staff_order_key(item):
 
 
 # ─────────────────────────────────────────────
+# PROVIDENT FUND CRITERIA — % of basic, pre-filled in the salary override table
+# ─────────────────────────────────────────────
+
+PF_PCT_BY_CATEGORY = {
+    'management_staff': 5,
+    'administration': 5,
+    'janitorial': 0,
+    'teacher': 7.5,
+}
+
+
+def staff_pf_pct(designation):
+    """Provident Fund % of basic for a designation.
+
+    Management Staff and Administration 5%, Teachers 7.5%, Janitorial 0%.
+    Designations outside every category get 0.
+    """
+    key = (designation or '').strip().lower()
+    for category, designations in STAFF_CATEGORY_DESIGNATIONS.items():
+        if key and key in designations:
+            return PF_PCT_BY_CATEGORY[category]
+    return 0
+
+
+# ─────────────────────────────────────────────
 # ATTENDANCE-ONLY ADMIN MANAGER DASHBOARD
 # ─────────────────────────────────────────────
 
@@ -431,7 +456,7 @@ def admin_dashboard(request):
                         teacher.ov_transport = 0
                         teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
-                        teacher.ov_pf = 7.5 if (teacher.designation or '').strip().lower() == 'teacher' else 0
+                        teacher.ov_pf = staff_pf_pct(teacher.designation)
                         teacher.ov_security = 0
                         teacher.ov_van_child = 0
                         teacher.ov_bonus_per_day = 0
@@ -444,7 +469,7 @@ def admin_dashboard(request):
                     teacher.ov_transport = 0
                     teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
-                    teacher.ov_pf = 7.5 if (teacher.designation or '').strip().lower() == 'teacher' else 0
+                    teacher.ov_pf = staff_pf_pct(teacher.designation)
                     teacher.ov_security = 0
                     teacher.ov_van_child = 0
                     teacher.ov_bonus_per_day = 0
