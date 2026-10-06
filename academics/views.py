@@ -376,6 +376,10 @@ def admin_dashboard(request):
                     config_mode = 'percentage'
                 hr_config = _DefaultConfig()
 
+            # PF criteria (% of basic) only applies in percentage mode — in PKR
+            # (fixed amount) mode the PF column is left at 0 for manual entry.
+            cfg_amount_mode = getattr(hr_config, 'config_mode', 'percentage') == 'amount'
+
             hr_salaries = sorted(
                 MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee'),
                 key=staff_order_key,
@@ -436,6 +440,8 @@ def admin_dashboard(request):
                                       ms.cfg_bonus_per_day, ms.cfg_bonus_pct])
                     except Exception:
                         pass
+                teacher.ov_pf_criteria = staff_pf_pct(teacher.designation)
+                teacher.ov_pf_from_criteria = False
                 if has_cfg:
                     try:
                         teacher.ov_housing = float(ms.cfg_housing_pct)
@@ -456,7 +462,8 @@ def admin_dashboard(request):
                         teacher.ov_transport = 0
                         teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
-                        teacher.ov_pf = staff_pf_pct(teacher.designation)
+                        teacher.ov_pf = 0 if cfg_amount_mode else teacher.ov_pf_criteria
+                        teacher.ov_pf_from_criteria = True
                         teacher.ov_security = 0
                         teacher.ov_van_child = 0
                         teacher.ov_bonus_per_day = 0
@@ -469,7 +476,8 @@ def admin_dashboard(request):
                     teacher.ov_transport = 0
                     teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
-                    teacher.ov_pf = staff_pf_pct(teacher.designation)
+                    teacher.ov_pf = 0 if cfg_amount_mode else teacher.ov_pf_criteria
+                    teacher.ov_pf_from_criteria = True
                     teacher.ov_security = 0
                     teacher.ov_van_child = 0
                     teacher.ov_bonus_per_day = 0
