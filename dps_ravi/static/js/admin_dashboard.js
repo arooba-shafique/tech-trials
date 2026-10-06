@@ -229,9 +229,10 @@ function filterStaff(designation, btn) {
     var visible = 0;
     var categoryDesignations = STAFF_CATEGORIES[activeStaffDesignation] || null;
     cards.forEach(function (card) {
-        var desig = card.dataset.designation || 'teacher';
+        var desig = (card.dataset.designation || 'teacher').trim().toLowerCase();
         var text  = (card.dataset.search || card.textContent || '').toLowerCase();
-        var showDesig = activeStaffDesignation === 'all' || desig === activeStaffDesignation || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
+        var want  = String(activeStaffDesignation).trim().toLowerCase();
+        var showDesig = activeStaffDesignation === 'all' || desig === want || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
         var showSearch = !q || text.indexOf(q) !== -1;
         var show = showDesig && showSearch;
         card.style.display = show ? '' : 'none';
