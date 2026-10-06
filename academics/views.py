@@ -38,6 +38,37 @@ def get_user_school(user):
 
 
 # ─────────────────────────────────────────────
+# STAFF ORDER — mirrors STAFF_CATEGORIES in dps_ravi/static/js/admin_dashboard.js
+# ─────────────────────────────────────────────
+
+STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'janitorial', 'teacher')
+
+STAFF_CATEGORY_DESIGNATIONS = {
+    'management_staff': {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'},
+    'administration': {'vp', 'coordinator', 'team_lead', 'accountant', 'fdc'},
+    'janitorial': {'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'},
+    'teacher': {'teacher'},
+}
+
+_DESIGNATION_RANK = {
+    designation: rank
+    for rank, category in enumerate(STAFF_CATEGORY_ORDER)
+    for designation in STAFF_CATEGORY_DESIGNATIONS[category]
+}
+
+
+def staff_order_key(item):
+    """Order like the Staff table: category (Management → Administration →
+    Janitorial → Teacher) first, then Employee ID numerically within each."""
+    employee = getattr(item, 'employee', None)
+    designation = ((getattr(employee, 'designation', None) or '').strip().lower())
+    rank = _DESIGNATION_RANK.get(designation, len(STAFF_CATEGORY_ORDER))
+    employee_id = (getattr(employee, 'employee_id', None) or '')
+    digits = ''.join(ch for ch in employee_id if ch.isdigit())
+    return (rank, int(digits) if digits else 0, employee_id.lower())
+
+
+# ─────────────────────────────────────────────
 # ATTENDANCE-ONLY ADMIN MANAGER DASHBOARD
 # ─────────────────────────────────────────────
 
@@ -320,7 +351,10 @@ def admin_dashboard(request):
                     config_mode = 'percentage'
                 hr_config = _DefaultConfig()
 
-            hr_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
+            hr_salaries = sorted(
+                MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee'),
+                key=staff_order_key,
+            )
             hr_month_name = calendar.month_name[sheet_month]
             hr_months = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
@@ -329,7 +363,10 @@ def admin_dashboard(request):
 
             # Salary slips
             slip_selected_employee = request.GET.get('employee_id', '')
-            slip_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
+            slip_salaries = sorted(
+                MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee'),
+                key=staff_order_key,
+            )
             slip_selected_name = ''
 
             # Monthly attendance data
