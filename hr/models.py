@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from academics.models import TeacherProfile
+from academics.staff_groups import pf_category, DEFAULT_PF_PCT
 from datetime import date
 import calendar
 
@@ -37,7 +38,11 @@ class SalaryConfig(models.Model):
     bonus_percentage = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Or bonus as % of basic (if per_day=0)")
 
     # Deductions
-    provident_fund_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="PF % of basic")
+    provident_fund_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="PF % of basic (legacy fallback)")
+    pf_management_pct = models.DecimalField(max_digits=12, decimal_places=2, default=5, help_text="Provident Fund % for Management Staff")
+    pf_administration_pct = models.DecimalField(max_digits=12, decimal_places=2, default=5, help_text="Provident Fund % for Administration")
+    pf_janitorial_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Provident Fund % for Janitorial")
+    pf_teacher_pct = models.DecimalField(max_digits=12, decimal_places=2, default="7.50", help_text="Provident Fund % for Teachers")
     security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Security deduction % of basic (normal, from 3rd month)")
     van_child_pct = models.DecimalField(max_digits=12, decimal_places=2, default=0, help_text="Van/Child deduction % of basic")
     new_employee_security_pct = models.DecimalField(max_digits=12, decimal_places=2, default=50, help_text="Security deduction % of basic for first 2 months after joining")
@@ -73,8 +78,22 @@ class SalaryConfig(models.Model):
         return self._apply(self.transport_allowance_pct, basic)
     def get_kids_education(self, basic):
         return self._apply(self.kids_education_pct, basic)
-    def get_pf(self, basic):
-        return self._apply(self.provident_fund_pct, basic)
+    def get_pf_pct(self, designation=None):
+        """Provident Fund % of basic for a designation (category criteria)."""
+        category = pf_category(designation)
+        field = {
+            'management_staff': 'pf_management_pct',
+            'administration': 'pf_administration_pct',
+            'janitorial': 'pf_janitorial_pct',
+            'teacher': 'pf_teacher_pct',
+        }[category]
+        value = getattr(self, field, None)
+        if value is None:
+            value = DEFAULT_PF_PCT[category]
+        return float(value)
+
+    def get_pf(self, basic, designation=None):
+        return float(basic) * (self.get_pf_pct(designation) / 100)
     def get_security(self, basic):
         return self._apply(self.security_pct, basic)
     def get_van_child(self, basic):
@@ -365,7 +384,7 @@ class MonthlySalary(models.Model):
                 else:
                     self.provident_fund = float(basic) * float(self.cfg_pf_pct) / 100
             else:
-                self.provident_fund = config.get_pf(basic)
+                self.provident_fund = config.get_pf(basic, emp.designation)
 
             # Security & Van/Child
             if has_cfg:
