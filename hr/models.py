@@ -431,6 +431,45 @@ class MonthlySalary(models.Model):
         return f"{self.employee.full_name} - {month_name} {self.year} - {self.net_salary}"
 
 
+class BankLetterConfig(models.Model):
+    """Editable recipient details for generated bank letters, per transaction type."""
+    TYPE_CHOICES = MonthlySalary.TRANSACTION_TYPE_CHOICES
+
+    DEFAULTS = {
+        'bank_islami': {
+            'recipient_header': 'The Manager,\nBank Islamic Pakistan Limited\nMain Northern Bypass Road, Multan.',
+        },
+        'ubl': {
+            'recipient_header': 'The Manager,\nUnited Bank Limited\nUBL Ameen MA Jinnah Road,\nMultan.',
+        },
+        'cash': {
+            'recipient_header': '',
+        },
+        'personal': {
+            'recipient_header': '',
+        },
+    }
+
+    transaction_type = models.CharField(max_length=20, choices=TYPE_CHOICES, unique=True)
+    recipient_header = models.TextField(blank=True, default='', help_text="Addressed-to block, e.g. The Manager, Bank Name, Branch, City.")
+    subject = models.CharField(max_length=200, default='TRANSFER OF OFFICERS / STAFF PAY')
+    signature_name = models.CharField(max_length=100, default='CEO')
+    signature_org = models.CharField(max_length=200, default='Royal International School System')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def get_for(cls, transaction_type):
+        defaults = cls.DEFAULTS.get(transaction_type, {})
+        obj, _ = cls.objects.get_or_create(
+            transaction_type=transaction_type,
+            defaults={**defaults, 'subject': 'TRANSFER OF OFFICERS / STAFF PAY'},
+        )
+        return obj
+
+    def __str__(self):
+        return f"Bank Letter Config - {self.get_transaction_type_display()}"
+
+
 class EmployeeAttendance(models.Model):
     """Daily attendance tracking for employees."""
     STATUS_CHOICES = (

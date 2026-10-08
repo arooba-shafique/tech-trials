@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Letter - {{ type_display }} - {{ month_name }} {{ year }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Plus Jakarta Sans',sans-serif; background:#fff; color:#1a1d23; padding:30px; }
+        .no-print { text-align:center; margin-bottom:20px; }
+        .no-print button { padding:10px 24px;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit; }
+        .slip { max-width:800px; margin:0 auto; background:#fff; padding:40px 48px; }
+        .letter-top { display:flex; justify-content:space-between; gap:20px; margin-bottom:18px; }
+        .recipient { font-size:13.5px; line-height:1.55; white-space:pre-line; }
+        .letter-date { font-size:13.5px; font-weight:700; white-space:nowrap; }
+        .subject { font-size:13.5px; margin-bottom:18px; }
+        .subject .label { font-weight:700; }
+        .subject .value { font-weight:700; text-decoration:underline; margin-left:8px; letter-spacing:.3px; }
+        .body-text { font-size:13.5px; line-height:1.75; margin-bottom:18px; }
+        .body-text .blank { display:inline-block; min-width:130px; border-bottom:1px solid #1a1d23; }
+        table.letter-table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:6px; }
+        table.letter-table th, table.letter-table td { border:1px solid #1a1d23; padding:5px 10px; }
+        table.letter-table th { font-weight:700; text-align:left; background:#f8fafc; }
+        table.letter-table td.num, table.letter-table th.num { text-align:right; }
+        table.letter-table td.sr { text-align:center; width:44px; }
+        .total-row td { font-weight:700; font-size:14px; border:none; padding-top:8px; }
+        .signature { margin-top:46px; font-size:13.5px; font-weight:700; line-height:1.6; }
+        @media print {
+            body { padding:0; }
+            .no-print { display:none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <button onclick="slipPDF(this, window.location.href)" style="background:#8b2a87;">Download PDF</button>
+        <button onclick="window.print()" style="background:#6b1f68;margin-left:8px;">Print</button>
+        <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Bank Letter — {{ type_display }} — {{ month_name }} {{ year }}</p>
+    </div>
+
+    <div class="slip" data-pdf-filename="Bank_Letter_{{ type_display|slugify }}_{{ month_name }}_{{ year }}">
+        <div class="letter-top">
+            <div class="recipient">{% if config.recipient_header %}{{ config.recipient_header }}{% else %}The Manager,{% endif %}</div>
+            <div class="letter-date">Dated: {{ dated_long }}</div>
+        </div>
+
+        <div class="subject">
+            <span class="label">Subject:-</span><span class="value">{{ config.subject }}</span>
+        </div>
+
+        <div class="body-text">
+            {% if ttype == 'cash' %}
+            Please find enclosed herewith the salary sheet of officers / staff amounting<br>
+            Rs. {{ total|floatformat:0 }} /- Rupees:- {{ total_words }} only<br>
+            on account of payment of Salaries of officers / staff for the month of {{ month_name }} {{ year }}.<br>
+            As per following details:<br>
+            It is therefore requested that salary may please be released on {{ dated_dash }}.
+            {% else %}
+            Please find enclosed herewith a crossed cheque No. <span class="blank"></span> dated:{{ dated_dots }} amounting<br>
+            Rs. {{ total|floatformat:0 }} /- Rupees:- {{ total_words }} only<br>
+            on account of payment of Salaries of officers / staff for the month of {{ month_name }} {{ year }}.<br>
+            As per following details:<br>
+            It is therefore requested that salary may please be released on {{ dated_dash }}.
+            {% endif %}
+        </div>
+
+        <table class="letter-table">
+            <thead>
+                <tr>
+                    <th class="sr">Sr#</th>
+                    <th>Account Title</th>
+                    {% if ttype != 'cash' %}<th>Account Number</th>{% endif %}
+                    <th class="num">Net Pay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <td class="sr">{{ forloop.counter }}</td>
+                    <td>{{ r.name }}</td>
+                    {% if ttype != 'cash' %}<td>{{ r.account|default:"-" }}</td>{% endif %}
+                    <td class="num">{{ r.net|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if ttype == 'cash' %}3{% else %}4{% endif %}" style="text-align:center;color:#6b7280;padding:24px;">No salary records found for {{ month_name }} {{ year }} ({{ type_display }}).</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <table class="letter-table" style="border:none;">
+            <tr class="total-row">
+                <td colspan="2" style="border:none;">Total</td>
+                {% if ttype != 'cash' %}<td style="border:none;"></td>{% endif %}
+                <td class="num" style="border:none;text-align:right;font-weight:700;font-size:15px;">{{ total|floatformat:0 }}</td>
+            </tr>
+        </table>
+
+        <div class="signature">
+            {{ config.signature_name }}<br>
+            {{ config.signature_org }}
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'js/slip_pdf.js' %}"></script>
+</body>
+</html>
