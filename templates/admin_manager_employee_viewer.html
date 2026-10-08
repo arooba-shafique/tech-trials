@@ -452,7 +452,7 @@
                             else l.remove();
                         }
                     });
-                    body.innerHTML = container.innerHTML;
+                    body.innerHTML = (container.tagName === 'FORM') ? container.outerHTML : container.innerHTML;
                 } else {
                     var form = doc.querySelector('form');
                     body.innerHTML = form ? form.outerHTML : '<p style="color:#dc2626;padding:20px;">Could not load content.</p>';
