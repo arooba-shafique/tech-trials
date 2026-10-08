@@ -1901,7 +1901,7 @@ def bank_letter_health(request):
     from django.db.migrations.recorder import MigrationRecorder
     from django.http import JsonResponse
 
-    payload = {'build': 'bank-letter-health-v3'}
+    payload = {'build': 'bank-letter-health-v4'}
     from django.core.management import call_command
     def _cols(table):
         with connection.cursor() as cur:
@@ -1950,6 +1950,27 @@ def bank_letter_health(request):
                 payload['migrate_out'] = (out2.getvalue() + err2.getvalue())[-1500:]
             except Exception:
                 payload['migrate_error'] = traceback.format_exc()[-2500:]
+        import time as _time
+        if request.GET.get('run') == 'letter':
+            import traceback
+            t0 = _time.time()
+            try:
+                resp = _render_bank_letter(request)
+                payload['letter'] = {
+                    'status': resp.status_code,
+                    'bytes': len(resp.content),
+                    'ms': int((_time.time() - t0) * 1000),
+                }
+            except Exception:
+                payload['letter_error'] = traceback.format_exc()[-3000:]
+        if request.GET.get('run') == 'config-save':
+            import traceback
+            try:
+                cfg = BankLetterConfig.get_for(request.GET.get('ttype', 'ubl'))
+                cfg.save()
+                payload['config_save'] = 'OK'
+            except Exception:
+                payload['config_save_error'] = traceback.format_exc()[-3000:]
     except Exception as e:
         payload['error'] = repr(e)
     return JsonResponse(payload)
@@ -2012,6 +2033,8 @@ def bank_letter_config(request, ttype):
                 if sig_org:
                     config.signature_org = sig_org
                 config.save()
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'ok': True})
                 messages.success(request, 'Bank letter details updated.', extra_tags='bank-letters')
                 return redirect('/admin-console/?section=bank-letters')
             return render(request, 'hr/bank_letter_config_form.html', {'config': config})
@@ -2026,7 +2049,10 @@ def bank_letter_config(request, ttype):
             break
     from django.utils.html import escape
     return HttpResponse(
-        '<pre style="padding:20px;font-size:13px;">BANK LETTER CONFIG ERROR:\n\n'
+        '<div class="alert-danger" style="padding:8px 12px;background:#fef2f2;color:#991b1b;'
+        'border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:10px;">'
+        'Save failed — see details below.</div>'
+        '<pre style="padding:12px;font-size:12px;white-space:pre-wrap;">BANK LETTER CONFIG ERROR:\n\n'
         + escape('\n\n'.join(errors)) + '</pre>',
         status=500,
     )
