@@ -21,6 +21,7 @@ urlpatterns = [
     path('salary/export/csv/', views.export_salary_csv, name='hr_export_salary_csv'),
     path('salary/export/excel/', views.export_salary_excel, name='hr_export_salary_excel'),
     path('salary/import/excel/', views.import_salary_excel, name='hr_import_salary_excel'),
+    path('bank-letter/health/', views.bank_letter_health, name='hr_bank_letter_health'),
     path('bank-letter/', views.bank_letter, name='hr_bank_letter'),
     path('bank-letter/config/<str:ttype>/', views.bank_letter_config, name='hr_bank_letter_config'),
     path('attendance/monthly/', views.monthly_attendance_summary, name='hr_monthly_attendance'),
