@@ -14,7 +14,12 @@
         .lf-strip { height:30px; background:#7d2579; clip-path:polygon(0 65%,100% 0,100% 100%,0 100%); }
         .letterhead { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:14px 24px 16px; background:#fff; }
         .lh-logo { height:66px; width:auto; display:block; }
-        .lh-contact { text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:10px; line-height:1.7; color:#4b5563; }
+        .lh-contact { text-align:left; font-family:Arial,Helvetica,sans-serif; font-size:10px; line-height:1.7; color:#4b5563; }
+        .lh-contact div { padding-left:22px; background-repeat:no-repeat; background-position:left center; background-size:14px 14px; }
+        .ic-mail { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='%238b2a87' d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E"); }
+        .ic-phone { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='%238b2a87' d='M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z'/%3E%3C/svg%3E"); }
+        .ic-pin { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='%238b2a87' d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z'/%3E%3C/svg%3E"); }
+        .ic-web { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='24' height='24'%3E%3Cpath fill='%238b2a87' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93A8.01 8.01 0 0 1 4 12c0-.62.08-1.21.21-1.79L9 15v1a2 2 0 0 0 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3a1 1 0 0 0-1-1H8v-2h2a1 1 0 0 0 1-1V7h2a2 2 0 0 0 2-2v-.41A7.98 7.98 0 0 1 20 12a7.95 7.95 0 0 1-2.1 5.39z'/%3E%3C/svg%3E"); }
         .header { background:linear-gradient(135deg,#8b2a87,#6b1f68); color:#fff; text-align:center; padding:24px 20px 18px; }
         .header h1 { font-size:20px; font-weight:700; margin-bottom:2px; }
         .header p { font-size:12px; opacity:.85; }
@@ -56,14 +61,14 @@
         <div class="letterhead">
             <img class="lh-logo" src="{% static 'images/royal_logo.jpg' %}" alt="Royal International School System">
             <div class="lh-contact">
-                <div>info@royalinternationalschoolsystem.com</div>
-                <div>0303-2224561 | 0093-2224562</div>
-                <div>Main Northern Bypass Road, Near Northern Bypass Chowk, Multan</div>
-                <div>www.royalinternationalschoolsystem.com</div>
+                <div class="ic-mail">info@royalinternationalschoolsystem.com</div>
+                <div class="ic-phone">0303-2224561 | 0093-2224562</div>
+                <div class="ic-pin">Main Northern Bypass Road, Near Northern Bypass Chowk, Multan</div>
+                <div class="ic-web">www.royalinternationalschoolsystem.com</div>
             </div>
         </div>
         <div class="header">
-            <h1>{% if school %}{{ school.name }}{% else %}INSTITUTION{% endif %}</h1>
+            <h1>{% if school %}{{ school.name }}{% else %}Royal International School System{% endif %}</h1>
             <p>Salary Slip for the Month of {{ month_name }} {{ salary.year }}</p>
         </div>
 
