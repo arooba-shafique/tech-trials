@@ -1870,6 +1870,42 @@ def _render_bank_letter(request):
     return render(request, 'hr/bank_letter.html', context)
 
 
+def bank_letter_health(request):
+    """Anonymous build/DB probe used to verify the live deployment (safe to remove later)."""
+    from django.conf import settings
+    from django.db import connection
+    from django.db.migrations.recorder import MigrationRecorder
+    from django.http import JsonResponse
+
+    payload = {'build': 'bank-letter-health-v1'}
+    try:
+        payload['max_number_fields'] = getattr(settings, 'DATA_UPLOAD_MAX_NUMBER_FIELDS', None)
+        payload['debug'] = settings.DEBUG
+        tables = connection.introspection.table_names()
+        payload['bankletter_table'] = 'hr_bankletterconfig' in tables
+        payload['migrations_table'] = 'django_migrations' in tables
+        try:
+            applied = list(
+                MigrationRecorder(connection).Migration.objects.filter(
+                    app='hr'
+                ).order_by('-id').values_list('name', flat=True)[:3]
+            )
+            payload['last_hr_migrations'] = applied
+        except Exception as e:
+            payload['last_hr_migrations_error'] = repr(e)
+        try:
+            from django.core.management import call_command
+            from io import StringIO
+            out = StringIO()
+            call_command('showmigrations', 'hr', stdout=out)
+            payload['hr_migration_state'] = out.getvalue().splitlines()[-6:]
+        except Exception as e:
+            payload['hr_migration_state_error'] = repr(e)
+    except Exception as e:
+        payload['error'] = repr(e)
+    return JsonResponse(payload)
+
+
 @login_required(login_url='admin_login')
 def bank_letter(request):
     """Printable bank letter listing account numbers + net pay for a month/transaction type."""
