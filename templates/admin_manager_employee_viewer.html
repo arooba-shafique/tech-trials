@@ -252,7 +252,7 @@
                 <p style="font-size:13px;font-weight:700;margin-bottom:12px;">Quick Actions</p>
                 <div style="display:flex;flex-wrap:wrap;gap:10px;">
                     <a href="#" onclick="showSection('staff',document.querySelector('.nav-item[onclick*=\'staff\']'));return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">View Staff</a>
-                    <a href="{% url 'add_teacher' %}" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">+ Add Staff</a>
+                    <a href="#" onclick="openDrawer('{% url 'add_teacher' %}','Add Staff');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">+ Add Staff</a>
                 </div>
             </div>
         </div>
@@ -263,7 +263,7 @@
                 <h2 style="font-size:15px;font-weight:700;">All Staff</h2>
                 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                     <span class="readonly-notice">View &amp; Edit Only — No Salary Access</span>
-                    <a href="{% url 'add_teacher' %}" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">+ Add Staff</a>
+                    <a href="#" onclick="openDrawer('{% url 'add_teacher' %}','Add Staff');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">+ Add Staff</a>
                 </div>
             </div>
             <!-- Designation filter pills -->
@@ -316,6 +316,7 @@
                                 <div style="display:inline-flex;gap:4px;align-items:center;flex-wrap:nowrap;">
                                     <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:3px 8px;font-size:10px;white-space:nowrap;">Docs</a>
                                     <a href="#" onclick="openDrawer('{% url 'edit_teacher' teacher.id %}','Edit Staff — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-yellow" style="padding:3px 8px;font-size:10px;white-space:nowrap;">Edit</a>
+                                    <a href="#" onclick="return deleteStaff('{% url 'delete_teacher' teacher.id %}','{{ teacher.full_name|escapejs }}');" class="btn btn-red" style="padding:3px 8px;font-size:10px;white-space:nowrap;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;">Del</a>
                                 </div>
                             </td>
                         </tr>
@@ -463,6 +464,10 @@
                 attachMaritalStatusToggle(body);
                 attachKidsHandler(body);
                 attachSidebarScrollspy(body);
+                var cancelBtn = body.querySelector('.btn-cancel');
+                if (cancelBtn) {
+                    cancelBtn.addEventListener('click', function(e) { e.preventDefault(); window.closeDrawer(); });
+                }
             })
             .catch(function(){
                 body.innerHTML = '<div style="text-align:center;padding:40px;"><p style="color:#dc2626;font-size:13px;margin-bottom:12px;">Failed to load.</p><a href="' + url + '" style="color:#7c3aed;font-weight:600;">Open Full Page Instead</a></div>';
@@ -478,6 +483,25 @@
         }
         if (overlay) overlay.style.display = 'none';
         document.body.style.overflow = '';
+    };
+    /* Delete staff (POST with CSRF) */
+    window.deleteStaff = function(url, name) {
+        if (!confirm('Delete staff member "' + name + '"? This cannot be undone.')) return false;
+        var m = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+        var token = m ? decodeURIComponent(m[1]) : '';
+        var input = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!token && input) token = input.value;
+        fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': token }
+        }).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            window.location.href = '{% url "admin_console" %}?section=staff';
+        }).catch(function() {
+            alert('Could not delete staff member. Please try again.');
+        });
+        return false;
     };
     /* Handle AJAX form submissions inside drawer */
     function attachAddMoreHandler(container) {
