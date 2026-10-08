@@ -31,7 +31,7 @@
         <div class="breadcrumb">HR Module / Salary Sheet / Slip</div>
     </div>
     <div class="actions">
-        <a href="{% url 'hr_salary_slip_pdf' salary.pk %}" class="btn-success">Download PDF</a>
+        <a href="{% url 'hr_salary_slip_pdf' salary.pk %}" class="btn-success" data-slip-url="{% url 'hr_salary_slip_pdf' salary.pk %}" onclick="return slipPDF(this)">Download PDF</a>
         <a href="javascript:window.print();" class="btn-primary">Print</a>
         <a href="{% url 'admin_console' %}" class="btn-ghost">Back to Dashboard</a>
     </div>
@@ -128,5 +128,8 @@
         <div style="font-size:28px;font-weight:700;">PKR {{ salary.net_salary|floatformat:0 }}</div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'js/slip_pdf.js' %}"></script>
 </body>
 </html>

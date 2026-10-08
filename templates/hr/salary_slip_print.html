@@ -41,11 +41,12 @@
 </head>
 <body>
     <div class="no-print" style="text-align:center;margin-bottom:20px;">
-        <button onclick="window.print()" style="padding:10px 24px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Print / Save as PDF</button>
-        <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Click the button above or press Ctrl+P to save as PDF</p>
+        <button onclick="slipPDF(this, window.location.href)" style="padding:10px 24px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Download PDF</button>
+        <button onclick="window.print()" style="padding:10px 24px;background:#0f766e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-left:8px;">Print</button>
+        <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Download PDF saves a .pdf file, or press Ctrl+P to print</p>
     </div>
 
-    <div class="slip">
+    <div class="slip" data-pdf-filename="{{ employee.full_name }}_Salary_{{ month_name }}_{{ salary.year }}">
         <div class="header">
             <h1>{% if school %}{{ school.name }}{% else %}INSTITUTION{% endif %}</h1>
             <p>Salary Slip for the Month of {{ month_name }} {{ salary.year }}</p>
@@ -107,5 +108,8 @@
             <div><div class="footer-line"></div><br>C.E.O</div>
         </div>
     </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'js/slip_pdf.js' %}"></script>
 </body>
 </html>

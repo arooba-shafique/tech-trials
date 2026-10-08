@@ -154,7 +154,7 @@
                         <td style="text-align:center;white-space:nowrap;">
                             <a href="{% url 'hr_edit_monthly_salary' s.pk %}" class="btn btn-warning btn-sm">Edit</a>
                             <a href="{% url 'hr_salary_slip' s.pk %}" class="btn btn-primary btn-sm" target="_blank">Slip</a>
-                            <a href="{% url 'hr_salary_slip_pdf' s.pk %}" class="btn btn-success btn-sm" target="_blank">PDF</a>
+                            <a href="{% url 'hr_salary_slip_pdf' s.pk %}" class="btn btn-success btn-sm" target="_blank" data-slip-url="{% url 'hr_salary_slip_pdf' s.pk %}" onclick="return slipPDF(this)">PDF</a>
                             <a href="{% url 'hr_delete_monthly_salary' s.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this salary record?')">Del</a>
                         </td>
                     </tr>

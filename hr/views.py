@@ -1281,7 +1281,7 @@ def salary_slip(request, pk):
 
 @login_required(login_url='admin_login')
 def salary_slip_pdf(request, pk):
-    """Returns salary slip as a downloadable file."""
+    """Returns slip HTML; the browser turns it into a PDF (see slip_pdf.js)."""
     salary = get_object_or_404(MonthlySalary, pk=pk)
     employee = salary.employee
     emp_salary = EmployeeSalary.objects.filter(employee=employee).first()
@@ -1298,10 +1298,7 @@ def salary_slip_pdf(request, pk):
     }
     html_string = render(request, 'hr/salary_slip_print.html', context).content.decode('utf-8')
 
-    filename = f"{employee.full_name}_Salary_{month_name}_{salary.year}.html"
-    response = HttpResponse(html_string, content_type='text/html')
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-    return response
+    return HttpResponse(html_string, content_type='text/html; charset=utf-8')
 
 
 @login_required(login_url='admin_login')
