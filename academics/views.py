@@ -64,6 +64,62 @@ def _apply_designation_ordering(qs):
 
 
 # ─────────────────────────────────────────────
+# STAFF ORDER — mirrors STAFF_CATEGORIES in dps_ravi/static/js/admin_dashboard.js
+# ─────────────────────────────────────────────
+
+STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'janitorial', 'teacher')
+
+STAFF_CATEGORY_DESIGNATIONS = {
+    'management_staff': {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'},
+    'administration': {'vp', 'coordinator', 'team_lead', 'accountant', 'fdc'},
+    'janitorial': {'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'},
+    'teacher': {'teacher'},
+}
+
+_DESIGNATION_RANK = {
+    designation: rank
+    for rank, category in enumerate(STAFF_CATEGORY_ORDER)
+    for designation in STAFF_CATEGORY_DESIGNATIONS[category]
+}
+
+
+def staff_order_key(item):
+    """Order like the Staff table: category (Management → Administration →
+    Janitorial → Teacher) first, then Employee ID numerically within each."""
+    employee = getattr(item, 'employee', None)
+    designation = ((getattr(employee, 'designation', None) or '').strip().lower())
+    rank = _DESIGNATION_RANK.get(designation, len(STAFF_CATEGORY_ORDER))
+    employee_id = (getattr(employee, 'employee_id', None) or '')
+    digits = ''.join(ch for ch in employee_id if ch.isdigit())
+    return (rank, int(digits) if digits else 0, employee_id.lower())
+
+
+# ─────────────────────────────────────────────
+# PROVIDENT FUND CRITERIA — % of basic, pre-filled in the salary override table
+# ─────────────────────────────────────────────
+
+PF_PCT_BY_CATEGORY = {
+    'management_staff': 5,
+    'administration': 5,
+    'janitorial': 0,
+    'teacher': 7.5,
+}
+
+
+def staff_pf_pct(designation):
+    """Provident Fund % of basic for a designation.
+
+    Management Staff and Administration 5%, Teachers 7.5%, Janitorial 0%.
+    Designations outside every category get 0.
+    """
+    key = (designation or '').strip().lower()
+    for category, designations in STAFF_CATEGORY_DESIGNATIONS.items():
+        if key and key in designations:
+            return PF_PCT_BY_CATEGORY[category]
+    return 0
+
+
+# ─────────────────────────────────────────────
 # ATTENDANCE-ONLY ADMIN MANAGER DASHBOARD
 # ─────────────────────────────────────────────
 
@@ -73,9 +129,9 @@ def _attendance_only_dashboard(request, today):
 
     from django.db.models import Q
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
 
     teachers_qs = _apply_designation_ordering(teachers_qs)
 
@@ -127,15 +183,24 @@ def _employee_viewer_dashboard(request, today):
 
     from django.db.models import Q
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
+
+    designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
+    raw_desiginations = teachers_qs.order_by().values_list('designation', flat=True).distinct()
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer', 'teacher'}
+    designation_choices = sorted(
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d.strip().lower() not in _category_desig],
+        key=lambda x: x[1]
+    )
 
     teachers_qs = _apply_designation_ordering(teachers_qs)
 
     context = {
         'teachers': teachers_qs,
         'user_role': 'admin_manager',
+        'designation_choices': designation_choices,
     }
 
     return render(request, 'admin_manager_employee_viewer.html', context)
@@ -181,10 +246,10 @@ def admin_dashboard(request):
 
     students_qs = StudentProfile.objects.filter(**school_filter)
     if not request.user.is_superuser and school:
-        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
+        teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
     else:
-        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
-
+        teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail').order_by('employee_id')
+        
     teachers_qs = _apply_designation_ordering(teachers_qs)
     parents_qs = ParentProfile.objects.filter(**school_filter)
     classes_qs = Class.objects.filter(**school_filter)
@@ -278,6 +343,16 @@ def admin_dashboard(request):
             'last_salary': last_salary,
         })
 
+    # Fetch distinct designations dynamically from the database
+    designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
+    raw_desiginations = teachers_qs.order_by().values_list('designation', flat=True).distinct()
+    # Designations already grouped under category pills — hide from individual pills
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer', 'teacher'}
+    designation_choices = sorted(
+        [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d.strip().lower() not in _category_desig],
+        key=lambda x: x[1]
+    )
+
     context = {
         'students':      students_qs,
         'teachers':      teachers_qs,
@@ -298,6 +373,7 @@ def admin_dashboard(request):
         'left_completed_count': left_completed_count,
         'left_search': left_search,
         'pending_clearance_alerts': pending_clearance_alerts,
+        'designation_choices': designation_choices,
     }
 
     # Add HR data for admin_manager
@@ -334,7 +410,14 @@ def admin_dashboard(request):
                     config_mode = 'percentage'
                 hr_config = _DefaultConfig()
 
-            hr_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
+            # PF criteria (% of basic) only applies in percentage mode — in PKR
+            # (fixed amount) mode the PF column is left at 0 for manual entry.
+            cfg_amount_mode = getattr(hr_config, 'config_mode', 'percentage') == 'amount'
+
+            hr_salaries = sorted(
+                MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee'),
+                key=staff_order_key,
+            )
             hr_month_name = calendar.month_name[sheet_month]
             hr_months = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
@@ -343,7 +426,10 @@ def admin_dashboard(request):
 
             # Salary slips
             slip_selected_employee = request.GET.get('employee_id', '')
-            slip_salaries = MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee')
+            slip_salaries = sorted(
+                MonthlySalary.objects.filter(month=sheet_month, year=sheet_year).select_related('employee'),
+                key=staff_order_key,
+            )
             slip_selected_name = ''
 
             # Monthly attendance data
@@ -388,6 +474,8 @@ def admin_dashboard(request):
                                       ms.cfg_bonus_per_day, ms.cfg_bonus_pct])
                     except Exception:
                         pass
+                teacher.ov_pf_criteria = staff_pf_pct(teacher.designation)
+                teacher.ov_pf_from_criteria = False
                 if has_cfg:
                     try:
                         teacher.ov_housing = float(ms.cfg_housing_pct)
@@ -408,7 +496,8 @@ def admin_dashboard(request):
                         teacher.ov_transport = 0
                         teacher.ov_kids_education = 0
                         teacher.ov_tax = 0
-                        teacher.ov_pf = 0
+                        teacher.ov_pf = 0 if cfg_amount_mode else teacher.ov_pf_criteria
+                        teacher.ov_pf_from_criteria = True
                         teacher.ov_security = 0
                         teacher.ov_van_child = 0
                         teacher.ov_bonus_per_day = 0
@@ -421,7 +510,8 @@ def admin_dashboard(request):
                     teacher.ov_transport = 0
                     teacher.ov_kids_education = 0
                     teacher.ov_tax = 0
-                    teacher.ov_pf = 0
+                    teacher.ov_pf = 0 if cfg_amount_mode else teacher.ov_pf_criteria
+                    teacher.ov_pf_from_criteria = True
                     teacher.ov_security = 0
                     teacher.ov_van_child = 0
                     teacher.ov_bonus_per_day = 0

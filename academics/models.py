@@ -84,10 +84,14 @@ class TeacherProfile(models.Model):
         ('teacher', 'Teacher'),
         ('coordinator', 'Coordinator'),
         ('manager', 'Manager'),
+        ('manager_academics', 'Manager Academics'),
+        ('hr_manager', 'HR Manager'),
+        ('director', 'Director'),
         ('vp', 'VP'),
         ('group_head', 'Group Head'),
         ('section_head', 'Section Head'),
         ('assistant_manager', 'Assistant Manager'),
+        ('assistant_manager_academics', 'Assistant Manager Academics'),
         ('a_coordinator', 'A. Coordinator'),
         ('accountant', 'Accountant'),
         ('team_lead', 'Team Leader'),
@@ -140,9 +144,10 @@ class TeacherProfile(models.Model):
 
     employee_id = models.CharField(max_length=30, unique=True, null=True, blank=True)
     cnic = models.CharField(max_length=20, blank=True, default='')
-    designation = models.CharField(max_length=25, choices=DESIGNATION_CHOICES, default='teacher', blank=True)
+    designation = models.CharField(max_length=50, choices=DESIGNATION_CHOICES, default='teacher', blank=True)
     employment_type = models.CharField(max_length=15, choices=EMPLOYMENT_TYPE_CHOICES, default='permanent', blank=True)
     skill_level = models.CharField(max_length=25, choices=SKILL_LEVEL_CHOICES, default='permanent_professional', blank=True)
+    qualification = models.CharField(max_length=100, blank=True, default='')
     subjects = models.ManyToManyField('Subject', blank=True, related_name='teachers')
     joining_date = models.DateField(null=True, blank=True)
 
@@ -156,6 +161,7 @@ class TeacherProfile(models.Model):
     husband_cnic = models.CharField(max_length=20, blank=True, default='')
     husband_address = models.TextField(blank=True, default='')
     husband_phone = models.CharField(max_length=15, blank=True, default='')
+    num_children = models.PositiveIntegerField(default=0, blank=True, help_text="Number of children (for non-single females)")
     kids_json = models.TextField(blank=True, default='[]', help_text='JSON array of kids: [{"name":"...","dob":"YYYY-MM-DD","gender":"M/F"}]')
 
     # Salary fields

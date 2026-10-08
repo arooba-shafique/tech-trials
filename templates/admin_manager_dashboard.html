@@ -592,49 +592,65 @@
             <!-- Designation filter pills -->
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                 <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
-                <button class="staff-filter-btn" onclick="filterStaff('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teachers</button>
-                <button class="staff-filter-btn" onclick="filterStaff('coordinator',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Coordinators</button>
-                <button class="staff-filter-btn" onclick="filterStaff('vp',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">VP</button>
-                <button class="staff-filter-btn" onclick="filterStaff('manager',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Managers</button>
-                <button class="staff-filter-btn" onclick="filterStaff('group_head',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Group Heads</button>
+                <button class="staff-filter-btn" onclick="filterStaff('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                <button class="staff-filter-btn" onclick="filterStaff('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                <button class="staff-filter-btn" onclick="filterStaff('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                <button class="staff-filter-btn" onclick="filterStaff('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                {% for value, label in designation_choices %}
+                <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
+                {% endfor %}
             </div>
-            <div id="staff-cards-grid" class="cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;">
-                {% for teacher in teachers %}
-                <div class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" style="background:var(--white);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07);overflow:hidden;">
-                    <div style="padding:18px 18px 14px;display:flex;align-items:center;gap:13px;border-bottom:1px solid #f3f4f6;">
-                        <div style="width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:#fff;flex-shrink:0;background:#16a34a;">{{ teacher.full_name|first|upper }}</div>
-                        <div style="flex:1;min-width:0;">
-                            <div style="font-size:14.5px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ teacher.full_name }}</div>
-                            <div style="font-size:11px;color:var(--text-muted);">{{ teacher.employee_id|default:"No ID" }}</div>
-                        </div>
-                        <span style="font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:20px;flex-shrink:0;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span>
-                    </div>
-                    <div style="padding:10px 18px;display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text-secondary);border-bottom:1px solid #f3f4f6;">
-                        <div><span style="color:var(--text-muted);">{% if teacher.marital_status == 'married' and teacher.gender == 'F' %}Husband{% else %}Father{% endif %}:</span> {% if teacher.marital_status == 'married' and teacher.gender == 'F' %}{{ teacher.husband_name|default:teacher.father_name|default:"-" }}{% else %}{{ teacher.father_name|default:"-" }}{% endif %}</div>
-                        <div><span style="color:var(--text-muted);">CNIC:</span> {{ teacher.cnic|default:"-" }}</div>
-                        <div><span style="color:var(--text-muted);">Desig:</span> {{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</div>
-                        <div><span style="color:var(--text-muted);">Type:</span> {{ teacher.get_employment_type_display|default:teacher.employment_type|default:"-" }}</div>
-                        <div><span style="color:var(--text-muted);">Phone:</span> {{ teacher.phone|default:"-" }}</div>
-                        <div><span style="color:var(--text-muted);">Joined:</span> {{ teacher.joining_date|default:"-" }}</div>
-
-                    </div>
-                    <div style="padding:10px 18px;">
-                        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text-muted);margin-bottom:6px;">Assigned Subjects</div>
-                        {% for ts in teacher.assignments.all %}
-                        <div style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f9fafb;gap:8px;">
-                            <div style="font-size:12px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ ts.subject.name }}</div>
-                            <span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px;background:#f0fdf4;color:#16a34a;flex-shrink:0;">{{ ts.assigned_class }}</span>
-                        </div>
-                        {% empty %}<div style="font-size:11px;color:var(--text-muted);padding:2px 0;">No subjects assigned.</div>{% endfor %}
-                    </div>
-                    <div style="padding:10px 18px;display:flex;gap:8px;border-top:1px solid #f3f4f6;flex-wrap:wrap;">
-                        <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:5px 12px;font-size:11.5px;">Docs</a>
-                        <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:5px 12px;font-size:11.5px;">Edit</a>
-                        <a href="#" onclick="openDrawer('{% url 'hr_employee_separation' teacher.id %}','Mark as Left — {{ teacher.full_name|escapejs }}');return false;" class="btn" style="padding:5px 12px;font-size:11.5px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;cursor:pointer;">Left</a>
-                        <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-danger" style="padding:5px 12px;font-size:11.5px;" onclick="return confirm('Delete?')">Delete</a>
-                    </div>
-                </div>
-                {% empty %}<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff found.</div>{% endfor %}
+            <div style="margin-bottom:14px;">
+                <input type="text" id="staff-search" placeholder="Search by name, ID, phone..." oninput="searchStaff(this.value)" style="width:100%;max-width:360px;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            </div>
+            <div class="staff-table-wrap" style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:11.5px;min-width:1500px;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Emp ID</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Full Name</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Father / Husband</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">CNIC</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Gender</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Designation</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Qualification</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Phone</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Email</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Address</th>
+                            <th style="padding:9px 10px;text-align:left;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Joined</th>
+                            <th style="padding:9px 10px;text-align:right;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Salary</th>
+                            <th style="padding:9px 10px;text-align:center;border-bottom:2px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr class="staff-card" data-designation="{{ teacher.designation|default:'teacher' }}" data-search="{{ teacher.full_name }} {{ teacher.employee_id|default:'' }} {{ teacher.phone|default:'' }} {{ teacher.get_designation_display|default:'' }}" style="border-bottom:1px solid #f1f5f9;">
+                            <td data-label="Emp ID" style="padding:9px 10px;font-weight:600;white-space:nowrap;">{{ teacher.employee_id|default:"-" }}</td>
+                            <td data-label="Name" style="padding:9px 10px;font-weight:600;white-space:nowrap;">{{ teacher.full_name }}</td>
+                            <td data-label="Father" style="padding:9px 10px;white-space:nowrap;">{{ teacher.father_name|default:teacher.husband_name|default:"-" }}</td>
+                            <td data-label="CNIC" style="padding:9px 10px;white-space:nowrap;">{{ teacher.cnic|default:"-" }}</td>
+                            <td data-label="Gender" style="padding:9px 10px;"><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;{% if teacher.gender == 'M' %}background:#eff6ff;color:#2563eb;{% else %}background:#fdf4ff;color:#9333ea;{% endif %}">{{ teacher.get_gender_display }}</span></td>
+                            <td data-label="Designation" style="padding:9px 10px;white-space:nowrap;">{{ teacher.get_designation_display|default:teacher.designation|default:"-" }}</td>
+                            <td data-label="Qualification" style="padding:9px 10px;white-space:nowrap;">{{ teacher.qualification|default:"-" }}</td>
+                            <td data-label="Phone" style="padding:9px 10px;white-space:nowrap;">{{ teacher.phone|default:"-" }}</td>
+                            <td data-label="Email" style="padding:9px 10px;white-space:nowrap;">{{ teacher.email|default:"-" }}</td>
+                            <td data-label="Address" style="padding:9px 10px;">{{ teacher.address|default:"-" }}</td>
+                            <td data-label="Joined" style="padding:9px 10px;white-space:nowrap;">{{ teacher.joining_date|default:"-" }}</td>
+                            <td data-label="Salary" style="padding:9px 10px;text-align:right;white-space:nowrap;">{{ teacher.salary|default:"0" }}</td>
+                            <td data-label="Actions" style="padding:9px 10px;text-align:center;">
+                                <div style="display:inline-flex;gap:4px;align-items:center;flex-wrap:nowrap;">
+                                    <a href="#" onclick="openDrawer('{% url 'staff_documents' teacher.id %}','Staff Documents — {{ teacher.full_name|escapejs }}');return false;" class="btn btn-primary" style="padding:3px 8px;font-size:10px;white-space:nowrap;">Docs</a>
+                                    <a href="{% url 'edit_teacher' teacher.id %}" class="btn btn-yellow" style="padding:3px 8px;font-size:10px;white-space:nowrap;">Edit</a>
+                                    <a href="#" onclick="openDrawer('{% url 'hr_employee_separation' teacher.id %}','Mark as Left — {{ teacher.full_name|escapejs }}');return false;" class="btn" style="padding:3px 8px;font-size:10px;background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;cursor:pointer;white-space:nowrap;">Left</a>
+                                    <a href="{% url 'delete_teacher' teacher.id %}" class="btn btn-red" style="padding:3px 8px;font-size:10px;white-space:nowrap;" onclick="return confirm('Delete this teacher?');">Del</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="13" style="text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <div id="staff-no-results" style="display:none;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;">No staff match the selected filter.</div>
         </div>
@@ -1131,8 +1147,28 @@
                 var yearInp = form.querySelector('input[name="year"]');
                 if (monthSel) monthSel.addEventListener('change', function() { form.submit(); });
                 if (yearInp) yearInp.addEventListener('change', function() { form.submit(); });
-            })();
-            </script>
+                    })();
+                    </script>
+                    <script>
+                    var SAL_SHEET_CATS = {
+                        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+                        'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+                        'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+                        'teacher': ['teacher']
+                    };
+                    function filterSalarySheet(designation, btn) {
+                        document.querySelectorAll('.sheet-filter-btn').forEach(function(b) {
+                            b.style.background = '#fff'; b.style.color = '#374151';
+                        });
+                        if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                        var cats = SAL_SHEET_CATS[designation] || null;
+                        document.querySelectorAll('#section-salary-sheet tbody tr').forEach(function(row) {
+                            var desig = row.dataset.designation || 'teacher';
+                            var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                            row.style.display = show ? '' : 'none';
+                        });
+                    }
+                    </script>
             <form method="post" action="{% url 'hr_monthly_attendance' %}">
                 {% csrf_token %}
                 <input type="hidden" name="month" value="{{ att_month }}">
@@ -1144,6 +1180,13 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                             Save Attendance
                         </button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:0 20px 14px;">
+                        <button class="att-cat-btn" onclick="filterAttCategory('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
                     </div>
                     <div style="overflow-x:auto;">
                         <table style="width:100%;border-collapse:collapse;min-width:900px;">
@@ -1162,7 +1205,7 @@
                             <tbody>
                                 {% for emp in hr_attendance_employees %}
                                 {% with emp_data=hr_att_existing|dictsort:"employee_id" %}
-                                <tr style="border-bottom:1px solid #f3f4f6;">
+                                <tr style="border-bottom:1px solid #f3f4f6;" data-designation="{{ emp.designation|default:'teacher' }}">
                                     <td style="padding:10px 14px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 14px;">
                                         <div style="font-weight:600;font-size:13px;">{{ emp.full_name }}</div>
@@ -1242,6 +1285,18 @@
                     });
                 });
             });
+            function filterAttCategory(designation, btn) {
+                document.querySelectorAll('.att-cat-btn').forEach(function(b) {
+                    b.style.background = '#fff'; b.style.color = '#374151';
+                });
+                if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                var cats = SAL_SHEET_CATS[designation] || null;
+                document.querySelectorAll('#section-hr-attendance tbody tr').forEach(function(row) {
+                    var desig = row.dataset.designation || 'teacher';
+                    var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                    row.style.display = show ? '' : 'none';
+                });
+            }
             </script>
         </div>
 
@@ -1276,11 +1331,13 @@
                     </div>
                     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teachers</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('coordinator',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Coordinators</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('vp',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">VP</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('manager',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Managers</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('group_head',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Group Heads</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                        {% for value, label in designation_choices %}
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
+                        {% endfor %}
                     </div>
                     <p id="config-mode-desc" style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Set salary configuration for each employee individually. Leave all fields at 0 to use default values.</p>
                     <form method="post" action="{% url 'hr_save_employee_overrides' %}">
@@ -1317,7 +1374,7 @@
                                         <td><input type="number" name="custom_transport_{{ teacher.id }}" value="{{ teacher.ov_transport }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
                                         <td><input type="number" name="custom_kids_education_{{ teacher.id }}" value="{{ teacher.ov_kids_education }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
                                         <td><input type="number" name="custom_tax_{{ teacher.id }}" value="{{ teacher.ov_tax }}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;" class="cfg-input"></td>
-                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_pf }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
+                                        <td><input type="number" name="custom_pf_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_pf }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input{% if teacher.ov_pf_from_criteria and not teacher.is_new_employee %} pf-criteria{% endif %}"{% if teacher.ov_pf_from_criteria and not teacher.is_new_employee %} data-pf="{{ teacher.ov_pf_criteria }}"{% endif %} {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
                                         <td><input type="number" name="custom_security_{{ teacher.id }}" value="{% if not teacher.is_new_employee %}0{% else %}{{ teacher.ov_security }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if not teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if not teacher.is_new_employee %}disabled readonly title="Only applies for new employees (first 2 months)"{% endif %}></td>
                                         <td><input type="number" name="custom_van_child_{{ teacher.id }}" value="{% if teacher.is_new_employee %}0{% else %}{{ teacher.ov_van_child }}{% endif %}" step="0.01" min="0" style="width:70px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;{% if teacher.is_new_employee %}background:#f3f4f6;color:#9ca3af;cursor:not-allowed;{% endif %}" class="cfg-input" {% if teacher.is_new_employee %}disabled readonly title="Skipped for new employees (first 2 months)"{% endif %}></td>
                                         <td><select name="custom_transaction_type_{{ teacher.id }}" style="width:120px;padding:5px;border:1px solid var(--border);border-radius:6px;font-size:12px;"><option value="bank_islami" {% if teacher.ov_transaction_type == 'bank_islami' %}selected{% endif %}>Bank Islami</option><option value="ubl" {% if teacher.ov_transaction_type == 'ubl' %}selected{% endif %}>UBL</option><option value="cash" {% if teacher.ov_transaction_type == 'cash' %}selected{% endif %}>Cash in Hand</option><option value="personal" {% if teacher.ov_transaction_type == 'personal' %}selected{% endif %}>Personal Account</option></select></td>
@@ -1340,6 +1397,12 @@
             document.getElementById('hidden-year').value = y;
             window.location.href = '{% url "admin_console" %}?section=salary-config&month=' + m + '&year=' + y;
         }
+        var SAL_CFG_CATEGORIES = {
+            'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+            'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+            'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+            'teacher': ['teacher']
+        };
         function filterSalaryConfig(designation, btn) {
             document.querySelectorAll('.cfg-filter-btn').forEach(function(b) {
                 b.style.background = '#fff';
@@ -1349,9 +1412,11 @@
                 btn.style.background = '#0d9488';
                 btn.style.color = '#fff';
             }
+            var categoryDesignations = SAL_CFG_CATEGORIES[designation] || null;
             document.querySelectorAll('#employee-overrides-section tbody tr').forEach(function(row) {
                 var desig = row.dataset.designation || 'teacher';
-                row.style.display = (designation === 'all' || desig === designation) ? '' : 'none';
+                var show = designation === 'all' || desig === designation || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
+                row.style.display = show ? '' : 'none';
             });
         }
 
@@ -1382,6 +1447,15 @@
                 desc.textContent = 'Values are treated as fixed PKR amounts.';
                 unitLabels.forEach(function(el) { el.textContent = '(PKR)'; });
             }
+
+            // PF criteria is a % of basic — clear it in PKR mode, restore it in % mode.
+            document.querySelectorAll('input.pf-criteria').forEach(function(inp) {
+                if (mode === 'amount') {
+                    inp.value = 0;
+                } else if (inp.dataset.pf !== undefined && inp.dataset.pf !== '') {
+                    inp.value = inp.dataset.pf;
+                }
+            });
         }
 
         // Initialize toggle on page load
@@ -1503,6 +1577,13 @@
                         <input type="file" name="excel_file" id="import-excel-input" accept=".xlsx,.xls" style="display:none;" onchange="if(this.files.length){this.form.submit();}">
                     </form>
                     </div>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                    </div>
                     <script>
                     (function() {
                         var form = document.querySelector('#section-salary-sheet form[method="get"]');
@@ -1560,7 +1641,7 @@
                             </thead>
                             <tbody>
                                 {% for s in hr_salaries %}
-                                <tr style="border-bottom:1px solid #f1f5f9;">
+                                <tr style="border-bottom:1px solid #f1f5f9;" data-designation="{{ s.employee.designation|default:'teacher' }}">
                                     <td style="padding:10px 12px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 12px;font-weight:600;">{{ s.employee.full_name }}<div style="font-size:11px;color:var(--text-muted);">{{ s.employee.employee_id|default:"-" }}</div></td>
                                     <td style="padding:10px 12px;text-align:right;">PKR {{ s.basic_salary|floatformat:0 }}</td>
@@ -1627,6 +1708,13 @@
                             <input type="text" id="slip-emp-search" placeholder="Type employee name…" autocomplete="off" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:220px;">
                         </label>
                     </form>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px;">
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                    </div>
                     <script>
                     (function() {
                         var form = document.getElementById('slip-filter-form');
@@ -1648,7 +1736,20 @@
                         }
                     })();
                     </script>
-
+                    <script>
+                    function filterSalarySlip(designation, btn) {
+                        document.querySelectorAll('.slip-filter-btn').forEach(function(b) {
+                            b.style.background = '#fff'; b.style.color = '#374151';
+                        });
+                        if (btn) { btn.style.background = '#0d9488'; btn.style.color = '#fff'; }
+                        var cats = SAL_SHEET_CATS[designation] || null;
+                        document.querySelectorAll('#section-salary-slips tbody tr').forEach(function(row) {
+                            var desig = row.dataset.designation || 'teacher';
+                            var show = designation === 'all' || desig === designation || (cats && cats.indexOf(desig) !== -1);
+                            row.style.display = show ? '' : 'none';
+                        });
+                    }
+                    </script>
                     <div style="font-size:14px;font-weight:700;margin-bottom:14px;">{{ hr_month_name }} {{ hr_year }}</div>
                     {% if slip_salaries %}
                     <div style="overflow-x:auto;">
@@ -1667,7 +1768,7 @@
                             </thead>
                             <tbody>
                                 {% for s in slip_salaries %}
-                                <tr style="border-bottom:1px solid #f1f5f9;" class="slip-row">
+                                <tr style="border-bottom:1px solid #f1f5f9;" class="slip-row" data-designation="{{ s.employee.designation|default:'teacher' }}">
                                     <td style="padding:10px 12px;">{{ forloop.counter }}</td>
                                     <td style="padding:10px 12px;font-weight:600;">{{ s.employee.full_name }}<div style="font-size:11px;color:var(--text-muted);">{{ s.employee.employee_id|default:"-" }}</div></td>
                                     <td style="padding:10px 12px;color:var(--text-muted);">{{ s.employee.designation|default:"-" }}</td>
@@ -1677,7 +1778,7 @@
                                     <td style="padding:10px 12px;text-align:right;font-weight:700;color:#16a34a;">PKR {{ s.net_salary|floatformat:0 }}</td>
                                     <td style="padding:10px 12px;text-align:center;">
                                         <a href="{% url 'hr_salary_slip' s.id %}" class="btn btn-primary" style="padding:4px 12px;font-size:11px;" target="_blank">View</a>
-                                        <a href="{% url 'hr_salary_slip_pdf' s.id %}" class="btn btn-yellow" style="padding:4px 12px;font-size:11px;">Print</a>
+                                        <a href="{% url 'hr_salary_slip_pdf' s.id %}" class="btn btn-yellow" style="padding:4px 12px;font-size:11px;" target="_blank" data-slip-url="{% url 'hr_salary_slip_pdf' s.id %}" onclick="return slipPDF(this)">Print</a>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -1696,7 +1797,8 @@
     </div><!-- end .content -->
 </main>
 
-<script src="{% static 'js/admin_dashboard.js' %}?v=4"></script>
+<script src="{% static 'js/admin_dashboard.js' %}?v=5"></script>
+<script src="{% static 'js/slip_pdf.js' %}?v=1"></script>
 
 <!-- Credentials JS -->
 <script>
@@ -1869,6 +1971,54 @@ function clearAttendanceDate(classId) {
 #drawer-body .card { padding: 16px !important; margin-bottom: 14px !important; }
 #drawer-body .form-row { display: grid !important; grid-template-columns: 1fr !important; gap: 10px !important; }
 @media (max-width:480px) { #drawer { width:100vw!important;border-radius:16px 16px 0 0!important;top:auto!important;bottom:0!important;left:0!important;transform:none!important; } }
+
+/* Staff table responsive */
+@media (max-width: 900px) {
+    .staff-table-wrap { overflow-x: hidden !important; }
+    .staff-table-wrap table { min-width: 0 !important; width: 100% !important; }
+    .staff-table-wrap thead { display: none; }
+    .staff-table-wrap tbody tr {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px 16px;
+        padding: 14px;
+        border-bottom: 1px solid #e5e7eb;
+        background: #fff;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    }
+    .staff-table-wrap tbody td {
+        padding: 3px 0;
+        border: none;
+        font-size: 12px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .staff-table-wrap tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #9ca3af;
+        margin-bottom: 2px;
+    }
+    .staff-table-wrap tbody td[data-label="Address"] { grid-column: 1 / -1; }
+    .staff-table-wrap tbody td[data-label="Joined"] { grid-column: 1 / -1; }
+    .staff-table-wrap tbody td[data-label="Salary"] { grid-column: 1 / -1; text-align: left !important; }
+    .staff-table-wrap tbody td:last-child {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        padding-top: 6px;
+        border-top: 1px solid #f3f4f6;
+    }
+    .staff-table-wrap tbody td:last-child::before { display: none; }
+}
 </style>
 
 <script>

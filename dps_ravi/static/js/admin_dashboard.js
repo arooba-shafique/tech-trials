@@ -202,12 +202,20 @@ function filterAttendance(clsId, status, btn) {
 }
 
 // ════════════════════════════════════════════
-// STAFF DESIGNATION FILTER
+// STAFF DESIGNATION FILTER + SEARCH
 // ════════════════════════════════════════════
 var activeStaffDesignation = 'all';
+var activeStaffSearch = '';
+
+var STAFF_CATEGORIES = {
+    'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+    'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+    'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+    'teacher': ['teacher']
+};
 
 function filterStaff(designation, btn) {
-    activeStaffDesignation = designation;
+    if (designation !== undefined) activeStaffDesignation = designation;
     document.querySelectorAll('.staff-filter-btn').forEach(function (b) {
         b.style.background = '#fff';
         b.style.color      = 'var(--text-secondary)';
@@ -216,16 +224,27 @@ function filterStaff(designation, btn) {
         btn.style.background = '#1a1d23';
         btn.style.color      = '#fff';
     }
+    var q = activeStaffSearch.toLowerCase();
     var cards   = document.querySelectorAll('.staff-card');
     var visible = 0;
+    var categoryDesignations = STAFF_CATEGORIES[activeStaffDesignation] || null;
     cards.forEach(function (card) {
-        var desig = card.dataset.designation || 'teacher';
-        var show  = designation === 'all' || desig === designation;
+        var desig = (card.dataset.designation || 'teacher').trim().toLowerCase();
+        var text  = (card.dataset.search || card.textContent || '').toLowerCase();
+        var want  = String(activeStaffDesignation).trim().toLowerCase();
+        var showDesig = activeStaffDesignation === 'all' || desig === want || (categoryDesignations && categoryDesignations.indexOf(desig) !== -1);
+        var showSearch = !q || text.indexOf(q) !== -1;
+        var show = showDesig && showSearch;
         card.style.display = show ? '' : 'none';
         if (show) visible++;
     });
     var noResults = document.getElementById('staff-no-results');
     if (noResults) noResults.style.display = visible === 0 ? 'block' : 'none';
+}
+
+function searchStaff(query) {
+    activeStaffSearch = query;
+    filterStaff();
 }
 
 // ════════════════════════════════════════════

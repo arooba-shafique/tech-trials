@@ -10,7 +10,12 @@
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Plus Jakarta Sans',sans-serif; background:#fff; color:#1a1d23; padding:30px; }
         .slip { max-width:700px; margin:0 auto; border:2px solid #e5e7eb; border-radius:12px; overflow:hidden; }
-        .header { background:linear-gradient(135deg,#0d9488,#0f766e); color:#fff; text-align:center; padding:24px 20px 18px; }
+        .lh-strip { height:30px; background:#7d2579; clip-path:polygon(0 0,100% 0,100% 35%,0 100%); }
+        .lf-strip { height:30px; background:#7d2579; clip-path:polygon(0 65%,100% 0,100% 100%,0 100%); }
+        .letterhead { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:14px 24px 16px; background:#fff; }
+        .lh-logo { height:66px; width:auto; display:block; }
+        .lh-contact { text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:10px; line-height:1.7; color:#4b5563; }
+        .header { background:linear-gradient(135deg,#8b2a87,#6b1f68); color:#fff; text-align:center; padding:24px 20px 18px; }
         .header h1 { font-size:20px; font-weight:700; margin-bottom:2px; }
         .header p { font-size:12px; opacity:.85; }
         .section-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#6b7280; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #e5e7eb; }
@@ -26,7 +31,7 @@
         .calc-col:first-child { border-right:1px solid #e5e7eb; }
         .calc-row { display:flex; justify-content:space-between; font-size:12px; padding:4px 0; }
         .calc-row.total { border-top:2px solid #e5e7eb; margin-top:6px; padding-top:8px; font-weight:700; font-size:13px; }
-        .net-box { background:linear-gradient(135deg,#0d9488,#0f766e); color:#fff; text-align:center; padding:20px; }
+        .net-box { background:linear-gradient(135deg,#8b2a87,#6b1f68); color:#fff; text-align:center; padding:20px; }
         .net-box .label { font-size:11px; text-transform:uppercase; letter-spacing:1px; opacity:.85; }
         .net-box .amount { font-size:30px; font-weight:700; margin-top:4px; }
         .footer { padding:14px 24px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; text-align:center; font-size:11px; color:#6b7280; border-top:1px solid #e5e7eb; }
@@ -41,11 +46,22 @@
 </head>
 <body>
     <div class="no-print" style="text-align:center;margin-bottom:20px;">
-        <button onclick="window.print()" style="padding:10px 24px;background:#0d9488;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Print / Save as PDF</button>
-        <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Click the button above or press Ctrl+P to save as PDF</p>
+        <button onclick="slipPDF(this, window.location.href)" style="padding:10px 24px;background:#8b2a87;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Download PDF</button>
+        <button onclick="window.print()" style="padding:10px 24px;background:#6b1f68;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-left:8px;">Print</button>
+        <p style="font-size:11px;color:#9ca3af;margin-top:6px;">Download PDF saves a .pdf file, or press Ctrl+P to print</p>
     </div>
 
-    <div class="slip">
+    <div class="slip" data-pdf-filename="{{ employee.full_name }}_Salary_{{ month_name }}_{{ salary.year }}">
+        <div class="lh-strip"></div>
+        <div class="letterhead">
+            <img class="lh-logo" src="{% static 'images/royal_logo.jpg' %}" alt="Royal International School System">
+            <div class="lh-contact">
+                <div>info@royalinternationalschoolsystem.com</div>
+                <div>0303-2224561 | 0093-2224562</div>
+                <div>Main Northern Bypass Road, Near Northern Bypass Chowk, Multan</div>
+                <div>www.royalinternationalschoolsystem.com</div>
+            </div>
+        </div>
         <div class="header">
             <h1>{% if school %}{{ school.name }}{% else %}INSTITUTION{% endif %}</h1>
             <p>Salary Slip for the Month of {{ month_name }} {{ salary.year }}</p>
@@ -56,22 +72,21 @@
             <div class="info-item"><span>Employee ID:</span> <strong>{{ employee.employee_id|default:"-" }}</strong></div>
             <div class="info-item"><span>Designation:</span> <strong>{{ employee.designation|default:"-" }}</strong></div>
             <div class="info-item"><span>Joining Date:</span> <strong>{{ employee.joining_date|default:"-" }}</strong></div>
-            <div class="info-item"><span>Pay Status:</span> <strong>{% if salary.pay_status == 'paid' %}PAID{% elif salary.pay_status == 'partial' %}PARTIAL{% else %}UNPAID{% endif %}</strong></div>
             <div class="info-item"><span>Per Day Salary:</span> <strong>PKR {{ salary.per_day_salary|floatformat:2 }}</strong></div>
         </div>
 
         <div class="att-grid" style="grid-template-columns:repeat(6,1fr);">
-            <div class="att-box"><div class="num" style="color:#16a34a;">{{ salary.present_days }}</div><div class="lbl">Present</div></div>
+            <div class="att-box"><div class="num" style="color:#8b2a87;">{{ salary.present_days }}</div><div class="lbl">Present</div></div>
             <div class="att-box"><div class="num" style="color:#dc2626;">{{ salary.days_absent }}</div><div class="lbl">Absent</div></div>
-            <div class="att-box"><div class="num" style="color:#0d9488;">{{ salary.paid_leaves }}</div><div class="lbl">Paid Leave</div></div>
+            <div class="att-box"><div class="num" style="color:#8b2a87;">{{ salary.paid_leaves }}</div><div class="lbl">Paid Leave</div></div>
             <div class="att-box"><div class="num" style="color:#d97706;">{{ salary.unpaid_leaves }}</div><div class="lbl">Unpaid Leave</div></div>
             <div class="att-box"><div class="num" style="color:#2563eb;">{{ salary.late_coming_days }}</div><div class="lbl">Late</div></div>
-            <div class="att-box"><div class="num" style="color:#9333ea;">{{ salary.days_in_month }}</div><div class="lbl">Total</div></div>
+            <div class="att-box"><div class="num" style="color:#6b1f68;">{{ salary.days_in_month }}</div><div class="lbl">Total</div></div>
         </div>
 
         <div class="calc-grid">
             <div class="calc-col">
-                <div class="section-title" style="color:#16a34a;">Earnings</div>
+                <div class="section-title" style="color:#8b2a87;">Earnings</div>
                 <div class="calc-row"><span>Basic Salary</span><span class="amount">PKR {{ salary.basic_salary|floatformat:0 }}</span></div>
                 <div class="calc-row"><span>Increment</span><span class="amount">PKR {{ salary.increment|floatformat:0 }}</span></div>
                 <div class="calc-row"><span>Housing Allowance</span><span class="amount">PKR {{ salary.housing_allowance|floatformat:0 }}</span></div>
@@ -79,7 +94,7 @@
                 <div class="calc-row"><span>Transport Allowance</span><span class="amount">PKR {{ salary.transport_allowance|floatformat:0 }}</span></div>
                 <div class="calc-row"><span>Kids Education Allowance</span><span class="amount">PKR {{ salary.kids_education_allowance|floatformat:0 }}</span></div>
                 <div class="calc-row"><span>Other Allowance</span><span class="amount">PKR {{ salary.other_allowance|floatformat:0 }}</span></div>
-                <div class="calc-row"><span>Bonus (0 Leave)</span><span class="amount" style="color:#16a34a;">PKR {{ salary.bonus_amount|floatformat:0 }}</span></div>
+                <div class="calc-row"><span>Bonus (0 Leave)</span><span class="amount" style="color:#8b2a87;">PKR {{ salary.bonus_amount|floatformat:0 }}</span></div>
                 <div class="calc-row total"><span>Gross Salary</span><span class="amount">PKR {{ salary.gross_salary|floatformat:0 }}</span></div>
             </div>
             <div class="calc-col">
@@ -106,6 +121,10 @@
             <div><div class="footer-line"></div><br>V. Principal</div>
             <div><div class="footer-line"></div><br>C.E.O</div>
         </div>
+        <div class="lf-strip"></div>
     </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'js/slip_pdf.js' %}"></script>
 </body>
 </html>
