@@ -180,27 +180,6 @@ class TeacherProfile(models.Model):
             return f"{base} - {email}"
         return base
 
-    @property
-    def designation_sort_order(self):
-        """Return sort order for designation categories:
-        1: Management, 2: Administration, 3: Teachers, 4: Janitorial
-        """
-        mgmt = {'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator'}
-        admin = {'team_lead', 'coordinator', 'accountant', 'fdc'}
-        teachers = {'teacher'}
-        janitorial = {'aya', 'sweeper', 'office_boy', 'compositer', 'photocopier'}
-
-        desig = self.designation or 'teacher'
-        if desig in mgmt:
-            return 1
-        elif desig in admin:
-            return 2
-        elif desig in teachers:
-            return 3
-        elif desig in janitorial:
-            return 4
-        return 5
-
     class Meta:
         verbose_name = "Teacher"
         verbose_name_plural = "Teachers"
