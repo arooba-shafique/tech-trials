@@ -23,6 +23,9 @@ custom_domain = os.environ.get('CUSTOM_DOMAIN')
 if custom_domain:
     CSRF_TRUSTED_ORIGINS.append(f'https://{custom_domain}')
 
+# Salary config posts ~9 fields per employee (110+ staff = 1000+ fields, Django's default limit)
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

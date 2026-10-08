@@ -1788,12 +1788,31 @@ def _hr_access_ok(request):
     return True
 
 
-@login_required(login_url='admin_login')
-def bank_letter(request):
-    """Printable bank letter listing account numbers + net pay for a month/transaction type."""
-    if not _hr_access_ok(request):
-        return HttpResponse("Unauthorized", status=403)
+def _selfheal_and_migrate():
+    """Recreate missing bank-letter table, then run migrations.
 
+    api/index.py swallows migration errors on cold start, so prod can be missing the
+    hr_bankletterconfig table while django_migrations still records it (e.g. a DB
+    restore). Drop the stale record first so migrate actually recreates the table.
+    Returns a traceback string on failure, else None.
+    """
+    from django.db import connection
+    from django.db.migrations.recorder import MigrationRecorder
+    from django.core.management import call_command
+    try:
+        if 'hr_bankletterconfig' not in connection.introspection.table_names():
+            MigrationRecorder(connection).Migration.objects.filter(
+                app='hr', name='0023_bankletterconfig'
+            ).delete()
+        call_command('migrate', verbosity=0)
+        return None
+    except Exception:
+        import traceback
+        return traceback.format_exc()
+
+
+def _render_bank_letter(request):
+    """Build the bank letter response (extracted so wrapper can retry after a DB error)."""
     from academics.designation_order import apply_designation_ordering
 
     today = timezone.now().date()
@@ -1852,6 +1871,35 @@ def bank_letter(request):
 
 
 @login_required(login_url='admin_login')
+def bank_letter(request):
+    """Printable bank letter listing account numbers + net pay for a month/transaction type."""
+    if not _hr_access_ok(request):
+        return HttpResponse("Unauthorized", status=403)
+
+    # api/index.py swallows migration errors on cold start, so a table can be missing
+    # while the site still serves. On a DB error, run migrate and retry once.
+    errors = []
+    for attempt in range(2):
+        try:
+            return _render_bank_letter(request)
+        except Exception:
+            import traceback
+            errors.append(traceback.format_exc())
+            if attempt == 0:
+                heal_tb = _selfheal_and_migrate()
+                if heal_tb:
+                    errors.append(heal_tb)
+                continue
+            break
+    from django.utils.html import escape
+    return HttpResponse(
+        '<pre style="padding:20px;font-size:13px;">BANK LETTER ERROR:\n\n'
+        + escape('\n\n'.join(errors)) + '</pre>',
+        status=500,
+    )
+
+
+@login_required(login_url='admin_login')
 def bank_letter_config(request, ttype):
     """Edit the recipient/subject/signature details used by bank letters, per transaction type."""
     if not _hr_access_ok(request):
@@ -1859,19 +1907,37 @@ def bank_letter_config(request, ttype):
     if ttype not in dict(BankLetterConfig.TYPE_CHOICES):
         return HttpResponse("Not found", status=404)
 
-    config = BankLetterConfig.get_for(ttype)
-    if request.method == 'POST':
-        config.recipient_header = request.POST.get('recipient_header', config.recipient_header)
-        subject = (request.POST.get('subject') or '').strip()
-        if subject:
-            config.subject = subject
-        sig_name = (request.POST.get('signature_name') or '').strip()
-        if sig_name:
-            config.signature_name = sig_name
-        sig_org = (request.POST.get('signature_org') or '').strip()
-        if sig_org:
-            config.signature_org = sig_org
-        config.save()
-        messages.success(request, 'Bank letter details updated.', extra_tags='bank-letters')
-        return redirect('/admin-console/?section=bank-letters')
-    return render(request, 'hr/bank_letter_config_form.html', {'config': config})
+    errors = []
+    for attempt in range(2):
+        try:
+            config = BankLetterConfig.get_for(ttype)
+            if request.method == 'POST':
+                config.recipient_header = request.POST.get('recipient_header', config.recipient_header)
+                subject = (request.POST.get('subject') or '').strip()
+                if subject:
+                    config.subject = subject
+                sig_name = (request.POST.get('signature_name') or '').strip()
+                if sig_name:
+                    config.signature_name = sig_name
+                sig_org = (request.POST.get('signature_org') or '').strip()
+                if sig_org:
+                    config.signature_org = sig_org
+                config.save()
+                messages.success(request, 'Bank letter details updated.', extra_tags='bank-letters')
+                return redirect('/admin-console/?section=bank-letters')
+            return render(request, 'hr/bank_letter_config_form.html', {'config': config})
+        except Exception:
+            import traceback
+            errors.append(traceback.format_exc())
+            if attempt == 0:
+                heal_tb = _selfheal_and_migrate()
+                if heal_tb:
+                    errors.append(heal_tb)
+                continue
+            break
+    from django.utils.html import escape
+    return HttpResponse(
+        '<pre style="padding:20px;font-size:13px;">BANK LETTER CONFIG ERROR:\n\n'
+        + escape('\n\n'.join(errors)) + '</pre>',
+        status=500,
+    )
