@@ -3,7 +3,10 @@ from django.db.models import Case, When, Value, IntegerField
 
 def _apply_designation_ordering(qs):
     """Apply ordering by designation category: Management, Administration, Teachers, Janitorial."""
-    mgmt = ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator']
+    mgmt = [
+        'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
+        'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
+    ]
     admin = ['team_lead', 'coordinator', 'accountant', 'fdc']
     teachers = ['teacher']
     janitorial = ['aya', 'sweeper', 'office_boy', 'compositer', 'photocopier']

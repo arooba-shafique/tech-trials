@@ -47,7 +47,10 @@ def get_user_school(user):
 STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'teacher', 'janitorial')
 
 STAFF_CATEGORY_DESIGNATIONS = {
-    'management_staff': {'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator'},
+    'management_staff': {
+        'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
+        'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
+    },
     'administration': {'team_lead', 'coordinator', 'accountant', 'fdc'},
     'janitorial': {'aya', 'sweeper', 'office_boy', 'compositer', 'photocopier'},
     'teacher': {'teacher'},

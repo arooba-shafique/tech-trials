@@ -1151,8 +1151,8 @@
                     </script>
                     <script>
                     var SAL_SHEET_CATS = {
-                        'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
-                        'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+                        'management_staff': ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator', 'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+                        'administration': ['team_lead', 'coordinator', 'accountant', 'fdc'],
                         'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
                         'teacher': ['teacher']
                     };
@@ -1398,8 +1398,8 @@
             window.location.href = '{% url "admin_console" %}?section=salary-config&month=' + m + '&year=' + y;
         }
         var SAL_CFG_CATEGORIES = {
-            'management_staff': ['director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
-            'administration': ['vp', 'coordinator', 'team_lead', 'accountant', 'fdc'],
+            'management_staff': ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator', 'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
+            'administration': ['team_lead', 'coordinator', 'accountant', 'fdc'],
             'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
             'teacher': ['teacher']
         };
