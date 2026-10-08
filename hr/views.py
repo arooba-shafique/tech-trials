@@ -1880,14 +1880,27 @@ def bank_letter_health(request):
     from django.db.migrations.recorder import MigrationRecorder
     from django.http import JsonResponse
 
-    payload = {'build': 'bank-letter-health-v2'}
+    payload = {'build': 'bank-letter-health-v3'}
     from django.core.management import call_command
+    def _cols(table):
+        with connection.cursor() as cur:
+            return {c.name for c in connection.introspection.get_table_description(cur, table)}
     try:
         payload['max_number_fields'] = getattr(settings, 'DATA_UPLOAD_MAX_NUMBER_FIELDS', None)
         payload['debug'] = settings.DEBUG
         tables = connection.introspection.table_names()
         payload['bankletter_table'] = 'hr_bankletterconfig' in tables
         payload['migrations_table'] = 'django_migrations' in tables
+        try:
+            payload['col_probe'] = {
+                'tp_qualification': 'qualification' in _cols('academics_teacherprofile'),
+                'ms_cfg_mode': 'cfg_mode' in _cols('hr_monthlysalary'),
+                'ms_cfg_kid_fee_pct': 'cfg_kid_fee_pct' in _cols('hr_monthlysalary'),
+                'sc_config_mode': 'config_mode' in _cols('hr_salaryconfig'),
+                'sr_total_tax': 'total_tax' in _cols('hr_separationrecord'),
+            }
+        except Exception as e:
+            payload['col_probe_error'] = repr(e)
         try:
             applied = list(
                 MigrationRecorder(connection).Migration.objects.filter(
