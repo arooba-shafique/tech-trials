@@ -96,7 +96,7 @@ class ParentProfileForm(forms.ModelForm):
 
 
 
-from academics.views import _apply_designation_ordering
+from .designation_order import _apply_designation_ordering
 
 class ClassForm(forms.ModelForm):
     class Meta:

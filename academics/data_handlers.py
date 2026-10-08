@@ -41,7 +41,7 @@ def _student_rows(school=None):
 
 
 def _teacher_rows(school=None):
-    from academics.views import _apply_designation_ordering
+    from .designation_order import _apply_designation_ordering
     qs = TeacherProfile.objects.select_related('user').all()
     if school:
         qs = qs.filter(school=school)
