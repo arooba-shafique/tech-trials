@@ -11,11 +11,12 @@ from django.db.models import Q, Sum
 import json
 
 from academics.models import TeacherProfile
-from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance, SeparationRecord
+from .models import EmployeeSalary, MonthlySalary, SalaryConfig, EmployeeAttendance, SeparationRecord, BankLetterConfig
 from .forms import (
     EmployeeSalaryForm, MonthlySalaryForm, SalaryConfigForm,
     EmployeeAttendanceForm, GenerateSalaryForm, SeparationForm, ClearanceForm
 )
+from .utils import number_to_words, ordinal
 
 
 def get_user_school(user):
@@ -1763,3 +1764,114 @@ def import_clearance_excel(request):
         messages.info(request, f'{skipped} empty row(s) skipped.')
 
     return redirect(_get_redirect())
+
+
+# ---------------------------------------------
+# BANK LETTERS
+# ---------------------------------------------
+
+from datetime import date as _date
+
+
+def _hr_access_ok(request):
+    role = getattr(request.user, 'role', None)
+    if not (request.user.is_superuser or role in ('admin', 'admin_manager', 'principal')):
+        return False
+    if role == 'admin_manager':
+        # Restricted admin managers (employee viewers / attendance-only) have no salary access
+        try:
+            profile = request.user.admin_manager_profile
+            if profile.is_employee_viewer or profile.is_attendance_only:
+                return False
+        except Exception:
+            pass
+    return True
+
+
+@login_required(login_url='admin_login')
+def bank_letter(request):
+    """Printable bank letter listing account numbers + net pay for a month/transaction type."""
+    if not _hr_access_ok(request):
+        return HttpResponse("Unauthorized", status=403)
+
+    from academics.designation_order import apply_designation_ordering
+
+    today = timezone.now().date()
+    try:
+        month = int(request.GET.get('month') or today.month)
+    except ValueError:
+        month = today.month
+    try:
+        year = int(request.GET.get('year') or today.year)
+    except ValueError:
+        year = today.year
+    month = min(max(month, 1), 12)
+
+    ttype = request.GET.get('type') or 'bank_islami'
+    if ttype not in dict(BankLetterConfig.TYPE_CHOICES):
+        ttype = 'bank_islami'
+
+    raw_date = request.GET.get('date') or today.isoformat()
+    try:
+        letter_date = _date.fromisoformat(raw_date)
+    except ValueError:
+        letter_date = today
+
+    qs = MonthlySalary.objects.filter(month=month, year=year, transaction_type=ttype).select_related(
+        'employee', 'employee__salary_detail'
+    )
+    qs = apply_designation_ordering(qs, 'employee__designation', 'employee__full_name')
+
+    rows = []
+    total = 0
+    for s in qs:
+        detail = getattr(s.employee, 'salary_detail', None)
+        account = ((detail.bank_account if detail else '') or s.employee.bank_account or '').strip()
+        rows.append({'name': s.employee.full_name, 'account': account, 'net': s.net_salary})
+        total += s.net_salary
+
+    month_name = calendar.month_name[month]
+    config = BankLetterConfig.get_for(ttype)
+
+    context = {
+        'rows': rows,
+        'total': total,
+        'total_words': number_to_words(total),
+        'month': month,
+        'year': year,
+        'month_name': month_name,
+        'letter_date': letter_date,
+        'dated_long': f"{ordinal(letter_date.day)} {calendar.month_name[letter_date.month]} {letter_date.year}",
+        'dated_dots': letter_date.strftime('%d.%m.%Y'),
+        'dated_dash': letter_date.strftime('%d-%m-%Y'),
+        'ttype': ttype,
+        'type_display': dict(BankLetterConfig.TYPE_CHOICES)[ttype],
+        'config': config,
+    }
+    return render(request, 'hr/bank_letter.html', context)
+
+
+@login_required(login_url='admin_login')
+def bank_letter_config(request, ttype):
+    """Edit the recipient/subject/signature details used by bank letters, per transaction type."""
+    if not _hr_access_ok(request):
+        return HttpResponse("Unauthorized", status=403)
+    if ttype not in dict(BankLetterConfig.TYPE_CHOICES):
+        return HttpResponse("Not found", status=404)
+
+    config = BankLetterConfig.get_for(ttype)
+    if request.method == 'POST':
+        config.recipient_header = request.POST.get('recipient_header', config.recipient_header)
+        subject = (request.POST.get('subject') or '').strip()
+        if subject:
+            config.subject = subject
+        sig_name = (request.POST.get('signature_name') or '').strip()
+        if sig_name:
+            config.signature_name = sig_name
+        sig_org = (request.POST.get('signature_org') or '').strip()
+        if sig_org:
+            config.signature_org = sig_org
+        config.save()
+        messages.success(request, 'Bank letter details updated.', extra_tags='bank-letters')
+        return redirect('/admin-console/?section=bank-letters')
+    return render(request, 'hr/bank_letter_config_form.html', {'config': config})

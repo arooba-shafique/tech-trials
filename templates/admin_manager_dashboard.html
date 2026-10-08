@@ -186,6 +186,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             Salary Sheet
         </a>
+        <a class="nav-item" href="#" onclick="showSection('bank-letters',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>
+            Bank Letters
+        </a>
         <a class="nav-item" href="#" onclick="showSection('salary-slips',this);return false;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Salary Slips
@@ -1684,6 +1688,86 @@
                 </div>
             </div>
         </div>
+
+        <!-- ═══════════ HR: BANK LETTERS ═══════════ -->
+        <div id="section-bank-letters" class="section">
+            <div class="table-card">
+                <div style="padding:22px;">
+                    <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Generate Bank Letter</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Pick the salary month, letter date and transaction type — the letter lists account titles, account numbers and net pay from that month's salary sheet.</p>
+
+                    <form id="bank-letter-form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:24px;">
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Month</span>
+                            <select name="month" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+                                {% for m_num, m_name in hr_months %}
+                                <option value="{{ m_num }}" {% if m_num == hr_month %}selected{% endif %}>{{ m_name }}</option>
+                                {% empty %}
+                                <option value="1" selected>January</option>
+                                <option value="2">February</option>
+                                <option value="3">March</option>
+                                <option value="4">April</option>
+                                <option value="5">May</option>
+                                <option value="6">June</option>
+                                <option value="7">July</option>
+                                <option value="8">August</option>
+                                <option value="9">September</option>
+                                <option value="10">October</option>
+                                <option value="11">November</option>
+                                <option value="12">December</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Year</span>
+                            <input type="number" name="year" value="{{ hr_year|default:'2026' }}" min="2020" max="2035" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;width:100px;">
+                        </label>
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Letter Date</span>
+                            <input type="date" name="date" id="bl-date" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+                        </label>
+                        <label style="display:flex;flex-direction:column;gap:5px;">
+                            <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Transaction Type</span>
+                            <select name="type" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+                                <option value="bank_islami">Bank Islami</option>
+                                <option value="ubl">UBL</option>
+                                <option value="cash">Cash in Hand</option>
+                                <option value="personal">Personal Account</option>
+                            </select>
+                        </label>
+                        <button type="button" onclick="generateBankLetter()" style="padding:9px 18px;background:#0D9488;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Generate Letter</button>
+                    </form>
+
+                    <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Bank Details</div>
+                    <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Recipient address, subject line and signature used on each letter — edit once per transaction type.</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <a href="#" onclick="openDrawer('{% url 'hr_bank_letter_config' 'bank_islami' %}','Bank Details — Bank Islami');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">Edit Bank Islami</a>
+                        <a href="#" onclick="openDrawer('{% url 'hr_bank_letter_config' 'ubl' %}','Bank Details — UBL');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">Edit UBL</a>
+                        <a href="#" onclick="openDrawer('{% url 'hr_bank_letter_config' 'cash' %}','Bank Details — Cash in Hand');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">Edit Cash in Hand</a>
+                        <a href="#" onclick="openDrawer('{% url 'hr_bank_letter_config' 'personal' %}','Bank Details — Personal Account');return false;" class="btn btn-primary" style="font-size:12px;padding:7px 14px;">Edit Personal Account</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        function generateBankLetter() {
+            var f = document.getElementById('bank-letter-form');
+            if (!f) return;
+            var dateVal = (f.querySelector('[name=date]') || {}).value || '';
+            var params = 'month=' + encodeURIComponent(f.querySelector('[name=month]').value) +
+                '&year=' + encodeURIComponent(f.querySelector('[name=year]').value) +
+                (dateVal ? '&date=' + encodeURIComponent(dateVal) : '') +
+                '&type=' + encodeURIComponent(f.querySelector('[name=type]').value);
+            window.open('{% url "hr_bank_letter" %}?' + params, '_blank');
+        }
+        (function() {
+            var d = document.getElementById('bl-date');
+            if (d && !d.value) {
+                var t = new Date();
+                d.value = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+            }
+        })();
+        </script>
 
         <!-- ═══════════ HR: SALARY SLIPS ═══════════ -->
         <div id="section-salary-slips" class="section">
