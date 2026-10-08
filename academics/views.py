@@ -646,8 +646,24 @@ def delete_student(request, pk):
 @login_required(login_url='admin_login')
 def add_teacher(request):
     school = get_user_school(request.user)
+
+    # Employee viewers may add staff, but never enter salary details
+    hide_salary = False
+    if getattr(request.user, 'role', None) == 'admin_manager':
+        try:
+            profile = request.user.admin_manager_profile
+            hide_salary = profile.is_employee_viewer
+        except Exception:
+            pass
+    salary_fields = ['salary', 'salary_type', 'working_days_per_week', 'bank_name', 'bank_account']
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     if request.method == 'POST':
         form = TeacherProfileForm(request.POST, request.FILES, school=school)
+        if hide_salary:
+            for f in salary_fields:
+                if f in form.fields:
+                    del form.fields[f]
         if form.is_valid():
             teacher = form.save(commit=False)
             teacher.school = get_user_school(request.user)
@@ -694,10 +710,20 @@ def add_teacher(request):
             form.save_m2m()  # save ManyToMany fields like subjects
 
             messages.success(request, 'Teacher added successfully.', extra_tags='teachers')
+            if is_ajax:
+                import json as _json
+                return HttpResponse(_json.dumps({'ok': True, 'msg': 'Staff added successfully.'}), content_type='application/json')
             return redirect('/admin-console/?section=staff')
+        elif is_ajax:
+            import json as _json
+            return HttpResponse(_json.dumps({'ok': False, 'errors': form.errors.as_json()}), content_type='application/json', status=400)
     else:
         form = TeacherProfileForm(school=school)
-    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher'})
+        if hide_salary:
+            for f in salary_fields:
+                if f in form.fields:
+                    del form.fields[f]
+    return render(request, 'add_teacher.html', {'form': form, 'model_name': 'Teacher', 'hide_salary': hide_salary})
 
 
 @login_required(login_url='admin_login')
