@@ -14,14 +14,19 @@
         .topbar .breadcrumb { font-size:12px; color:#6b7280; }
         .topbar .actions { margin-top:10px; display:flex; gap:8px; justify-content:center; }
         .topbar .actions a { padding:8px 18px; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; }
-        .btn-primary { background:#0d9488; color:#fff; border:none; }
-        .btn-primary:hover { background:#0f766e; }
+        .btn-primary { background:#6b1f68; color:#fff; border:none; }
+        .btn-primary:hover { background:#571856; }
         .btn-ghost { background:#fff; color:#1a1d23; border:1px solid #e5e7eb; }
         .btn-ghost:hover { background:#f9fafb; }
-        .btn-success { background:#16a34a; color:#fff; border:none; }
-        .btn-success:hover { background:#15803d; }
+        .btn-success { background:#8b2a87; color:#fff; border:none; }
+        .btn-success:hover { background:#6b1f68; }
         .card { background:#fff; border-radius:14px; box-shadow:0 1px 4px rgba(0,0,0,.06); padding:24px; }
-        :root { --primary:#0d9488; --green:#16a34a; --red:#dc2626; --border:#e5e7eb; --text-muted:#6b7280; --text-secondary:#4b5563; }
+        .lh-strip { height:30px; background:#7d2579; clip-path:polygon(0 0,100% 0,100% 35%,0 100%); }
+        .lf-strip { height:30px; background:#7d2579; clip-path:polygon(0 65%,100% 0,100% 100%,0 100%); }
+        .letterhead { display:flex; align-items:center; justify-content:space-between; gap:20px; padding:14px 24px 16px; background:#fff; }
+        .lh-logo { height:66px; width:auto; display:block; }
+        .lh-contact { text-align:right; font-family:Arial,Helvetica,sans-serif; font-size:10px; line-height:1.7; color:#4b5563; }
+        :root { --primary:#8b2a87; --primary-dark:#6b1f68; --green:#8b2a87; --red:#dc2626; --border:#e5e7eb; --text-muted:#6b7280; --text-secondary:#4b5563; --yellow:#d97706; --blue:#2563eb; --purple:#8b2a87; }
     </style>
 </head>
 <body>
@@ -37,7 +42,18 @@
     </div>
 </div>
 
-<div class="card" style="max-width:800px;margin:0 auto;">
+<div class="card" style="max-width:800px;margin:0 auto;padding:0;overflow:hidden;">
+    <div class="lh-strip"></div>
+    <div class="letterhead">
+        <img class="lh-logo" src="{% static 'images/royal_logo.jpg' %}" alt="Royal International School System">
+        <div class="lh-contact">
+            <div>info@royalinternationalschoolsystem.com</div>
+            <div>0303-2224561 | 0093-2224562</div>
+            <div>Main Northern Bypass Road, Near Northern Bypass Chowk, Multan</div>
+            <div>www.royalinternationalschoolsystem.com</div>
+        </div>
+    </div>
+    <div style="padding:24px;">
     <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:2px solid var(--primary);">
         <h2 style="font-size:18px;font-weight:700;color:var(--primary);">{% if school %}{{ school.name }}{% else %}INSTITUTION{% endif %}</h2>
         <p style="font-size:12px;color:var(--text-muted);">Salary Slip for the Month of {{ month_name }} {{ salary.year }}</p>
@@ -57,14 +73,13 @@
             <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Salary Details</div>
             <div style="margin-top:8px;">
                 <div style="font-size:12px;">Joining Date: {{ employee.joining_date|default:"-" }}</div>
-                <div style="font-size:12px;">Pay Status: <strong>{% if salary.pay_status == 'paid' %}PAID{% elif salary.pay_status == 'partial' %}PARTIAL{% else %}UNPAID{% endif %}</strong></div>
             </div>
         </div>
     </div>
 
     <!-- Attendance -->
     <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px;">
-        <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:8px;">
+        <div style="text-align:center;padding:10px;background:#f7eef7;border-radius:8px;">
             <div style="font-size:18px;font-weight:700;color:var(--green);">{{ salary.present_days }}</div>
             <div style="font-size:10px;color:var(--text-muted);">Present</div>
         </div>
@@ -72,8 +87,8 @@
             <div style="font-size:18px;font-weight:700;color:var(--red);">{{ salary.days_absent }}</div>
             <div style="font-size:10px;color:var(--text-muted);">Absent</div>
         </div>
-        <div style="text-align:center;padding:10px;background:#f0fdf4;border-radius:8px;">
-            <div style="font-size:18px;font-weight:700;color:#0d9488;">{{ salary.paid_leaves }}</div>
+        <div style="text-align:center;padding:10px;background:#f7eef7;border-radius:8px;">
+            <div style="font-size:18px;font-weight:700;color:#8b2a87;">{{ salary.paid_leaves }}</div>
             <div style="font-size:10px;color:var(--text-muted);">Paid Leave</div>
         </div>
         <div style="text-align:center;padding:10px;background:#fffbeb;border-radius:8px;">
@@ -127,6 +142,8 @@
         <div style="font-size:12px;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Net Salary Payable</div>
         <div style="font-size:28px;font-weight:700;">PKR {{ salary.net_salary|floatformat:0 }}</div>
     </div>
+    </div>
+    <div class="lf-strip"></div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
