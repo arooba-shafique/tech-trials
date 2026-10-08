@@ -94,6 +94,8 @@ class ParentProfileForm(forms.ModelForm):
 
 
 
+from academics.views import _apply_designation_ordering
+
 class ClassForm(forms.ModelForm):
     class Meta:
         model = Class
@@ -103,7 +105,7 @@ class ClassForm(forms.ModelForm):
         school = kwargs.pop('school', None)
         super().__init__(*args, **kwargs)
         if school:
-            self.fields['class_teacher'].queryset = TeacherProfile.objects.filter(school=school)
+            self.fields['class_teacher'].queryset = _apply_designation_ordering(TeacherProfile.objects.filter(school=school))
 
 
 class SubjectForm(forms.ModelForm):
@@ -121,7 +123,7 @@ class TeacherSubjectAssignmentForm(forms.ModelForm):
         school = kwargs.pop('school', None)
         super().__init__(*args, **kwargs)
         if school:
-            self.fields['teacher'].queryset = TeacherProfile.objects.filter(school=school)
+            self.fields['teacher'].queryset = _apply_designation_ordering(TeacherProfile.objects.filter(school=school))
             self.fields['subject'].queryset = Subject.objects.filter(school=school)
             self.fields['assigned_class'].queryset = Class.objects.filter(school=school)
 

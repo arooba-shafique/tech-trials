@@ -37,6 +37,32 @@ def get_user_school(user):
     return getattr(user, 'school', None)
 
 
+def _apply_designation_ordering(qs):
+    """Apply ordering by designation category: Management, Administration, Teachers, Janitorial."""
+    from django.db.models import Case, When, Value, IntegerField
+
+    mgmt = ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator']
+    admin = ['team_lead', 'coordinator', 'accountant', 'fdc']
+    teachers = ['teacher']
+    janitorial = ['aya', 'sweeper', 'office_boy', 'compositer', 'photocopier']
+
+    whens = []
+    for i, desig in enumerate(mgmt):
+        whens.append(When(designation=desig, then=Value(1)))
+    for i, desig in enumerate(admin):
+        whens.append(When(designation=desig, then=Value(2)))
+    for i, desig in enumerate(teachers):
+        whens.append(When(designation=desig, then=Value(3)))
+    for i, desig in enumerate(janitorial):
+        whens.append(When(designation=desig, then=Value(4)))
+
+    whens.append(When(designation__in=[], then=Value(5)))
+
+    return qs.annotate(
+        desig_order=Case(*whens, default=Value(5), output_field=IntegerField())
+    ).order_by('desig_order', 'full_name')
+
+
 # ─────────────────────────────────────────────
 # ATTENDANCE-ONLY ADMIN MANAGER DASHBOARD
 # ─────────────────────────────────────────────
@@ -50,6 +76,8 @@ def _attendance_only_dashboard(request, today):
         teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
     else:
         teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+
+    teachers_qs = _apply_designation_ordering(teachers_qs)
 
     import calendar
     from hr.models import SalaryConfig, MonthlySalary
@@ -103,6 +131,8 @@ def _employee_viewer_dashboard(request, today):
     else:
         teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
 
+    teachers_qs = _apply_designation_ordering(teachers_qs)
+
     context = {
         'teachers': teachers_qs,
         'user_role': 'admin_manager',
@@ -154,6 +184,8 @@ def admin_dashboard(request):
         teachers_qs = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False).select_related('salary_detail')
     else:
         teachers_qs = TeacherProfile.objects.filter(is_employee_separated=False).select_related('salary_detail')
+
+    teachers_qs = _apply_designation_ordering(teachers_qs)
     parents_qs = ParentProfile.objects.filter(**school_filter)
     classes_qs = Class.objects.filter(**school_filter)
     subjects_qs = Subject.objects.filter(**school_filter)
@@ -191,6 +223,8 @@ def admin_dashboard(request):
             Q2(cnic__icontains=left_search)
         )
     left_employees = left_employees.order_by('-id')
+
+    left_employees = _apply_designation_ordering(left_employees)
 
     left_data = []
     left_pending_count = 0
@@ -305,7 +339,7 @@ def admin_dashboard(request):
             hr_months = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
             # All employees for salary slips dropdown
-            hr_all_employees = teachers_qs.filter(is_employee_separated=False).order_by('full_name')
+            hr_all_employees = teachers_qs.filter(is_employee_separated=False)
 
             # Salary slips
             slip_selected_employee = request.GET.get('employee_id', '')
@@ -1083,7 +1117,7 @@ def add_assignment(request):
         form = TeacherSubjectAssignmentForm()
         form.fields['assigned_class'].queryset = qs
         if not request.user.is_superuser and school:
-            form.fields['teacher'].queryset = TeacherProfile.objects.filter(school=school)
+            form.fields['teacher'].queryset = _apply_designation_ordering(TeacherProfile.objects.filter(school=school))
             form.fields['subject'].queryset = Subject.objects.filter(school=school)
     return render(request, 'add_entry.html', {'form': form, 'model_name': 'Teacher Assignment'})
 
