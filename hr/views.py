@@ -1871,13 +1871,17 @@ def _render_bank_letter(request):
 
 
 def bank_letter_health(request):
-    """Anonymous build/DB probe used to verify the live deployment (safe to remove later)."""
+    """Anonymous build/DB probe used to verify the live deployment (safe to remove later).
+
+    Pass ?run=migrate to actually execute migrations and report the failure.
+    """
     from django.conf import settings
     from django.db import connection
     from django.db.migrations.recorder import MigrationRecorder
     from django.http import JsonResponse
 
-    payload = {'build': 'bank-letter-health-v1'}
+    payload = {'build': 'bank-letter-health-v2'}
+    from django.core.management import call_command
     try:
         payload['max_number_fields'] = getattr(settings, 'DATA_UPLOAD_MAX_NUMBER_FIELDS', None)
         payload['debug'] = settings.DEBUG
@@ -1893,14 +1897,25 @@ def bank_letter_health(request):
             payload['last_hr_migrations'] = applied
         except Exception as e:
             payload['last_hr_migrations_error'] = repr(e)
+        from io import StringIO
         try:
-            from django.core.management import call_command
-            from io import StringIO
             out = StringIO()
-            call_command('showmigrations', 'hr', stdout=out)
-            payload['hr_migration_state'] = out.getvalue().splitlines()[-6:]
+            call_command('showmigrations', stdout=out)
+            lines = out.getvalue().splitlines()
+            payload['pending_migrations'] = [
+                ln.strip() for ln in lines if ln.strip().startswith('[ ]')
+            ][:20]
         except Exception as e:
-            payload['hr_migration_state_error'] = repr(e)
+            payload['showmigrations_error'] = repr(e)
+        if request.GET.get('run') == 'migrate':
+            import traceback
+            try:
+                out2, err2 = StringIO(), StringIO()
+                call_command('migrate', verbosity=1, stdout=out2, stderr=err2)
+                payload['migrate'] = 'OK'
+                payload['migrate_out'] = (out2.getvalue() + err2.getvalue())[-1500:]
+            except Exception:
+                payload['migrate_error'] = traceback.format_exc()[-2500:]
     except Exception as e:
         payload['error'] = repr(e)
     return JsonResponse(payload)
