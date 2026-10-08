@@ -22,6 +22,30 @@ def get_user_school(user):
     return getattr(user, 'school', None)
 
 
+def _apply_designation_ordering(qs):
+    """Apply ordering by designation category: Management, Administration, Teachers, Janitorial."""
+    from django.db.models import Case, When, Value, IntegerField
+
+    mgmt = ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator']
+    admin = ['team_lead', 'coordinator', 'accountant', 'fdc']
+    teachers = ['teacher']
+    janitorial = ['aya', 'sweeper', 'office_boy', 'compositer', 'photocopier']
+
+    whens = []
+    for desig in mgmt:
+        whens.append(When(designation=desig, then=Value(1)))
+    for desig in admin:
+        whens.append(When(designation=desig, then=Value(2)))
+    for desig in teachers:
+        whens.append(When(designation=desig, then=Value(3)))
+    for desig in janitorial:
+        whens.append(When(designation=desig, then=Value(4)))
+
+    return qs.annotate(
+        desig_order=Case(*whens, default=Value(5), output_field=IntegerField())
+    ).order_by('desig_order', 'full_name')
+
+
 # ─────────────────────────────────────────────
 # EMPLOYEE (TEACHER) HR VIEW — with all FORMAT.xlsx fields
 # ─────────────────────────────────────────────
@@ -39,6 +63,8 @@ def employee_list(request):
         employees = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False)
     else:
         employees = TeacherProfile.objects.filter(is_employee_separated=False)
+
+    employees = _apply_designation_ordering(employees)
 
     # Search
     search = request.GET.get('search', '').strip()
@@ -309,7 +335,7 @@ def left_employees(request):
         )
 
     clearance_filter = request.GET.get('clearance', '')
-    employees = employees.select_related('separation_record').order_by('-separation_record__last_working_date')
+    employees = _apply_designation_ordering(employees).select_related('separation_record')
 
     left_data = []
     pending_count = 0
@@ -483,6 +509,7 @@ def salary_config(request):
         school = get_user_school(request.user)
         if school and not request.user.is_superuser:
             all_employees = all_employees.filter(school=school)
+        all_employees = _apply_designation_ordering(all_employees)
         for emp in all_employees:
             try:
                 emp_salary, _ = EmployeeSalary.objects.get_or_create(
@@ -551,6 +578,7 @@ def save_employee_overrides(request):
     employees = TeacherProfile.objects.filter(is_employee_separated=False)
     if school and not request.user.is_superuser:
         employees = employees.filter(school=school)
+    employees = _apply_designation_ordering(employees)
 
     def _run_migrate():
         from django.core.management import call_command
@@ -692,6 +720,7 @@ def generate_monthly_salary(request):
     employees = TeacherProfile.objects.filter(is_employee_separated=False)
     if school and not request.user.is_superuser:
         employees = employees.filter(school=school)
+    employees = _apply_designation_ordering(employees)
 
     month = int(request.POST.get('month', timezone.now().month)) if request.method == 'POST' else int(request.GET.get('month', timezone.now().month))
     year = int(request.POST.get('year', timezone.now().year)) if request.method == 'POST' else int(request.GET.get('year', timezone.now().year))
@@ -1334,6 +1363,7 @@ def monthly_attendance_summary(request):
         employees = TeacherProfile.objects.filter(Q(school=school) | Q(school__isnull=True), is_employee_separated=False)
     else:
         employees = TeacherProfile.objects.filter(is_employee_separated=False)
+    employees = _apply_designation_ordering(employees)
 
     now = timezone.now()
     if request.method == 'POST':
@@ -1428,6 +1458,7 @@ def _get_clearance_rows(school=None):
     qs = TeacherProfile.objects.filter(is_employee_separated=True).select_related('user')
     if school:
         qs = qs.filter(school=school)
+    qs = _apply_designation_ordering(qs)
     rows = []
     for emp in qs:
         sep = SeparationRecord.objects.filter(employee=emp).first()
