@@ -598,8 +598,8 @@
                 <button class="staff-filter-btn" onclick="filterStaff('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                 <button class="staff-filter-btn" onclick="filterStaff('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                 <button class="staff-filter-btn" onclick="filterStaff('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
-                <button class="staff-filter-btn" onclick="filterStaff('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                 <button class="staff-filter-btn" onclick="filterStaff('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                <button class="staff-filter-btn" onclick="filterStaff('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                 {% for value, label in designation_choices %}
                 <button class="staff-filter-btn" onclick="filterStaff('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                 {% endfor %}
@@ -1189,8 +1189,8 @@
                         <button class="att-cat-btn" onclick="filterAttCategory('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                         <button class="att-cat-btn" onclick="filterAttCategory('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                         <button class="att-cat-btn" onclick="filterAttCategory('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
-                        <button class="att-cat-btn" onclick="filterAttCategory('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         <button class="att-cat-btn" onclick="filterAttCategory('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                        <button class="att-cat-btn" onclick="filterAttCategory('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                     </div>
                     <div style="overflow-x:auto;">
                         <table style="width:100%;border-collapse:collapse;min-width:900px;">
@@ -1337,8 +1337,8 @@
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
-                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                        <button class="cfg-filter-btn" onclick="filterSalaryConfig('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         {% for value, label in designation_choices %}
                         <button class="cfg-filter-btn" onclick="filterSalaryConfig('{{ value|escapejs }}',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">{{ label }}</button>
                         {% endfor %}
@@ -1585,8 +1585,8 @@
                         <button class="sheet-filter-btn" onclick="filterSalarySheet('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                         <button class="sheet-filter-btn" onclick="filterSalarySheet('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                         <button class="sheet-filter-btn" onclick="filterSalarySheet('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
-                        <button class="sheet-filter-btn" onclick="filterSalarySheet('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         <button class="sheet-filter-btn" onclick="filterSalarySheet('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                        <button class="sheet-filter-btn" onclick="filterSalarySheet('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                     </div>
                     <script>
                     (function() {
@@ -1796,8 +1796,8 @@
                         <button class="slip-filter-btn" onclick="filterSalarySlip('all',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#0d9488;color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">All</button>
                         <button class="slip-filter-btn" onclick="filterSalarySlip('management_staff',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Management Staff</button>
                         <button class="slip-filter-btn" onclick="filterSalarySlip('administration',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Administration</button>
-                        <button class="slip-filter-btn" onclick="filterSalarySlip('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                         <button class="slip-filter-btn" onclick="filterSalarySlip('teacher',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Teacher</button>
+                        <button class="slip-filter-btn" onclick="filterSalarySlip('janitorial',this)" style="padding:5px 14px;border-radius:20px;border:1px solid #e5e7eb;background:#fff;color:#374151;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Janitorial</button>
                     </div>
                     <script>
                     (function() {
