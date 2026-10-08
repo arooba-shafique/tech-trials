@@ -1852,6 +1852,26 @@ def _render_bank_letter(request):
     month_name = calendar.month_name[month]
     config = BankLetterConfig.get_for(ttype)
 
+    dated_long = f"{ordinal(letter_date.day)} {calendar.month_name[letter_date.month]} {letter_date.year}"
+    dated_dots = letter_date.strftime('%d.%m.%Y')
+    dated_dash = letter_date.strftime('%d-%m-%Y')
+
+    body_template = (config.body_content or '').strip()
+    if not body_template:
+        body_template = BankLetterConfig.DEFAULT_BODIES['cash' if ttype == 'cash' else 'bank']
+    body_text = body_template
+    for token, value in {
+        'cheque_no': config.cheque_no or '__________',
+        'dated': dated_dots,
+        'dated_long': dated_long,
+        'release_date': dated_dash,
+        'amount': f'{float(total):.0f}',
+        'amount_words': number_to_words(total),
+        'month': month_name,
+        'year': year,
+    }.items():
+        body_text = body_text.replace('{' + token + '}', str(value))
+
     context = {
         'rows': rows,
         'total': total,
@@ -1860,12 +1880,13 @@ def _render_bank_letter(request):
         'year': year,
         'month_name': month_name,
         'letter_date': letter_date,
-        'dated_long': f"{ordinal(letter_date.day)} {calendar.month_name[letter_date.month]} {letter_date.year}",
-        'dated_dots': letter_date.strftime('%d.%m.%Y'),
-        'dated_dash': letter_date.strftime('%d-%m-%Y'),
+        'dated_long': dated_long,
+        'dated_dots': dated_dots,
+        'dated_dash': dated_dash,
         'ttype': ttype,
         'type_display': dict(BankLetterConfig.TYPE_CHOICES)[ttype],
         'config': config,
+        'body_text': body_text,
     }
     return render(request, 'hr/bank_letter.html', context)
 
@@ -1980,6 +2001,10 @@ def bank_letter_config(request, ttype):
                 subject = (request.POST.get('subject') or '').strip()
                 if subject:
                     config.subject = subject
+                if 'cheque_no' in request.POST:
+                    config.cheque_no = request.POST['cheque_no'].strip()
+                if 'body_content' in request.POST:
+                    config.body_content = request.POST['body_content'].strip()
                 sig_name = (request.POST.get('signature_name') or '').strip()
                 if sig_name:
                     config.signature_name = sig_name
