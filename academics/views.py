@@ -44,7 +44,7 @@ def get_user_school(user):
 # STAFF ORDER — mirrors STAFF_CATEGORIES in dps_ravi/static/js/admin_dashboard.js
 # ─────────────────────────────────────────────
 
-STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'janitorial', 'teacher')
+STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'teacher', 'janitorial')
 
 STAFF_CATEGORY_DESIGNATIONS = {
     'management_staff': {'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator'},
@@ -62,7 +62,7 @@ _DESIGNATION_RANK = {
 
 def staff_order_key(item):
     """Order like the Staff table: category (Management → Administration →
-    Janitorial → Teacher) first, then Employee ID numerically within each."""
+    Teacher → Janitorial) first, then Employee ID numerically within each."""
     employee = getattr(item, 'employee', None)
     designation = ((getattr(employee, 'designation', None) or '').strip().lower())
     rank = _DESIGNATION_RANK.get(designation, len(STAFF_CATEGORY_ORDER))
