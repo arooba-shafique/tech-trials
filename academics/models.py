@@ -96,7 +96,8 @@ class TeacherProfile(models.Model):
         ('accountant', 'Accountant'),
         ('team_lead', 'Team Leader'),
         ('fdc', 'F.D.C'),
-        ('compositer', 'Compositer'),
+        ('compositor', 'Compositor'),
+        ('office_assistant', 'Office Assistant'),
         ('aya', 'Aya'),
         ('photocopier', 'Photocopier'),
         ('office_boy', 'Office Boy'),
@@ -189,9 +190,9 @@ class TeacherProfile(models.Model):
             'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
             'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
         }
-        admin = {'team_lead', 'coordinator', 'accountant', 'fdc'}
+        admin = {'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor', 'office_assistant'}
         teachers = {'teacher'}
-        janitorial = {'aya', 'sweeper', 'office_boy', 'compositer', 'photocopier'}
+        janitorial = {'aya', 'sweeper', 'office_boy', 'photocopier'}
 
         desig = self.designation or 'teacher'
         if desig in mgmt:

@@ -11,9 +11,9 @@ def apply_designation_ordering(qs, designation_field='designation', name_field='
         'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
         'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
     ]
-    admin = ['team_lead', 'coordinator', 'accountant', 'fdc']
+    admin = ['team_lead', 'coordinator', 'accountant', 'fdc', 'compositor', 'office_assistant']
     teachers = ['teacher']
-    janitorial = ['aya', 'sweeper', 'office_boy', 'compositer', 'photocopier']
+    janitorial = ['aya', 'sweeper', 'office_boy', 'photocopier']
 
     whens = []
     for desig in mgmt:
