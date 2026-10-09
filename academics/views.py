@@ -51,8 +51,8 @@ STAFF_CATEGORY_DESIGNATIONS = {
         'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
         'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
     },
-    'administration': {'team_lead', 'coordinator', 'accountant', 'fdc'},
-    'janitorial': {'aya', 'sweeper', 'office_boy', 'compositer', 'photocopier'},
+    'administration': {'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'},
+    'janitorial': {'aya', 'sweeper', 'office_boy', 'photocopier', 'office_assistant'},
     'teacher': {'teacher'},
 }
 
@@ -169,7 +169,7 @@ def _employee_viewer_dashboard(request, today):
 
     designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
     raw_desiginations = teachers_qs.order_by().values_list('designation', flat=True).distinct()
-    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer', 'teacher'}
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'compositor', 'aya', 'photocopier', 'office_boy', 'sweeper', 'office_assistant', 'teacher'}
     designation_choices = sorted(
         [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d.strip().lower() not in _category_desig],
         key=lambda x: x[1]
@@ -327,7 +327,7 @@ def admin_dashboard(request):
     designation_map = dict(TeacherProfile.DESIGNATION_CHOICES)
     raw_desiginations = teachers_qs.order_by().values_list('designation', flat=True).distinct()
     # Designations already grouped under category pills — hide from individual pills
-    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'aya', 'photocopier', 'office_boy', 'sweeper', 'compositer', 'teacher'}
+    _category_desig = {'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics', 'vp', 'coordinator', 'team_lead', 'accountant', 'fdc', 'aya', 'photocopier', 'office_boy', 'sweeper', 'compositor', 'office_assistant', 'teacher'}
     designation_choices = sorted(
         [(d, designation_map.get(d, d.replace('_', ' ').replace('-', ' ').title())) for d in raw_desiginations if d and d.strip().lower() not in _category_desig],
         key=lambda x: x[1]
