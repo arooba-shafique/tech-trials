@@ -450,28 +450,9 @@ class BankLetterConfig(models.Model):
         },
     }
 
-    DEFAULT_BODIES = {
-        'bank': (
-            'Please find enclosed herewith a crossed cheque No. {cheque_no} dated:{dated} amounting\n'
-            'Rs. {amount} /- Rupees:- {amount_words} only\n'
-            'on account of payment of Salaries of officers / staff for the month of {month} {year}.\n'
-            'As per following details:\n'
-            'It is therefore requested that salary may please be released on {release_date}.'
-        ),
-        'cash': (
-            'Please find enclosed herewith the salary sheet of officers / staff amounting\n'
-            'Rs. {amount} /- Rupees:- {amount_words} only\n'
-            'on account of payment of Salaries of officers / staff for the month of {month} {year}.\n'
-            'As per following details:\n'
-            'It is therefore requested that salary may please be released on {release_date}.'
-        ),
-    }
-
     transaction_type = models.CharField(max_length=20, choices=TYPE_CHOICES, unique=True)
     recipient_header = models.TextField(blank=True, default='', help_text="Addressed-to block, e.g. The Manager, Bank Name, Branch, City.")
     subject = models.CharField(max_length=200, default='TRANSFER OF OFFICERS / STAFF PAY')
-    cheque_no = models.CharField(max_length=50, blank=True, default='', help_text="Cheque number used in the letter body. Leave blank for cash letters.")
-    body_content = models.TextField(blank=True, default='', help_text="Letter body. Placeholders: {cheque_no} {dated} {dated_long} {release_date} {amount} {amount_words} {month} {year}")
     signature_name = models.CharField(max_length=100, default='CEO')
     signature_org = models.CharField(max_length=200, default='Royal International School System')
     updated_at = models.DateTimeField(auto_now=True)

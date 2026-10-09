@@ -1139,11 +1139,7 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                             }
                         }
                     });
-                    if (container.tagName === 'FORM') {
-                        body.innerHTML = container.outerHTML;
-                    } else {
-                        body.innerHTML = container.innerHTML;
-                    }
+                    body.innerHTML = container.innerHTML;
                 } else {
                     var form = doc.querySelector('form');
                     if (form) {
@@ -1405,12 +1401,6 @@ var fname = (title).replace(/[^a-zA-Z0-9 _-]/g, '').replace(/\s+/g, '_') + '.pdf
                         drawerBody.innerHTML = form2 ? form2.outerHTML : xhr.responseText;
                         attachFormHandler(drawerBody, originalUrl);
                         drawerBody.scrollTop = 0;
-                    } else if (xhr.status >= 400) {
-                        var errBody = document.getElementById('drawer-body');
-                        errBody.innerHTML = '<div class="alert-danger" style="padding:10px 14px;background:#fef2f2;'
-                            + 'color:#991b1b;border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;">'
-                            + 'Save failed (HTTP ' + xhr.status + '). Please try again.</div>';
-                        if (btn) { btn.disabled = false; btn.textContent = originalText; }
                     } else {
                         var isClearanceComplete2 = false;
                         var clearanceData2 = {};

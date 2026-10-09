@@ -2,29 +2,6 @@
 
 from django.db import migrations, models
 
-TABLE = 'academics_teacherprofile'
-COLUMN = 'qualification'
-DDL = "ALTER TABLE academics_teacherprofile ADD COLUMN qualification varchar(100) DEFAULT '' NOT NULL"
-
-
-def _existing_columns(connection, table):
-    with connection.cursor() as cursor:
-        return {col.name for col in connection.introspection.get_table_description(cursor, table)}
-
-
-def add_qualification(apps, schema_editor):
-    # Production already has this column (manual schema drift); adding it again
-    # crashed migrate and blocked every migration after this one.
-    if COLUMN not in _existing_columns(schema_editor.connection, TABLE):
-        schema_editor.execute(DDL)
-
-
-def drop_qualification(apps, schema_editor):
-    try:
-        schema_editor.execute("ALTER TABLE academics_teacherprofile DROP COLUMN qualification")
-    except Exception:
-        pass
-
 
 class Migration(migrations.Migration):
 
@@ -33,16 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=[
-                migrations.RunPython(add_qualification, drop_qualification),
-            ],
-            state_operations=[
-                migrations.AddField(
-                    model_name='teacherprofile',
-                    name='qualification',
-                    field=models.CharField(blank=True, default='', max_length=100),
-                ),
-            ],
+        migrations.AddField(
+            model_name='teacherprofile',
+            name='qualification',
+            field=models.CharField(blank=True, default='', max_length=100),
         ),
     ]

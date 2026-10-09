@@ -1852,26 +1852,6 @@ def _render_bank_letter(request):
     month_name = calendar.month_name[month]
     config = BankLetterConfig.get_for(ttype)
 
-    dated_long = f"{ordinal(letter_date.day)} {calendar.month_name[letter_date.month]} {letter_date.year}"
-    dated_dots = letter_date.strftime('%d.%m.%Y')
-    dated_dash = letter_date.strftime('%d-%m-%Y')
-
-    body_template = (config.body_content or '').strip()
-    if not body_template:
-        body_template = BankLetterConfig.DEFAULT_BODIES['cash' if ttype == 'cash' else 'bank']
-    body_text = body_template
-    for token, value in {
-        'cheque_no': config.cheque_no or '__________',
-        'dated': dated_dots,
-        'dated_long': dated_long,
-        'release_date': dated_dash,
-        'amount': f'{float(total):.0f}',
-        'amount_words': number_to_words(total),
-        'month': month_name,
-        'year': year,
-    }.items():
-        body_text = body_text.replace('{' + token + '}', str(value))
-
     context = {
         'rows': rows,
         'total': total,
@@ -1880,13 +1860,12 @@ def _render_bank_letter(request):
         'year': year,
         'month_name': month_name,
         'letter_date': letter_date,
-        'dated_long': dated_long,
-        'dated_dots': dated_dots,
-        'dated_dash': dated_dash,
+        'dated_long': f"{ordinal(letter_date.day)} {calendar.month_name[letter_date.month]} {letter_date.year}",
+        'dated_dots': letter_date.strftime('%d.%m.%Y'),
+        'dated_dash': letter_date.strftime('%d-%m-%Y'),
         'ttype': ttype,
         'type_display': dict(BankLetterConfig.TYPE_CHOICES)[ttype],
         'config': config,
-        'body_text': body_text,
     }
     return render(request, 'hr/bank_letter.html', context)
 
@@ -1901,27 +1880,14 @@ def bank_letter_health(request):
     from django.db.migrations.recorder import MigrationRecorder
     from django.http import JsonResponse
 
-    payload = {'build': 'bank-letter-health-v4'}
+    payload = {'build': 'bank-letter-health-v2'}
     from django.core.management import call_command
-    def _cols(table):
-        with connection.cursor() as cur:
-            return {c.name for c in connection.introspection.get_table_description(cur, table)}
     try:
         payload['max_number_fields'] = getattr(settings, 'DATA_UPLOAD_MAX_NUMBER_FIELDS', None)
         payload['debug'] = settings.DEBUG
         tables = connection.introspection.table_names()
         payload['bankletter_table'] = 'hr_bankletterconfig' in tables
         payload['migrations_table'] = 'django_migrations' in tables
-        try:
-            payload['col_probe'] = {
-                'tp_qualification': 'qualification' in _cols('academics_teacherprofile'),
-                'ms_cfg_mode': 'cfg_mode' in _cols('hr_monthlysalary'),
-                'ms_cfg_kid_fee_pct': 'cfg_kid_fee_pct' in _cols('hr_monthlysalary'),
-                'sc_config_mode': 'config_mode' in _cols('hr_salaryconfig'),
-                'sr_total_tax': 'total_tax' in _cols('hr_separationrecord'),
-            }
-        except Exception as e:
-            payload['col_probe_error'] = repr(e)
         try:
             applied = list(
                 MigrationRecorder(connection).Migration.objects.filter(
@@ -1950,27 +1916,6 @@ def bank_letter_health(request):
                 payload['migrate_out'] = (out2.getvalue() + err2.getvalue())[-1500:]
             except Exception:
                 payload['migrate_error'] = traceback.format_exc()[-2500:]
-        import time as _time
-        if request.GET.get('run') == 'letter':
-            import traceback
-            t0 = _time.time()
-            try:
-                resp = _render_bank_letter(request)
-                payload['letter'] = {
-                    'status': resp.status_code,
-                    'bytes': len(resp.content),
-                    'ms': int((_time.time() - t0) * 1000),
-                }
-            except Exception:
-                payload['letter_error'] = traceback.format_exc()[-3000:]
-        if request.GET.get('run') == 'config-save':
-            import traceback
-            try:
-                cfg = BankLetterConfig.get_for(request.GET.get('ttype', 'ubl'))
-                cfg.save()
-                payload['config_save'] = 'OK'
-            except Exception:
-                payload['config_save_error'] = traceback.format_exc()[-3000:]
     except Exception as e:
         payload['error'] = repr(e)
     return JsonResponse(payload)
@@ -2022,10 +1967,6 @@ def bank_letter_config(request, ttype):
                 subject = (request.POST.get('subject') or '').strip()
                 if subject:
                     config.subject = subject
-                if 'cheque_no' in request.POST:
-                    config.cheque_no = request.POST['cheque_no'].strip()
-                if 'body_content' in request.POST:
-                    config.body_content = request.POST['body_content'].strip()
                 sig_name = (request.POST.get('signature_name') or '').strip()
                 if sig_name:
                     config.signature_name = sig_name
@@ -2033,8 +1974,6 @@ def bank_letter_config(request, ttype):
                 if sig_org:
                     config.signature_org = sig_org
                 config.save()
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({'ok': True})
                 messages.success(request, 'Bank letter details updated.', extra_tags='bank-letters')
                 return redirect('/admin-console/?section=bank-letters')
             return render(request, 'hr/bank_letter_config_form.html', {'config': config})
@@ -2049,10 +1988,7 @@ def bank_letter_config(request, ttype):
             break
     from django.utils.html import escape
     return HttpResponse(
-        '<div class="alert-danger" style="padding:8px 12px;background:#fef2f2;color:#991b1b;'
-        'border:1px solid #fecaca;border-radius:8px;font-size:13px;font-weight:600;margin-bottom:10px;">'
-        'Save failed — see details below.</div>'
-        '<pre style="padding:12px;font-size:12px;white-space:pre-wrap;">BANK LETTER CONFIG ERROR:\n\n'
+        '<pre style="padding:20px;font-size:13px;">BANK LETTER CONFIG ERROR:\n\n'
         + escape('\n\n'.join(errors)) + '</pre>',
         status=500,
     )

@@ -2,48 +2,6 @@
 
 from django.db import migrations, models
 
-# (table, column, type/default clause) — added only when missing, so schema drift
-# in the production DB cannot block this migration and every one after it.
-SPECS = [
-    ('hr_monthlysalary', 'cfg_kid_fee_pct', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_monthlysalary', 'cfg_kids_education_pct', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_monthlysalary', 'cfg_mode', "varchar(10) DEFAULT 'percentage' NOT NULL"),
-    ('hr_monthlysalary', 'kid_fee', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_monthlysalary', 'kids_education_allowance', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_salaryconfig', 'config_mode', "varchar(10) DEFAULT 'percentage' NOT NULL"),
-    ('hr_salaryconfig', 'kids_education_pct', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_deductions', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_other', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_pf', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_security', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_tax', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-    ('hr_separationrecord', 'total_van_child', 'numeric(12,2) DEFAULT 0 NOT NULL'),
-]
-
-
-def _existing_columns(connection, table):
-    with connection.cursor() as cursor:
-        return {col.name for col in connection.introspection.get_table_description(cursor, table)}
-
-
-def add_missing_columns(apps, schema_editor):
-    connection = schema_editor.connection
-    cache = {}
-    for table, column, ddl in SPECS:
-        if table not in cache:
-            cache[table] = _existing_columns(connection, table)
-        if column not in cache[table]:
-            schema_editor.execute(f'ALTER TABLE {table} ADD COLUMN {column} {ddl}')
-            cache[table].add(column)
-
-
-def drop_columns(apps, schema_editor):
-    for table, column, _ in SPECS:
-        try:
-            schema_editor.execute(f'ALTER TABLE {table} DROP COLUMN {column}')
-        except Exception:
-            pass
-
 
 class Migration(migrations.Migration):
 
@@ -52,76 +10,69 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.SeparateDatabaseAndState(
-            database_operations=[
-                migrations.RunPython(add_missing_columns, drop_columns),
-            ],
-            state_operations=[
-                migrations.AddField(
-                    model_name='monthlysalary',
-                    name='cfg_kid_fee_pct',
-                    field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='monthlysalary',
-                    name='cfg_kids_education_pct',
-                    field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='monthlysalary',
-                    name='cfg_mode',
-                    field=models.CharField(choices=[('percentage', 'Percentage'), ('amount', 'Fixed Amount')], default='percentage', help_text='Mode used when this record was saved: percentage or amount', max_length=10),
-                ),
-                migrations.AddField(
-                    model_name='monthlysalary',
-                    name='kid_fee',
-                    field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='monthlysalary',
-                    name='kids_education_allowance',
-                    field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='salaryconfig',
-                    name='config_mode',
-                    field=models.CharField(choices=[('percentage', 'Percentage'), ('amount', 'Fixed Amount')], default='percentage', help_text='All salary fields use percentage or fixed amount', max_length=10),
-                ),
-                migrations.AddField(
-                    model_name='salaryconfig',
-                    name='kids_education_pct',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Kids education allowance % of basic', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_deductions',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Grand total accumulated deductions', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_other',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Total other deductions', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_pf',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Total provident fund deducted', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_security',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Total security deducted', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_tax',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Total tax deducted', max_digits=12),
-                ),
-                migrations.AddField(
-                    model_name='separationrecord',
-                    name='total_van_child',
-                    field=models.DecimalField(decimal_places=2, default=0, help_text='Total van/child deducted', max_digits=12),
-                ),
-            ],
+        migrations.AddField(
+            model_name='monthlysalary',
+            name='cfg_kid_fee_pct',
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='monthlysalary',
+            name='cfg_kids_education_pct',
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='monthlysalary',
+            name='cfg_mode',
+            field=models.CharField(choices=[('percentage', 'Percentage'), ('amount', 'Fixed Amount')], default='percentage', help_text='Mode used when this record was saved: percentage or amount', max_length=10),
+        ),
+        migrations.AddField(
+            model_name='monthlysalary',
+            name='kid_fee',
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='monthlysalary',
+            name='kids_education_allowance',
+            field=models.DecimalField(decimal_places=2, default=0, max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='salaryconfig',
+            name='config_mode',
+            field=models.CharField(choices=[('percentage', 'Percentage'), ('amount', 'Fixed Amount')], default='percentage', help_text='All salary fields use percentage or fixed amount', max_length=10),
+        ),
+        migrations.AddField(
+            model_name='salaryconfig',
+            name='kids_education_pct',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Kids education allowance % of basic', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_deductions',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Grand total accumulated deductions', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_other',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Total other deductions', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_pf',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Total provident fund deducted', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_security',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Total security deducted', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_tax',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Total tax deducted', max_digits=12),
+        ),
+        migrations.AddField(
+            model_name='separationrecord',
+            name='total_van_child',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Total van/child deducted', max_digits=12),
         ),
     ]

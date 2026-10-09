@@ -41,14 +41,6 @@
                 <input type="text" name="subject" value="{{ config.subject }}">
             </label>
             <label class="field">
-                Cheque No <span class="hint">Used for {cheque_no} in the letter body — leave blank for cash letters.</span>
-                <input type="text" name="cheque_no" value="{{ config.cheque_no }}" placeholder="e.g. 0123456">
-            </label>
-            <label class="field">
-                Letter Body (Main Content) <span class="hint">Available placeholders: {cheque_no} {dated} {dated_long} {release_date} {amount} {amount_words} {month} {year}. Leave empty to restore the default wording.</span>
-                <textarea name="body_content" rows="9" placeholder="Please find enclosed herewith...">{{ config.body_content }}</textarea>
-            </label>
-            <label class="field">
                 Signature Name (e.g. CEO)
                 <input type="text" name="signature_name" value="{{ config.signature_name }}">
             </label>
