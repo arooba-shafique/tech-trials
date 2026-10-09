@@ -209,8 +209,8 @@ var activeStaffSearch = '';
 
 var STAFF_CATEGORIES = {
     'management_staff': ['vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator', 'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'],
-    'administration': ['team_lead', 'coordinator', 'accountant', 'fdc'],
-    'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'compositer'],
+    'administration': ['team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'],
+    'janitorial': ['aya', 'photocopier', 'office_boy', 'sweeper', 'office_assistant'],
     'teacher': ['teacher']
 };
 
