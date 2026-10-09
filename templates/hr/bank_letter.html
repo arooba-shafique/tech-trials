@@ -50,21 +50,7 @@
             <span class="label">Subject:-</span><span class="value">{{ config.subject }}</span>
         </div>
 
-        <div class="body-text">
-            {% if ttype == 'cash' %}
-            Please find enclosed herewith the salary sheet of officers / staff amounting<br>
-            Rs. {{ total|floatformat:0 }} /- Rupees:- {{ total_words }} only<br>
-            on account of payment of Salaries of officers / staff for the month of {{ month_name }} {{ year }}.<br>
-            As per following details:<br>
-            It is therefore requested that salary may please be released on {{ dated_dash }}.
-            {% else %}
-            Please find enclosed herewith a crossed cheque No. <span class="blank"></span> dated:{{ dated_dots }} amounting<br>
-            Rs. {{ total|floatformat:0 }} /- Rupees:- {{ total_words }} only<br>
-            on account of payment of Salaries of officers / staff for the month of {{ month_name }} {{ year }}.<br>
-            As per following details:<br>
-            It is therefore requested that salary may please be released on {{ dated_dash }}.
-            {% endif %}
-        </div>
+        <div class="body-text">{{ body_text|linebreaksbr }}</div>
 
         <table class="letter-table">
             <thead>
