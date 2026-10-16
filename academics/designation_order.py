@@ -8,10 +8,10 @@ def apply_designation_ordering(qs, designation_field='designation', name_field='
     apply_designation_ordering(qs, 'employee__designation', 'employee__full_name').
     """
     mgmt = [
-        'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
+        'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
         'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
     ]
-    admin = ['team_lead', 'coordinator', 'accountant', 'fdc', 'compositor']
+    admin = ['vp', 'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor']
     teachers = ['teacher']
     janitorial = ['aya', 'sweeper', 'office_boy', 'photocopier', 'office_assistant']
 

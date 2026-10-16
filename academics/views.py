@@ -48,10 +48,10 @@ STAFF_CATEGORY_ORDER = ('management_staff', 'administration', 'teacher', 'janito
 
 STAFF_CATEGORY_DESIGNATIONS = {
     'management_staff': {
-        'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
+        'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
         'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
     },
-    'administration': {'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'},
+    'administration': {'vp', 'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'},
     'janitorial': {'aya', 'sweeper', 'office_boy', 'photocopier', 'office_assistant'},
     'teacher': {'teacher'},
 }

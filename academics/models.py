@@ -187,10 +187,10 @@ class TeacherProfile(models.Model):
         1: Management, 2: Administration, 3: Teachers, 4: Janitorial
         """
         mgmt = {
-            'vp', 'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
+            'group_head', 'section_head', 'manager', 'assistant_manager', 'a_coordinator',
             'director', 'manager_academics', 'hr_manager', 'assistant_manager_academics'
         }
-        admin = {'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'}
+        admin = {'vp', 'team_lead', 'coordinator', 'accountant', 'fdc', 'compositor'}
         teachers = {'teacher'}
         janitorial = {'aya', 'sweeper', 'office_boy', 'photocopier', 'office_assistant'}
 
