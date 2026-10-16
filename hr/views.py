@@ -1376,6 +1376,12 @@ def monthly_attendance_summary(request):
                 late_days = int(request.POST.get(f'late_{emp.id}', 0))
                 remarks = request.POST.get(f'remarks_{emp.id}', '')
 
+                # Clamp to the number of days in the selected month (e.g. 31 for January)
+                days_absent = max(0, min(days_absent, days_in_month))
+                paid_leaves = max(0, min(paid_leaves, days_in_month))
+                unpaid_leaves = max(0, min(unpaid_leaves, days_in_month))
+                late_days = max(0, min(late_days, days_in_month))
+
                 days_present = max(0, days_in_month - days_absent)
 
                 existing_ms = MonthlySalary.objects.filter(employee=emp, month=month, year=year).first()
@@ -1423,6 +1429,7 @@ def monthly_attendance_summary(request):
         'year': year,
         'month_name': month_name,
         'total_working_days': total_working_days,
+        'days_in_month': days_in_month,
         'existing': existing,
         'section': 'attendance',
     }

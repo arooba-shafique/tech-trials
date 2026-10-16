@@ -81,51 +81,51 @@
                         <td>
                             {% for key, val in existing.items %}
                                 {% if key == emp.id %}
-                            <input type="number" name="absent_{{ emp.id }}" value="{{ val.days_absent }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-emp="{{ emp.id }}">
+                            <input type="number" name="absent_{{ emp.id }}" value="{{ val.days_absent }}" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-days-in-month="{{ days_in_month }}" data-emp="{{ emp.id }}">
                                 {% endif %}
                             {% endfor %}
                             {% if emp.id not in existing %}
-                            <input type="number" name="absent_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-emp="{{ emp.id }}">
+                            <input type="number" name="absent_{{ emp.id }}" value="0" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;" data-working="{{ total_working_days }}" data-days-in-month="{{ days_in_month }}" data-emp="{{ emp.id }}">
                             {% endif %}
                         </td>
                         <td>
                             {% for key, val in existing.items %}
                                 {% if key == emp.id %}
-                            <input type="number" name="paid_leaves_{{ emp.id }}" value="{{ val.paid_leaves }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="paid_leaves_{{ emp.id }}" value="{{ val.paid_leaves }}" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
                             {% if emp.id not in existing %}
-                            <input type="number" name="paid_leaves_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="paid_leaves_{{ emp.id }}" value="0" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
                         <td>
                             {% for key, val in existing.items %}
                                 {% if key == emp.id %}
-                            <input type="number" name="unpaid_leaves_{{ emp.id }}" value="{{ val.unpaid_leaves }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="unpaid_leaves_{{ emp.id }}" value="{{ val.unpaid_leaves }}" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
                             {% if emp.id not in existing %}
-                            <input type="number" name="unpaid_leaves_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="unpaid_leaves_{{ emp.id }}" value="0" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
                         <td>
                             {% for key, val in existing.items %}
                                 {% if key == emp.id %}
-                            <input type="number" name="late_{{ emp.id }}" value="{{ val.late_coming_days }}" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="late_{{ emp.id }}" value="{{ val.late_coming_days }}" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                                 {% endif %}
                             {% endfor %}
                             {% if emp.id not in existing %}
-                            <input type="number" name="late_{{ emp.id }}" value="0" min="0" max="{{ total_working_days }}" class="form-control" style="min-width:70px;">
+                            <input type="number" name="late_{{ emp.id }}" value="0" min="0" max="{{ days_in_month }}" class="form-control" style="min-width:70px;">
                             {% endif %}
                         </td>
                         <td>
                             {% for key, val in existing.items %}
                                 {% if key == emp.id %}
-                            <span class="badge badge-green" id="present_{{ emp.id }}">{{ val.days_present|default:total_working_days }}</span>
+                            <span class="badge badge-green" id="present_{{ emp.id }}">{{ val.days_present|default_if_none:days_in_month }}</span>
                                 {% endif %}
                             {% endfor %}
                             {% if emp.id not in existing %}
-                            <span class="badge badge-green" id="present_{{ emp.id }}">{{ total_working_days }}</span>
+                            <span class="badge badge-green" id="present_{{ emp.id }}">{{ days_in_month }}</span>
                             {% endif %}
                         </td>
                         <td>
@@ -153,11 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[type="number"][data-emp]').forEach(function(input) {
         input.addEventListener('input', function() {
             var empId = this.getAttribute('data-emp');
-            var working = parseInt(this.getAttribute('data-working'));
+            var daysInMonth = parseInt(this.getAttribute('data-days-in-month')) || parseInt(this.getAttribute('data-working'));
             var row = this.closest('tr');
             var absent = parseInt(row.querySelector('input[name="absent_' + empId + '"]').value) || 0;
-            var unpaid = parseInt(row.querySelector('input[name="unpaid_leaves_' + empId + '"]').value) || 0;
-            var present = Math.max(0, working - absent - unpaid);
+            var present = Math.max(0, daysInMonth - absent);
             document.getElementById('present_' + empId).textContent = present;
         });
     });
