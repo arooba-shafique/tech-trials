@@ -263,6 +263,10 @@ class Attendance(models.Model):
         ('absent', 'Absent'),
         ('leave', 'Leave'),
     ]
+    SOURCE_CHOICES = [
+        ('manual', 'Manual'),
+        ('ai', 'AI'),
+    ]
 
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='attendances')
     student_class = models.ForeignKey('Class', on_delete=models.SET_NULL, null=True, related_name='attendances')
@@ -270,6 +274,7 @@ class Attendance(models.Model):
     marked_by = models.ForeignKey(TeacherProfile, on_delete=models.SET_NULL, null=True, related_name='marked_attendances')
     date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='present')
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='manual', blank=True)
 
     class Meta:
         unique_together = ('student', 'subject', 'date')

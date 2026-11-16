@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}AI Attendance{% endblock %} — Teacher Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --night:#f0f4f8;--navy:#e8eef5;--navy2:#ffffff;--navy3:#f7fafc;
+    --panel:#ffffff;--panel2:#f0f4f8;--rim:rgba(0,0,0,0.08);--rim2:rgba(0,0,0,0.13);
+    --gold:#0d9488;--gold2:#14b8a6;--gold-dim:#e6faf8;
+    --teal:#0d9488;--teal-dim:#ccfbf1;--rose:#e11d48;--rose-dim:#ffe4e6;
+    --blue:#2563eb;--blue-dim:#dbeafe;--green:#16a34a;--green-dim:#dcfce7;
+    --purple:#7c3aed;--amber:#d97706;--amber-dim:#fef3c7;
+    --t1:#0f172a;--t2:#475569;--t3:#94a3b8;
+    --shadow:0 2px 8px rgba(0,0,0,0.08);--shadow-lg:0 10px 40px rgba(0,0,0,0.15);
+    --radius:16px;--radius-sm:10px;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'DM Sans',sans-serif;background:var(--night);color:var(--t1);min-height:100vh;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%,rgba(13,148,136,0.06) 0%,transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 110%,rgba(124,58,237,0.04) 0%,transparent 60%),
+      linear-gradient(rgba(0,0,0,0.018) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(0,0,0,0.018) 1px,transparent 1px);
+    background-size:100% 100%,100% 100%,48px 48px,48px 48px;
+  }
+  ::-webkit-scrollbar{width:5px;height:5px}
+  ::-webkit-scrollbar-track{background:var(--navy)}
+  ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+
+  .ai-topbar{height:56px;background:#0f2744;border-bottom:1px solid rgba(255,255,255,0.08);padding:0 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+  .ai-topbar-left{display:flex;align-items:center;gap:14px;min-width:0}
+  .ai-back{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.65);text-decoration:none;padding:6px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.14);background:rgba(255,255,255,0.05);transition:all .18s;white-space:nowrap}
+  .ai-back:hover{color:#fff;background:rgba(255,255,255,0.12)}
+  .ai-topbar-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700;color:#fff;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ai-topbar-title span{color:#14b8a6}
+  .ai-topbar-right{display:flex;align-items:center;gap:10px;font-size:12px;color:rgba(255,255,255,0.45)}
+  .ai-user-pill{display:flex;align-items:center;gap:8px;padding:5px 13px 5px 6px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:40px;color:#fff;font-size:12.5px;font-weight:600}
+  .ai-user-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#14b8a6,#2563eb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+
+  .ai-container{max-width:1240px;margin:0 auto;padding:28px 32px 80px}
+  .page-hero{padding:8px 0 24px}
+  .page-hero-title{font-family:'Sora',sans-serif;font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-.6px}
+  .page-hero-title span{color:#0d9488}
+  .page-hero-sub{font-size:13.5px;color:var(--t3);margin-top:5px;max-width:640px}
+  .fade-up{opacity:0;transform:translateY(14px);animation:fadeUpIn .45s ease forwards}
+  @keyframes fadeUpIn{to{opacity:1;transform:translateY(0)}}
+
+  .card{background:var(--panel);border:1px solid var(--rim);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .card-head{padding:15px 20px;background:var(--panel2);border-bottom:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .card-title{font-size:13.5px;font-weight:700;color:var(--t1);display:flex;align-items:center;gap:8px;font-family:'Sora',sans-serif}
+  .card-body{padding:20px 22px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;font-family:'DM Sans',sans-serif;border:1px solid;cursor:pointer;text-decoration:none;transition:all .18s;white-space:nowrap}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn-solid-gold{background:#0d9488;color:#fff;border-color:#0d9488;font-weight:700}
+  .btn-solid-gold:hover:not(:disabled){background:#14b8a6;box-shadow:0 0 16px rgba(13,148,136,.25)}
+  .btn-gold{background:rgba(13,148,136,.1);color:#0d9488;border-color:rgba(13,148,136,.25)}
+  .btn-gold:hover:not(:disabled){background:rgba(13,148,136,.18)}
+  .btn-ghost{background:var(--panel2);color:var(--t2);border-color:var(--rim2)}
+  .btn-ghost:hover:not(:disabled){color:var(--t1);background:var(--navy)}
+  .btn-rose{background:rgba(225,29,72,.08);color:#e11d48;border-color:rgba(225,29,72,.2)}
+  .btn-rose:hover:not(:disabled){background:rgba(225,29,72,.14)}
+  .btn-green{background:rgba(22,163,74,.1);color:#16a34a;border-color:rgba(22,163,74,.2)}
+  .btn-blue{background:rgba(37,99,235,.1);color:#2563eb;border-color:rgba(37,99,235,.2)}
+  .btn-sm{padding:6px 13px;font-size:12px}
+  .btn-xs{padding:4px 10px;font-size:11px}
+  .btn-lg{padding:11px 22px;font-size:13.5px}
+
+  .badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.3px}
+  .badge-gold{background:rgba(13,148,136,.12);color:#0d9488;border:1px solid rgba(13,148,136,.25)}
+  .badge-rose{background:rgba(225,29,72,.1);color:#e11d48;border:1px solid rgba(225,29,72,.2)}
+  .badge-blue{background:rgba(37,99,235,.1);color:#2563eb;border:1px solid rgba(37,99,235,.2)}
+  .badge-green{background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.2)}
+  .badge-amber{background:rgba(217,119,6,.12);color:#d97706;border:1px solid rgba(217,119,6,.28)}
+  .badge-gray{background:rgba(0,0,0,.05);color:var(--t2);border:1px solid var(--rim)}
+  .badge-purple{background:rgba(124,58,237,.1);color:#7c3aed;border:1px solid rgba(124,58,237,.2)}
+
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  .form-label{font-size:10.5px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+  .form-input,.form-select{padding:10px 13px;background:var(--navy2);border:1.5px solid var(--rim2);border-radius:9px;font-size:13.5px;font-family:'DM Sans',sans-serif;color:var(--t1);outline:none;transition:border-color .2s,box-shadow .2s}
+  .form-input:focus,.form-select:focus{border-color:rgba(13,148,136,.5);box-shadow:0 0 0 3px rgba(13,148,136,.08)}
+  .form-select option{background:#fff}
+  .form-row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .form-row .form-group{flex:1;min-width:170px}
+
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse}
+  thead th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--t3);padding:11px 16px;background:var(--panel2);border-bottom:1px solid var(--rim)}
+  tbody td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--rim);vertical-align:middle;color:var(--t1)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr{transition:background .15s}
+  tbody tr:hover td{background:#f8fbfe}
+  .empty-row td{text-align:center;color:var(--t3);font-size:13px;padding:40px!important}
+
+  .att-btn-group{display:flex;gap:5px;justify-content:center}
+  .att-btn{padding:4px 12px;border-radius:6px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;background:transparent}
+  .att-btn.p{border-color:rgba(22,163,74,.35);color:#16a34a}.att-btn.a{border-color:rgba(225,29,72,.3);color:#e11d48}.att-btn.l{border-color:rgba(13,148,136,.35);color:#0d9488}
+  .att-btn.p.sel{background:#16a34a;color:#fff;border-color:#16a34a}
+  .att-btn.a.sel{background:#e11d48;color:#fff;border-color:#e11d48}
+  .att-btn.l.sel{background:#0d9488;color:#fff;border-color:#0d9488}
+
+  .stat-strip{display:flex;gap:10px;flex-wrap:wrap}
+  .stat-chip{display:flex;flex-direction:column;min-width:96px;padding:10px 14px;background:var(--panel);border:1px solid var(--rim);border-radius:12px;box-shadow:var(--shadow)}
+  .stat-chip .v{font-family:'Sora',sans-serif;font-size:20px;font-weight:800;line-height:1.1;color:var(--t1)}
+  .stat-chip .l{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+  .stat-chip.ok .v{color:#16a34a}.stat-chip.warn .v{color:#d97706}.stat-chip.bad .v{color:#e11d48}.stat-chip.info .v{color:#0d9488}
+
+  .toast{position:fixed;bottom:28px;right:28px;z-index:9999;background:#fff;color:var(--t1);padding:14px 18px;border-radius:12px;box-shadow:var(--shadow-lg),0 0 0 1px var(--rim);font-size:13.5px;font-weight:500;display:flex;align-items:center;gap:10px;min-width:260px;max-width:400px;animation:slideUpToast .35s cubic-bezier(.16,1,.3,1);border-left:3px solid #16a34a}
+  .toast.err{border-left-color:#e11d48}
+  @keyframes slideUpToast{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-overlay.open{display:flex}
+  .modal{background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);width:100%;max-width:760px;max-height:92vh;overflow:auto;animation:fadeUpIn .25s ease}
+  .modal-head{padding:16px 22px;border-bottom:1px solid var(--rim);display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .modal-title{font-family:'Sora',sans-serif;font-size:15px;font-weight:700}
+  .modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--rim);background:var(--panel2);color:var(--t2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .modal-close:hover{background:var(--navy);color:var(--t1)}
+  .modal-body{padding:20px 22px}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--rim);display:flex;justify-content:flex-end;gap:10px;background:var(--panel2)}
+
+  .hint{font-size:12px;color:var(--t3);line-height:1.55}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:900px){.grid-2{grid-template-columns:1fr}}
+  @media (max-width:720px){
+    .ai-container{padding:18px 14px 60px}
+    .page-hero-title{font-size:21px}
+    .ai-topbar{padding:0 12px}
+    .ai-topbar-title{font-size:13.5px}
+  }
+  {% block extra_css %}{% endblock %}
+</style>
+</head>
+<body>
+  <header class="ai-topbar">
+    <div class="ai-topbar-left">
+      <a href="{% url 'teacher_dashboard' %}" class="ai-back">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Dashboard
+      </a>
+      <div class="ai-topbar-title">AI <span>Attendance</span> — {% block topbar_page %}Session{% endblock %}</div>
+    </div>
+    <div class="ai-topbar-right">
+      <div class="ai-user-pill"><div class="ai-user-avatar">{{ teacher.user.username|slice:":1"|upper|default:"T" }}</div>{{ teacher.full_name|default:teacher.user.username }}</div>
+    </div>
+  </header>
+
+  <main class="ai-container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <div class="toast" id="ai-toast" style="display:none"></div>
+
+  <script>
+    function aiToast(msg, isErr) {
+      var t = document.getElementById('ai-toast');
+      t.textContent = msg;
+      t.className = 'toast' + (isErr ? ' err' : '');
+      t.style.display = 'flex';
+      clearTimeout(t._h);
+      t._h = setTimeout(function () { t.style.display = 'none'; }, 3500);
+    }
+    function getCookie(name) {
+      var m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return m ? decodeURIComponent(m[2]) : '';
+    }
+    function aiPost(url, body) {
+      return fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+        body: JSON.stringify(body || {})
+      }).then(function (r) { return r.json().then(function (j) { if (!r.ok || j.ok === false) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); });
+    }
+    function aiGet(url) {
+      return fetch(url).then(function (r) { return r.json().then(function (j) { if (!r.ok || j.ok === false) throw new Error(j.error || ('HTTP ' + r.status)); return j; }); });
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

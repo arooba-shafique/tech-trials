@@ -10,6 +10,7 @@ urlpatterns = [
     path('', landing_page, name='landing_page'),
     path('', include('accounts.urls')),
     path('', include('academics.urls')),
+    path('', include('aiattendance.urls')),
     path('hr/', include('hr.urls')),
     path('', include('activity.urls')),
     path('accounts/logout/', auth_views.LogoutView.as_view(

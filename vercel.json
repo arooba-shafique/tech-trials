@@ -9,9 +9,27 @@
     {
       "src": "dps_ravi/static/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "dps_ravi/media/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
+    {
+      "src": "/static/ai/js/(.*\\.mjs)",
+      "headers": { "Content-Type": "text/javascript" },
+      "continue": true
+    },
+    {
+      "src": "/static/ai/js/(.*\\.wasm)",
+      "headers": { "Content-Type": "application/wasm" },
+      "continue": true
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/dps_ravi/static/$1"
+    },
     {
       "src": "/media/(.*)",
       "dest": "/dps_ravi/media/$1"

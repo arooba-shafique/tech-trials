@@ -1,0 +1,115 @@
+{% extends 'aiattendance/base_ai.html' %}
+{% load static %}
+
+{% block title %}AI Attendance Session{% endblock %}
+{% block topbar_page %}Live Session{% endblock %}
+
+{% block content %}
+<div class="page-hero fade-up">
+  <div class="page-hero-title">AI <span>Attendance</span> Session</div>
+  <div class="page-hero-sub">Run the camera, let the models detect and recognize your students, then verify the list yourself before saving. Nothing is saved automatically.</div>
+</div>
+
+<div class="card fade-up" style="margin-bottom:20px">
+  <div class="card-body">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;min-width:200px">
+        <label class="form-label">Class</label>
+        <select id="ai-class-sel" class="form-select">
+          <option value="">— Choose class —</option>
+          {% for cls in assigned_classes %}
+          <option value="{{ cls.id }}">{{ cls }} ({{ cls.total_students }} students, {{ cls.enrolled_students }} enrolled)</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="flex:2;min-width:170px">
+        <label class="form-label">Subject</label>
+        <select id="ai-subj-sel" class="form-select" disabled><option value="">— Select class first —</option></select>
+      </div>
+      <div class="form-group" style="min-width:150px">
+        <label class="form-label">Date</label>
+        <input type="date" id="ai-date" class="form-input" value="{{ today|date:'Y-m-d' }}">
+      </div>
+      <div class="form-group" style="flex:0 0 auto">
+        <label class="form-label">&nbsp;</label>
+        <button id="ai-start-btn" class="btn btn-solid-gold btn-lg" disabled>▶ Start session</button>
+      </div>
+    </div>
+    <div class="hint" id="ai-setup-hint" style="margin-top:10px">Choose a class to begin.</div>
+  </div>
+</div>
+
+<div class="grid-2 fade-up" id="ai-live-grid" style="display:none">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-title-dot" id="ai-cam-dot" style="background:#94a3b8"></span> Camera</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="badge badge-gray" id="ai-fps">— fps</span>
+        <button id="ai-stop-btn" class="btn btn-rose btn-xs">■ Stop</button>
+      </div>
+    </div>
+    <div style="position:relative;background:#0f2744;aspect-ratio:4/3;max-height:56vh">
+      <video id="ai-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1)"></video>
+      <canvas id="ai-overlay" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas>
+      <div id="ai-stage-msg" style="position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.78);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;white-space:nowrap;max-width:94%;overflow:hidden;text-overflow:ellipsis"></div>
+    </div>
+    <div class="card-body" style="padding:14px 18px">
+      <div class="stat-strip">
+        <div class="stat-chip ok"><div class="v" id="ai-n-recognized">0</div><div class="l">Recognized</div></div>
+        <div class="stat-chip warn"><div class="v" id="ai-n-unknown">0</div><div class="l">Unknown</div></div>
+        <div class="stat-chip bad"><div class="v" id="ai-n-spoof">0</div><div class="l">Spoof flags</div></div>
+        <div class="stat-chip info"><div class="v" id="ai-n-tracks">0</div><div class="l">Faces now</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title"><span class="card-title-dot" style="background:#16a34a"></span> Detected students</div>
+      <span class="hint" id="ai-live-hint">Waiting for camera…</span>
+    </div>
+    <div class="table-wrap" style="max-height:60vh;overflow-y:auto">
+      <table>
+        <thead><tr><th>Student</th><th>Roll</th><th style="text-align:center">Confidence</th><th style="text-align:center">Votes</th></tr></thead>
+        <tbody id="ai-live-body">
+          <tr class="empty-row"><td colspan="4">Recognized students appear here in real time.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card fade-up" id="ai-review-card" style="display:none;margin-top:20px">
+  <div class="card-head">
+    <div class="card-title"><span class="card-title-dot" style="background:#d97706"></span> Review &amp; verify — then save</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn btn-ghost btn-xs" id="ai-all-present">✓ All present</button>
+      <button class="btn btn-ghost btn-xs" id="ai-all-absent">✗ All absent</button>
+      <span class="hint">Suggested values below — edit anything before saving.</span>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>Student</th><th>Roll No</th><th style="text-align:center">AI suggestion</th><th style="text-align:center">Status</th></tr></thead>
+      <tbody id="ai-review-body"></tbody>
+    </table>
+  </div>
+  <div class="card-body" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--rim);background:var(--panel2)">
+    <span class="hint" id="ai-save-summary"></span>
+    <button id="ai-save-btn" class="btn btn-solid-gold btn-lg" style="margin-left:auto">💾 Save attendance</button>
+  </div>
+</div>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'ai/js/ort.wasm.min.js' %}"></script>
+<script src="{% static 'ai/js/yunet.js' %}"></script>
+<script src="{% static 'ai/js/arcface.js' %}"></script>
+<script src="{% static 'ai/js/minifasnet.js' %}"></script>
+<script src="{% static 'ai/js/bytetrack.js' %}"></script>
+<script src="{% static 'ai/js/models.js' %}"></script>
+<script src="{% static 'ai/js/pipeline.js' %}"></script>
+<script src="{% static 'ai/js/session.js' %}"></script>
+{% endblock %}

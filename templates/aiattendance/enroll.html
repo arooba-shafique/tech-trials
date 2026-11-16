@@ -1,0 +1,98 @@
+{% extends 'aiattendance/base_ai.html' %}
+{% load static %}
+
+{% block title %}Face Enrollment{% endblock %}
+{% block topbar_page %}Enrollment{% endblock %}
+
+{% block content %}
+<div class="page-hero fade-up">
+  <div class="page-hero-title">Face <span>Enrollment</span></div>
+  <div class="page-hero-sub">Build the face database for a class. Photos are processed entirely in your browser — embeddings only are sent to the server.</div>
+</div>
+
+<div class="card fade-up" style="margin-bottom:20px">
+  <div class="card-body">
+    <div class="form-row">
+      <div class="form-group" style="flex:2;min-width:220px">
+        <label class="form-label">Class</label>
+        <select id="en-class-sel" class="form-select">
+          <option value="">— Choose class —</option>
+          {% for cls in assigned_classes %}
+          <option value="{{ cls.id }}">{{ cls }} ({{ cls.total_students }} students, {{ cls.enrolled_students }} enrolled)</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" style="flex:3;min-width:240px">
+        <label class="form-label">Bulk action</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="en-auto-all-btn" class="btn btn-gold" disabled>⚡ Auto-enroll all from profile photos</button>
+          <span class="hint" id="en-bulk-status" style="align-self:center"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stat-strip fade-up" id="en-stats" style="display:none;margin-bottom:20px">
+  <div class="stat-chip"><div class="v" id="en-stat-total">0</div><div class="l">Students</div></div>
+  <div class="stat-chip ok"><div class="v" id="en-stat-done">0</div><div class="l">Enrolled</div></div>
+  <div class="stat-chip warn"><div class="v" id="en-stat-missing">0</div><div class="l">Pending</div></div>
+  <div class="stat-chip info"><div class="v" id="en-stat-vectors">0</div><div class="l">Vectors</div></div>
+</div>
+
+<div class="card fade-up">
+  <div class="card-head">
+    <div class="card-title"><span class="card-title-dot" style="background:#0d9488"></span> Class Roster</div>
+    <span class="hint" id="en-roster-hint">Select a class to load its roster</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:56px">Photo</th><th>Student</th><th>Roll No</th>
+        <th style="text-align:center">Enrolled</th><th style="text-align:right">Actions</th>
+      </tr></thead>
+      <tbody id="en-roster-body">
+        <tr class="empty-row"><td colspan="5">Select a class above to load its roster.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-overlay" id="en-capture-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Capture faces — <span id="en-cap-name" style="color:#0d9488"></span></div>
+      <button class="modal-close" onclick="EnrollUI.closeCapture()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="position:relative;background:#0f2744;border-radius:14px;overflow:hidden;aspect-ratio:4/3;max-height:52vh;display:flex;align-items:center;justify-content:center">
+        <video id="en-cap-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1)"></video>
+        <canvas id="en-cap-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas>
+        <div id="en-cap-guide" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44%;aspect-ratio:0.78;border:2px dashed rgba(20,184,166,.7);border-radius:50% 50% 46% 46%;pointer-events:none"></div>
+        <div id="en-cap-msg" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.75);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:20px;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap">
+        <div id="en-cap-shots" style="display:flex;gap:6px"></div>
+        <span class="hint" id="en-cap-count">0 / 5 captured</span>
+        <span class="hint" style="margin-left:auto">Keep the face inside the oval · good light · remove masks/hats</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="EnrollUI.closeCapture()">Cancel</button>
+      <button class="btn btn-solid-gold" id="en-cap-btn" disabled>📷 Capture face</button>
+      <button class="btn btn-green" id="en-cap-save" disabled>Save enrollment</button>
+    </div>
+  </div>
+</div>
+
+<input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'ai/js/ort.wasm.min.js' %}"></script>
+<script src="{% static 'ai/js/yunet.js' %}"></script>
+<script src="{% static 'ai/js/arcface.js' %}"></script>
+<script src="{% static 'ai/js/minifasnet.js' %}"></script>
+<script src="{% static 'ai/js/models.js' %}"></script>
+<script src="{% static 'ai/js/enroll.js' %}"></script>
+{% endblock %}

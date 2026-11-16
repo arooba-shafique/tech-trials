@@ -1382,6 +1382,7 @@ def teacher_mark_attendance(request):
                     'student_class': cls,
                     'marked_by': teacher,
                     'status': status,
+                    'source': 'manual',
                 }
             )
         messages.success(request, f'Attendance saved for {cls} ({students.count()} students).', extra_tags='attendance')
