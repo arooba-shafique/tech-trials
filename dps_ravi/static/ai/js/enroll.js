@@ -127,9 +127,12 @@ window.EnrollUI = (function () {
   }
 
   function saveEmbeddings(studentId, vectors, source) {
+    // ArcFace.embed returns Float32Array, which JSON.stringify encodes as
+    // {"0":..,"1":..} (an object). Convert to plain arrays for the API.
+    var plain = vectors.map(function (v) { return Array.from(v); });
     return aiPost('/api/ai/enroll/', {
       student_id: studentId,
-      embeddings: vectors,
+      embeddings: plain,
       source: source,
       model_version: 'arcface-mbf-v1',
       quality: 1
