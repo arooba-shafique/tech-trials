@@ -358,6 +358,25 @@ class TimetableSlot(models.Model):
         ordering = ['day', 'period_number']
         unique_together = ['assigned_class', 'day', 'period_number']
 
-@property
-def period_label(self):
-    return f"P{self.period_number}"
+    @property
+    def period_label(self):
+        return f"P{self.period_number}"
+
+
+class StoredFile(models.Model):
+    """File contents persisted in the database (base64).
+
+    Backed by academics.storage.DatabaseStorage so uploads work on hosts
+    with a read-only filesystem (e.g. Vercel serverless functions).
+    """
+    name = models.CharField(max_length=500, unique=True)
+    data = models.TextField()
+    size = models.PositiveIntegerField(default=0)
+    content_type = models.CharField(max_length=100, blank=True, default='')
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name

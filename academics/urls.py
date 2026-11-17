@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin-console/', views.admin_dashboard, name='admin_console'),
+    path('db-media/<path:name>', views.serve_stored_file, name='serve_stored_file'),
 path('teacher/login/',views.teacher_login, name='teacher_login'),
 path('teacher_dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
 path('teacher/logout/', views.teacher_logout, name='teacher_logout'),

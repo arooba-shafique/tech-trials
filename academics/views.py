@@ -2093,3 +2093,18 @@ def import_data(request):
         messages.success(request, f'Successfully imported {result["success"]} {data_type} record(s).', extra_tags=section_tag)
 
     return redirect(f'/admin-console/?section={section_tag}')
+
+
+def serve_stored_file(request, name):
+    """Serve a database-stored media file (academics.storage.DatabaseStorage)."""
+    import base64
+    from .models import StoredFile
+
+    row = get_object_or_404(StoredFile, name=name)
+    content = base64.b64decode(row.data)
+    response = HttpResponse(
+        content, content_type=row.content_type or 'application/octet-stream'
+    )
+    response['Content-Length'] = str(len(content))
+    response['Cache-Control'] = 'public, max-age=3600'
+    return response

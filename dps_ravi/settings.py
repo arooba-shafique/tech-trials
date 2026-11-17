@@ -114,7 +114,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'dps_ravi', 'media')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'dps_ravi' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# ✅ File uploads persist in the database: Vercel functions have a read-only
+#    filesystem, so uploads cannot be written to MEDIA_ROOT at runtime.
+STORAGES = {
+    'default': {'BACKEND': 'academics.storage.DatabaseStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
 
 # ✅ WhiteNoise configuration
 WHITENOISE_KEEP_APP_FILES = True
