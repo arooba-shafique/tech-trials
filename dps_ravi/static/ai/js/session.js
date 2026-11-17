@@ -139,32 +139,86 @@ window.SessionUI = (function () {
     $('ai-video').style.transform = state.facing === 'user' ? 'scaleX(-1)' : 'none';
   }
 
+  function requestCamera(facing, exact, withSize) {
+    var v = {};
+    v.facingMode = exact ? { exact: facing } : facing;
+    if (withSize !== false) {
+      v.width = { ideal: 1280 };
+      v.height = { ideal: 960 };
+    }
+    return navigator.mediaDevices.getUserMedia({ video: v, audio: false });
+  }
+
+  function adoptStream(s, facing) {
+    state.stream = s;
+    state.facing = facing;
+    applyFacing();
+    var video = $('ai-video');
+    video.srcObject = s;
+    video.play().catch(function () {});
+  }
+
+  function isGoodSwitch(s, wantFacing, oldSettings) {
+    var t = s.getVideoTracks()[0];
+    var st = (t && t.getSettings) ? (t.getSettings() || {}) : {};
+    // Same physical camera means the switch did not actually happen.
+    if (oldSettings && oldSettings.deviceId && st.deviceId &&
+        st.deviceId === oldSettings.deviceId) {
+      return false;
+    }
+    if (st.facingMode && st.facingMode !== wantFacing) return false;
+    return true;
+  }
+
   function flipCamera() {
     if (!state.running || state._flipping) return;
     state._flipping = true;
     var btn = $('ai-flip-btn');
     btn.disabled = true;
-    var next = state.facing === 'user' ? 'environment' : 'user';
-    navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { exact: next }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
-    }).then(function (s) {
-      stopStream();
-      state.stream = s;
-      state.facing = next;
-      applyFacing();
-      var video = $('ai-video');
-      video.srcObject = s;
-      video.play().catch(function () {});
-      state._flipping = false;
-      btn.disabled = false;
-      setStage(next === 'environment' ? 'Back camera on' : 'Front camera on');
-    }, function () {
-      state._flipping = false;
-      btn.disabled = false;
-      aiToast(next === 'environment'
-        ? 'No back camera available on this device'
-        : 'No front camera available', true);
-    });
+    var prev = state.facing;
+    var next = prev === 'user' ? 'environment' : 'user';
+    var oldSettings = {};
+    if (state.stream) {
+      var ot = state.stream.getVideoTracks()[0];
+      if (ot && ot.getSettings) oldSettings = ot.getSettings() || {};
+    }
+    setStage('Switching camera…');
+    // Stop the current camera first: many Android devices only feed one
+    // camera stream at a time, so a parallel request gets rejected.
+    stopStream();
+
+    requestCamera(next, true)
+      .catch(function () { return requestCamera(next, true, false); })
+      .catch(function () { return requestCamera(next, false); })
+      .then(function (s) {
+        if (!isGoodSwitch(s, next, oldSettings)) {
+          s.getTracks().forEach(function (t) { t.stop(); });
+          throw new Error('requested camera not provided');
+        }
+        adoptStream(s, next);
+        state._flipping = false;
+        btn.disabled = false;
+        setStage(next === 'environment' ? 'Back camera on' : 'Front camera on');
+      })
+      .catch(function (err) {
+        console.error('camera flip failed:', err);
+        // Restore the previous camera so the session keeps running.
+        return requestCamera(prev, false).then(function (s) {
+          adoptStream(s, prev);
+          state._flipping = false;
+          btn.disabled = false;
+          setStage(prev === 'environment' ? 'Back camera on' : 'Front camera on');
+          aiToast(next === 'environment'
+            ? 'Back camera not available on this device'
+            : 'Front camera not available on this device', true);
+        }, function (err2) {
+          console.error('camera restore failed:', err2);
+          state._flipping = false;
+          btn.disabled = false;
+          setStage('Camera lost — press Stop');
+          aiToast('Camera error — press Stop, then start again', true);
+        });
+      });
   }
 
   function setStage(msg) { $('ai-stage-msg').textContent = msg; }
