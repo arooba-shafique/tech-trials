@@ -149,6 +149,22 @@ window.SessionUI = (function () {
     return navigator.mediaDevices.getUserMedia({ video: v, audio: false });
   }
 
+  function requestCameraById(deviceId) {
+    return navigator.mediaDevices.getUserMedia({
+      video: {
+        deviceId: { exact: deviceId },
+        width: { ideal: 1280 },
+        height: { ideal: 960 }
+      },
+      audio: false
+    });
+  }
+
+  function trackSettings(stream) {
+    var t = stream && stream.getVideoTracks()[0];
+    return (t && t.getSettings) ? (t.getSettings() || {}) : {};
+  }
+
   function adoptStream(s, facing) {
     state.stream = s;
     state.facing = facing;
@@ -159,14 +175,13 @@ window.SessionUI = (function () {
   }
 
   function isGoodSwitch(s, wantFacing, oldSettings) {
-    var t = s.getVideoTracks()[0];
-    var st = (t && t.getSettings) ? (t.getSettings() || {}) : {};
+    var st = trackSettings(s);
     // Same physical camera means the switch did not actually happen.
     if (oldSettings && oldSettings.deviceId && st.deviceId &&
         st.deviceId === oldSettings.deviceId) {
       return false;
     }
-    if (st.facingMode && st.facingMode !== wantFacing) return false;
+    if (wantFacing && st.facingMode && st.facingMode !== wantFacing) return false;
     return true;
   }
 
@@ -177,48 +192,72 @@ window.SessionUI = (function () {
     btn.disabled = true;
     var prev = state.facing;
     var next = prev === 'user' ? 'environment' : 'user';
-    var oldSettings = {};
-    if (state.stream) {
-      var ot = state.stream.getVideoTracks()[0];
-      if (ot && ot.getSettings) oldSettings = ot.getSettings() || {};
-    }
+    var oldSettings = trackSettings(state.stream);
+    var target = null; // next deviceId to cycle to (USB cams have no facing)
     setStage('Switching camera…');
     // Stop the current camera first: many Android devices only feed one
     // camera stream at a time, so a parallel request gets rejected.
     stopStream();
 
-    requestCamera(next, true)
-      .catch(function () { return requestCamera(next, true, false); })
-      .catch(function () { return requestCamera(next, false); })
-      .then(function (s) {
-        if (!isGoodSwitch(s, next, oldSettings)) {
-          s.getTracks().forEach(function (t) { t.stop(); });
-          throw new Error('requested camera not provided');
-        }
-        adoptStream(s, next);
+    navigator.mediaDevices.enumerateDevices().catch(function () {
+      return [];
+    }).then(function (devices) {
+      var ids = devices.filter(function (d) {
+        return d.kind === 'videoinput' && d.deviceId;
+      }).map(function (d) { return d.deviceId; });
+      if (ids.length > 1 && oldSettings.deviceId) {
+        var i = ids.indexOf(oldSettings.deviceId);
+        target = ids[((i === -1 ? 0 : i) + 1) % ids.length];
+        if (target === oldSettings.deviceId) target = null;
+      }
+      if (target) {
+        // Cycle cameras by device id — works for phone front/back pairs
+        // and for external USB cameras that have no facing label.
+        return requestCameraById(target).catch(function () {
+          return requestCamera(next, true)
+            .catch(function () { return requestCamera(next, false); });
+        });
+      }
+      return requestCamera(next, true)
+        .catch(function () { return requestCamera(next, true, false); })
+        .catch(function () { return requestCamera(next, false); });
+    }).then(function (s) {
+      if (!isGoodSwitch(s, target ? null : next, oldSettings)) {
+        s.getTracks().forEach(function (t) { t.stop(); });
+        throw new Error('requested camera not provided');
+      }
+      var st = trackSettings(s);
+      adoptStream(s, st.facingMode || (target ? prev : next));
+      state._flipping = false;
+      btn.disabled = false;
+      setStage(target ? 'Camera switched'
+        : (next === 'environment' ? 'Back camera on' : 'Front camera on'));
+    }).catch(function (err) {
+      console.error('camera flip failed:', err);
+      // Restore the previous camera so the session keeps running.
+      var restoreP = oldSettings.deviceId
+        ? requestCameraById(oldSettings.deviceId)
+        : requestCamera(prev, false);
+      return restoreP.catch(function () {
+        return requestCamera(prev, false);
+      }).then(function (s) {
+        adoptStream(s, trackSettings(s).facingMode || prev);
         state._flipping = false;
         btn.disabled = false;
-        setStage(next === 'environment' ? 'Back camera on' : 'Front camera on');
-      })
-      .catch(function (err) {
-        console.error('camera flip failed:', err);
-        // Restore the previous camera so the session keeps running.
-        return requestCamera(prev, false).then(function (s) {
-          adoptStream(s, prev);
-          state._flipping = false;
-          btn.disabled = false;
-          setStage(prev === 'environment' ? 'Back camera on' : 'Front camera on');
-          aiToast(next === 'environment'
+        setStage(prev === 'environment' ? 'Back camera on' : 'Front camera on');
+        aiToast(target
+          ? 'Could not switch camera on this device'
+          : (next === 'environment'
             ? 'Back camera not available on this device'
-            : 'Front camera not available on this device', true);
-        }, function (err2) {
-          console.error('camera restore failed:', err2);
-          state._flipping = false;
-          btn.disabled = false;
-          setStage('Camera lost — press Stop');
-          aiToast('Camera error — press Stop, then start again', true);
-        });
+            : 'Front camera not available on this device'), true);
+      }, function (err2) {
+        console.error('camera restore failed:', err2);
+        state._flipping = false;
+        btn.disabled = false;
+        setStage('Camera lost — press Stop');
+        aiToast('Camera error — press Stop, then start again', true);
       });
+    });
   }
 
   function setStage(msg) { $('ai-stage-msg').textContent = msg; }
