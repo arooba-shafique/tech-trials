@@ -8,6 +8,8 @@ window.SessionUI = (function () {
     stream: null,
     loopTimer: null,
     running: false,
+    facing: 'user',
+    _flipping: false,
     lastProcess: 0,
     processed: 0,
     fpsWindowStart: 0,
@@ -74,7 +76,7 @@ window.SessionUI = (function () {
     $('ai-setup-hint').textContent = 'Requesting camera and loading AI models…';
 
     var streamP = navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
+      video: { facingMode: state.facing, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
     });
     var dataP = Promise.all([
       aiGet('/api/ai/class/' + classId + '/'),
@@ -88,6 +90,7 @@ window.SessionUI = (function () {
       var video = $('ai-video');
       video.srcObject = state.stream;
       return video.play().then(function () {
+        detectCams();
         startBtn.textContent = '⏳ Initializing AI…';
         return AIPipeline.init({ embeddings: embeddings, roster: roster });
       }).then(function (info) {
@@ -109,6 +112,7 @@ window.SessionUI = (function () {
       $('ai-setup-hint').textContent = 'Could not start: ' + e.message;
       startBtn.disabled = false;
       startBtn.textContent = '▶ Start session';
+      $('ai-flip-btn').style.display = 'none';
       stopStream();
     });
   }
@@ -118,6 +122,49 @@ window.SessionUI = (function () {
       state.stream.getTracks().forEach(function (t) { t.stop(); });
       state.stream = null;
     }
+  }
+
+  // Show the flip button only when the device actually has 2+ cameras
+  // (phones); single-camera laptops never see it.
+  function detectCams() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
+    navigator.mediaDevices.enumerateDevices().then(function (devices) {
+      var n = devices.filter(function (d) { return d.kind === 'videoinput'; }).length;
+      $('ai-flip-btn').style.display = n > 1 ? '' : 'none';
+    }).catch(function () {});
+  }
+
+  function applyFacing() {
+    // Front camera previews mirrored (selfie convention); back camera natural.
+    $('ai-video').style.transform = state.facing === 'user' ? 'scaleX(-1)' : 'none';
+  }
+
+  function flipCamera() {
+    if (!state.running || state._flipping) return;
+    state._flipping = true;
+    var btn = $('ai-flip-btn');
+    btn.disabled = true;
+    var next = state.facing === 'user' ? 'environment' : 'user';
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { exact: next }, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false
+    }).then(function (s) {
+      stopStream();
+      state.stream = s;
+      state.facing = next;
+      applyFacing();
+      var video = $('ai-video');
+      video.srcObject = s;
+      video.play().catch(function () {});
+      state._flipping = false;
+      btn.disabled = false;
+      setStage(next === 'environment' ? 'Back camera on' : 'Front camera on');
+    }, function () {
+      state._flipping = false;
+      btn.disabled = false;
+      aiToast(next === 'environment'
+        ? 'No back camera available on this device'
+        : 'No front camera available', true);
+    });
   }
 
   function setStage(msg) { $('ai-stage-msg').textContent = msg; }
@@ -175,7 +222,7 @@ window.SessionUI = (function () {
     ctx.lineWidth = 2.5;
     ctx.font = '600 12px "DM Sans", sans-serif';
     faces.forEach(function (f) {
-      var mx = fw - (f.x + f.w); // video is mirrored
+      var mx = state.facing === 'user' ? fw - (f.x + f.w) : f.x; // front camera preview is mirrored
       var x = mx * sx, y = f.y * sy, bw = f.w * sx, bh = f.h * sy;
       ctx.strokeStyle = '#14b8a6';
       ctx.strokeRect(x, y, bw, bh);
@@ -184,7 +231,7 @@ window.SessionUI = (function () {
     var live = state._lastLive || [];
     live.forEach(function (l) {
       if (l.studentId === null || !l.box) return;
-      var mx = fw - (l.box.x + l.box.w);
+      var mx = state.facing === 'user' ? fw - (l.box.x + l.box.w) : l.box.x;
       var x = mx * sx, y = l.box.y * sy;
       var label = (l.name || 'Student') + (l.cos > 0 ? ' · ' + l.cos.toFixed(2) : '');
       var tw = ctx.measureText(label).width + 12;
@@ -251,6 +298,7 @@ window.SessionUI = (function () {
     state.running = false;
     if (state.loopTimer) clearTimeout(state.loopTimer);
     stopStream();
+    $('ai-flip-btn').style.display = 'none';
     $('ai-cam-dot').style.background = '#94a3b8';
     setStage('Stopped');
     buildReview();
@@ -353,6 +401,7 @@ window.SessionUI = (function () {
     });
     $('ai-start-btn').addEventListener('click', start);
     $('ai-stop-btn').addEventListener('click', stop);
+    $('ai-flip-btn').addEventListener('click', flipCamera);
     $('ai-save-btn').addEventListener('click', save);
     $('ai-all-present').addEventListener('click', function () { markAll('present'); });
     $('ai-all-absent').addEventListener('click', function () { markAll('absent'); });
