@@ -21,6 +21,7 @@ var titles = {
     credentials: 'Credentials Generator',
     dashboard:   'Dashboard',
     students:    'Students',
+    idcards:     'Student ID Cards',
     staff:       'Staff',
     parents:     'Parents',
     classes:     'Classes',
@@ -70,7 +71,7 @@ window.addEventListener('load', function () {
     var section = '';
     var urlParams = new URLSearchParams(window.location.search);
     var urlSection = urlParams.get('section');
-    var valid   = ['students','staff','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials','left-employees'];
+    var valid   = ['students','idcards','staff','parents','classes','subjects','assignments','timetable','exams','results','dashboard','salary-config','salary-sheet','salary-slips','hr-attendance','credentials','left-employees'];
 
     if (urlSection && valid.indexOf(urlSection) !== -1) {
         section = urlSection;

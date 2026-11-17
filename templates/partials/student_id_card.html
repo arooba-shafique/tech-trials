@@ -1,0 +1,141 @@
+{% load static %}
+{% load hr_filters %}
+{# ── Student ID Card (front + back) — expects `s` = StudentProfile ── #}
+<div class="idc"
+     data-name="{{ s.full_name|lower }}"
+     data-roll="{{ s.roll_number|default:''|lower }}"
+     data-adm="{{ s.admission_number|default:''|lower }}"
+     data-class="{{ s.student_class|default:'' }}"
+     data-gender="{{ s.gender }}">
+
+    <!-- ══════════════ FRONT ══════════════ -->
+    <div class="idc-card idc-front">
+        <svg class="idc-deco" viewBox="0 0 1040 470" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="idcPurple" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66186e"/><stop offset="1" stop-color="#380b40"/>
+                </linearGradient>
+                <linearGradient id="idcGold" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#a8791a"/><stop offset=".3" stop-color="#f2dc93"/>
+                    <stop offset=".62" stop-color="#d4af37"/><stop offset="1" stop-color="#9a7412"/>
+                </linearGradient>
+            </defs>
+            <!-- top-right purple sweep -->
+            <path d="M640 0 H1040 V196 C928 176 786 108 640 0 Z" fill="url(#idcPurple)"/>
+            <path d="M626 0 C780 112 924 184 1040 208 L1040 262 C916 236 766 156 618 34 Z" fill="url(#idcGold)"/>
+            <!-- bottom-left purple sweep -->
+            <path d="M0 412 C200 428 400 456 624 470 H0 Z" fill="url(#idcPurple)"/>
+            <path d="M0 386 C200 403 405 435 648 470 H618 C396 451 196 421 0 412 Z" fill="url(#idcGold)"/>
+        </svg>
+        <img class="idc-wm" src="{% static 'images/royal_shield.png' %}" alt="">
+
+        <div class="idc-inner">
+            <div class="idc-head">
+                <img class="idc-logo" src="{% static 'images/royal_shield.png' %}" alt="Royal International School">
+                <span class="idc-head-line"></span>
+                <div class="idc-school">ROYAL INTERNATIONAL<br>SCHOOL MULTAN</div>
+            </div>
+
+            <div class="idc-main">
+                <div class="idc-photo">
+                    {% if s.profile_picture %}
+                        <img src="{{ s.profile_picture.url }}" alt="{{ s.full_name }}">
+                    {% else %}
+                        <span class="idc-initials">{{ s.full_name|first|upper }}</span>
+                    {% endif %}
+                </div>
+                <div class="idc-info">
+                    <div class="idc-name">{{ s.full_name }}</div>
+                    <div class="idc-rule"></div>
+                    <dl class="idc-fields">
+                        <div class="idc-field">
+                            <dt>Student ID</dt>
+                            <dd>: {{ s.admission_number|default:s.roll_number|default:"—" }}</dd>
+                        </div>
+                        <div class="idc-field">
+                            <dt>Class</dt>
+                            <dd>: {% if s.student_class %}{{ s.student_class.name }} – {{ s.student_class.section }}{% else %}—{% endif %}</dd>
+                        </div>
+                        <div class="idc-field">
+                            <dt>Father’s Name</dt>
+                            <dd>: {{ s.guardian_name|default:"—" }}</dd>
+                        </div>
+                        <div class="idc-field">
+                            <dt>Date of Birth</dt>
+                            <dd>: {{ s.date_of_birth|date:"d-m-Y"|default:"—" }}</dd>
+                        </div>
+                        <div class="idc-field">
+                            <dt>Session</dt>
+                            <dd>: {{ s.student_class.academic_year|session_fmt }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════ BACK ══════════════ -->
+    <div class="idc-card idc-back">
+        <svg class="idc-deco" viewBox="0 0 1040 470" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="idcPurpleB" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#66186e"/><stop offset="1" stop-color="#380b40"/>
+                </linearGradient>
+                <linearGradient id="idcGoldB" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#a8791a"/><stop offset=".3" stop-color="#f2dc93"/>
+                    <stop offset=".62" stop-color="#d4af37"/><stop offset="1" stop-color="#9a7412"/>
+                </linearGradient>
+            </defs>
+            <!-- purple header band with wavy gold edge -->
+            <path d="M0 0 H1040 V148 C880 208 700 212 520 176 C360 144 180 128 0 166 Z" fill="url(#idcPurpleB)"/>
+            <path d="M0 166 C180 128 360 144 520 176 C700 212 880 208 1040 148 V196 C872 254 690 256 512 220 C350 188 176 174 0 214 Z" fill="url(#idcGoldB)"/>
+            <!-- bottom-right corner accent -->
+            <path d="M1040 344 C960 382 900 428 876 470 H1040 Z" fill="url(#idcPurpleB)"/>
+            <path d="M1040 314 C956 354 896 404 872 470 H846 C878 396 938 336 1040 290 Z" fill="url(#idcGoldB)"/>
+        </svg>
+        <img class="idc-wm idc-wm-back" src="{% static 'images/royal_shield.png' %}" alt="">
+
+        <div class="idc-inner idc-back-inner">
+            <div class="idc-head idc-head-light">
+                <img class="idc-logo" src="{% static 'images/royal_shield.png' %}" alt="Royal International School">
+                <span class="idc-head-line"></span>
+                <div class="idc-school">ROYAL INTERNATIONAL<br>SCHOOL MULTAN</div>
+            </div>
+
+            <div class="idc-back-body">
+                <div class="idc-details">
+                    <h3>Student Details</h3>
+                    <ul>
+                        <li>
+                            <span class="idc-ico">
+                                <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </span>
+                            <span>Contact: {{ s.phone|default:"—" }}</span>
+                        </li>
+                        <li>
+                            <span class="idc-ico">
+                                <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            </span>
+                            <span>Address: {{ s.address|default:"—"|truncatewords:9 }}</span>
+                        </li>
+                        <li>
+                            <span class="idc-ico">
+                                <svg viewBox="0 0 24 24" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </span>
+                            <span>Valid: {{ s.student_class.academic_year|session_fmt }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="idc-sign">
+                    <div class="idc-sign-line"></div>
+                    <span>Principal’s Signature</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="idc-actions">
+        <button type="button" class="idc-btn" onclick="idcPrintOne(this)">Print</button>
+        <button type="button" class="idc-btn idc-btn-pdf" onclick="idcPdfOne(this)">Download PDF</button>
+    </div>
+</div>

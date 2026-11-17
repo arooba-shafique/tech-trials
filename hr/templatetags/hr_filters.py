@@ -5,6 +5,14 @@ register = template.Library()
 
 
 @register.filter
+def session_fmt(value):
+    """Format an academic year / session as '2026 – 2027' (falls back to the current session)."""
+    if not value:
+        return '2026 – 2027'
+    return str(value).replace('-', ' – ')
+
+
+@register.filter
 def months_since(date_value):
     """Calculate the number of months between a given date and today."""
     if not date_value:

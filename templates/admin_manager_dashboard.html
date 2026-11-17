@@ -129,6 +129,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             Students
         </a>
+        <a class="nav-item" href="#" onclick="showSection('idcards',this);return false;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2.2"/><path d="M5.5 16.5c.6-1.4 1.5-2.1 2.5-2.1s1.9.7 2.5 2.1"/><line x1="14" y1="10" x2="18.5" y2="10"/><line x1="14" y1="14" x2="18.5" y2="14"/></svg>
+            ID Cards
+        </a>
         <a class="nav-item" href="#" onclick="showSection('staff',this);return false;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             Staff
@@ -570,6 +574,176 @@
 
             // init
             filterStudents();
+        })();
+        </script>
+
+        <!-- ═══════════ STUDENT ID CARDS ═══════════ -->
+        <style>
+            .idc-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(0, 500px)); gap:26px; justify-content:center; }
+            .idc{ width:100%; max-width:500px; display:flex; flex-direction:column; gap:10px; }
+            .idc-card{
+                position:relative; width:100%; aspect-ratio:1040/470;
+                container-type:inline-size;
+                border-radius:4cqw; overflow:hidden;
+                box-shadow:0 8px 22px rgba(59,10,64,.18);
+                background:#fffcf6;
+            }
+            .idc-deco{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+            .idc-wm{ position:absolute; right:4cqw; top:52%; transform:translateY(-50%); width:24cqw; opacity:.10; z-index:1; pointer-events:none; }
+            .idc-wm-back{ left:3cqw; right:auto; width:24cqw; opacity:.10; }
+            .idc-inner{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:3cqw 4.5cqw; }
+            .idc-head{ display:flex; align-items:center; gap:2.6cqw; }
+            .idc-logo{ height:7.4cqw; width:auto; display:block; }
+            .idc-head-line{ width:.5cqw; min-width:2px; height:8cqw; background:#6d1a74; border-radius:2px; flex:0 0 auto; }
+            .idc-school{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:3.4cqw; line-height:1.18; color:#43104b; letter-spacing:.02em; }
+            .idc-main{ flex:1; display:flex; align-items:center; gap:4cqw; min-height:0; }
+            .idc-photo{
+                flex:0 0 auto; width:19.5cqw; aspect-ratio:200/272;
+                border:.7cqw solid #d9b45a; border-radius:2cqw; overflow:hidden;
+                background:#efe9f3; display:flex; align-items:center; justify-content:center;
+                box-shadow:0 2px 6px rgba(0,0,0,.14);
+            }
+            .idc-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
+            .idc-initials{ font-family:Georgia,'Times New Roman',serif; font-size:8cqw; font-weight:700; color:#6b1f6e; }
+            .idc-info{ flex:1; min-width:0; }
+            .idc-name{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:4.2cqw; color:#3b0d44; line-height:1.1; }
+            .idc-rule{ width:68%; height:.5cqw; min-height:2px; margin:1cqw 0 1.3cqw; background:linear-gradient(90deg,#b8860b,#f2dc93,#c9a227); border-radius:2px; }
+            .idc-fields{ margin:0; display:grid; gap:.5cqw; }
+            .idc-field{ display:grid; grid-template-columns:40% 1fr; align-items:baseline; font-size:2.7cqw; line-height:1.15; }
+            .idc-field dt{ color:#3b0d44; font-weight:700; }
+            .idc-field dd{ margin:0; color:#3b0d44; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+            .idc-back{ background:linear-gradient(160deg,#fffdf7,#fdf7ec); }
+            .idc-back-inner{ padding:0 4.5cqw 3.4cqw; }
+            .idc-back .idc-head{ height:19cqw; }
+            .idc-head-light .idc-school{ color:#fff; }
+            .idc-head-light .idc-head-line{ background:#f0d684; }
+            .idc-back-body{ flex:1; display:flex; align-items:center; gap:4cqw; min-height:0; }
+            .idc-details{ flex:1; min-width:0; }
+            .idc-details h3{ margin:0 0 1.6cqw; font-family:Georgia,'Times New Roman',serif; font-size:3.4cqw; letter-spacing:.08em; text-transform:uppercase; color:#43104b; }
+            .idc-details ul{ list-style:none; margin:0; padding:0; display:grid; gap:1.3cqw; }
+            .idc-details li{ display:flex; align-items:center; gap:1.7cqw; font-size:2.8cqw; color:#2f0b36; font-weight:600; min-width:0; }
+            .idc-details li > span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+            .idc-ico{ width:4.4cqw; height:4.4cqw; min-width:16px; min-height:16px; border-radius:50%; background:#4b1252; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+            .idc-ico svg{ width:2.5cqw; height:2.5cqw; min-width:9px; min-height:9px; display:block; }
+            .idc-sign{ position:relative; flex:0 0 33%; display:flex; flex-direction:column; align-items:center; gap:1.4cqw; padding-top:5cqw; }
+            .idc-sign::before{ content:""; position:absolute; top:-4cqw; bottom:-2cqw; left:-2cqw; width:.4cqw; min-width:2px; background:linear-gradient(180deg,#e6c766,#b8860b); }
+            .idc-sign-line{ width:100%; height:.4cqw; min-height:2px; background:#3b0d44; }
+            .idc-sign span{ font-size:2.4cqw; color:#3b0d44; font-weight:600; text-align:center; white-space:nowrap; }
+
+            .idc-actions{ display:flex; gap:8px; justify-content:center; }
+            .idc-btn{ font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; font-family:inherit; transition:.15s; }
+            .idc-btn:hover{ background:#f9fafb; border-color:#d1d5db; }
+            .idc-btn-pdf{ background:#4b1252; border-color:#4b1252; color:#fff; }
+            .idc-btn-pdf:hover{ background:#5f1868; border-color:#5f1868; }
+            #idcPrintArea{ display:none; }
+            html.idc-printing body > *:not(#idcPrintArea){ display:none !important; }
+            html.idc-printing #idcPrintArea{ display:block !important; }
+            #idcPrintArea .idc{ width:500px !important; max-width:none !important; margin:0 auto 8mm; break-inside:avoid; page-break-inside:avoid; }
+            #idcPrintArea .idc-actions{ display:none !important; }
+            #idcPrintArea .idc-card{ box-shadow:none !important; }
+            @media (max-width:560px){
+                .idc-grid{ grid-template-columns:1fr; }
+                .idc{ max-width:100%; }
+            }
+        </style>
+
+        <div id="section-idcards" class="section">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+                <h2 style="font-size:15px;font-weight:700;">Student ID Cards (<span id="idcCount">{{ students|length }}</span>)</h2>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="idc-btn" onclick="idcPrintAll()">🖨 Print All</button>
+                    <button type="button" class="idc-btn idc-btn-pdf" onclick="idcPdfAll()">⬇ Download PDF (All)</button>
+                </div>
+            </div>
+
+            <!-- Search + Class Filter -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+                <input type="text" id="idcSearch" placeholder="Search by name, roll no, admission no..." oninput="idcFilter()" style="flex:1;min-width:200px;padding:9px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:border-color 0.15s;">
+                <select id="idcClassFilter" onchange="idcFilter()" style="padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#fff;min-width:170px;">
+                    <option value="">All Classes</option>
+                    {% for cls in classes %}<option value="{{ cls }}">{{ cls.name }} – {{ cls.section }}</option>{% endfor %}
+                </select>
+            </div>
+
+            {% if students %}
+            <div id="idcGrid" class="idc-grid">
+                {% for student in students %}{% include "partials/student_id_card.html" with s=student %}{% endfor %}
+            </div>
+            <div id="idcEmpty" style="display:none;text-align:center;color:var(--text-muted);font-size:13px;padding:48px;background:var(--white);border-radius:12px;">No student cards match the current filter.</div>
+            {% else %}
+            <div id="idcEmpty" style="text-align:center;color:var(--text-muted);font-size:13px;padding:48px;background:var(--white);border-radius:12px;">No students found.</div>
+            {% endif %}
+        </div>
+
+        <script>
+        (function(){
+            function allCards(){
+                return Array.prototype.slice.call(document.querySelectorAll('#idcGrid .idc'));
+            }
+            function visibleCards(){
+                return allCards().filter(function(el){ return el.style.display !== 'none'; });
+            }
+            function idcFilter(){
+                var q = (document.getElementById('idcSearch').value || '').toLowerCase();
+                var cls = document.getElementById('idcClassFilter').value;
+                var n = 0;
+                allCards().forEach(function(el){
+                    var name = el.getAttribute('data-name') || '';
+                    var roll = el.getAttribute('data-roll') || '';
+                    var adm  = el.getAttribute('data-adm') || '';
+                    var rcls = el.getAttribute('data-class') || '';
+                    var ok = (!q || name.indexOf(q) !== -1 || roll.indexOf(q) !== -1 || adm.indexOf(q) !== -1) &&
+                             (!cls || rcls === cls);
+                    el.style.display = ok ? '' : 'none';
+                    if (ok) n++;
+                });
+                document.getElementById('idcCount').textContent = n;
+                var empty = document.getElementById('idcEmpty');
+                if (empty) empty.style.display = n ? 'none' : 'block';
+            }
+
+            function preparePrint(list){
+                var area = document.getElementById('idcPrintArea');
+                area.innerHTML = '';
+                list.forEach(function(el){
+                    var c = el.cloneNode(true);
+                    var a = c.querySelector('.idc-actions');
+                    if (a && a.parentNode) a.parentNode.removeChild(a);
+                    area.appendChild(c);
+                });
+                var st = document.getElementById('idcPageStyle');
+                if (!st){ st = document.createElement('style'); st.id = 'idcPageStyle'; document.head.appendChild(st); }
+                st.textContent = '@page{ size:A4 landscape; margin:8mm; }';
+                document.documentElement.classList.add('idc-printing');
+                void document.body.offsetHeight; // flush styles before printing
+            }
+            function finishPrint(){
+                document.documentElement.classList.remove('idc-printing');
+                var st = document.getElementById('idcPageStyle');
+                if (st && st.parentNode) st.parentNode.removeChild(st);
+                var area = document.getElementById('idcPrintArea');
+                if (area) area.innerHTML = '';
+            }
+            window.addEventListener('afterprint', finishPrint);
+
+            window.idcFilter = idcFilter;
+            window.idcPrintAll = function(){
+                var list = visibleCards();
+                if (!list.length){ alert('No student cards to print.'); return; }
+                preparePrint(list);
+                window.print();
+            };
+            window.idcPrintOne = function(btn){
+                var card = btn.closest ? btn.closest('.idc') : null;
+                if (!card) return;
+                preparePrint([card]);
+                window.print();
+            };
+            window.idcVisible = visibleCards;
+
+            // init
+            idcFilter();
         })();
         </script>
 
@@ -1881,8 +2055,9 @@
     </div><!-- end .content -->
 </main>
 
-<script src="{% static 'js/admin_dashboard.js' %}?v=6"></script>
+<script src="{% static 'js/admin_dashboard.js' %}?v=7"></script>
 <script src="{% static 'js/slip_pdf.js' %}?v=1"></script>
+<script src="{% static 'js/idcard_pdf.js' %}?v=1"></script>
 
 <!-- Credentials JS -->
 <script>
@@ -2113,6 +2288,9 @@ document.addEventListener('click', function(e) {
     }
 });
 </script>
+
+<!-- Container used when printing student ID cards -->
+<div id="idcPrintArea" aria-hidden="true"></div>
 
 </body>
 </html>
