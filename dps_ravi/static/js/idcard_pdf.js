@@ -68,7 +68,7 @@
                 var w = maxW;
                 var h = canvas.height * w / canvas.width;
                 if (h > maxH) { h = maxH; w = canvas.width * h / canvas.height; }
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', (pw - w) / 2, (ph - h) / 2, w, h);
+                pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pw - w) / 2, (ph - h) / 2, w, h);
             }).then(next);
         }
 
