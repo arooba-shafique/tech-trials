@@ -1,6 +1,11 @@
 {% load static %}
 {% load hr_filters %}
-{# ── Student ID Card (front + back) — expects `s` = StudentProfile ── #}
+{% comment %} Student ID Card (front + back) — expects `s` = StudentProfile.
+  cid = per-card suffix so the SVG gradient ids are unique across cards.
+  Without it every card shares #idcPurple/#idcGold: url(#...) then resolves to
+  the FIRST card in the DOM, and if a search hides that card the gradients sit
+  in a display:none tree and Chrome paints nothing (card colours go flat). {% endcomment %}
+{% with cid=s.pk|default:"0" %}
 <div class="idc"
      data-name="{{ s.full_name|lower }}"
      data-roll="{{ s.roll_number|default:''|lower }}"
@@ -12,20 +17,20 @@
     <div class="idc-card idc-front">
         <svg class="idc-deco" viewBox="0 0 860 540" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <linearGradient id="idcPurple" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="idcPurple{{ cid }}" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stop-color="#66186e"/><stop offset="1" stop-color="#380b40"/>
                 </linearGradient>
-                <linearGradient id="idcGold" x1="0" y1="0" x2="1" y2="0">
+                <linearGradient id="idcGold{{ cid }}" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0" stop-color="#a8791a"/><stop offset=".3" stop-color="#f2dc93"/>
                     <stop offset=".62" stop-color="#d4af37"/><stop offset="1" stop-color="#9a7412"/>
                 </linearGradient>
             </defs>
             <!-- top-right purple sweep -->
-            <path d="M624 0 H860 V182 C792 165 704 108 624 0 Z" fill="url(#idcPurple)"/>
-            <path d="M612 0 C694 106 788 172 860 196 L860 248 C784 226 690 154 606 30 Z" fill="url(#idcGold)"/>
+            <path d="M624 0 H860 V182 C792 165 704 108 624 0 Z" fill="url(#idcPurple{{ cid }})"/>
+            <path d="M612 0 C694 106 788 172 860 196 L860 248 C784 226 690 154 606 30 Z" fill="url(#idcGold{{ cid }})"/>
             <!-- bottom-left purple sweep -->
-            <path d="M0 468 C170 484 345 510 530 540 H0 Z" fill="url(#idcPurple)"/>
-            <path d="M0 442 C170 458 348 486 536 540 H530 C345 510 170 484 0 468 Z" fill="url(#idcGold)"/>
+            <path d="M0 468 C170 484 345 510 530 540 H0 Z" fill="url(#idcPurple{{ cid }})"/>
+            <path d="M0 442 C170 458 348 486 536 540 H530 C345 510 170 484 0 468 Z" fill="url(#idcGold{{ cid }})"/>
         </svg>
         <img class="idc-wm" src="{% static 'images/royal_shield.png' %}" alt="">
 
@@ -78,20 +83,20 @@
     <div class="idc-card idc-back">
         <svg class="idc-deco" viewBox="0 0 860 540" preserveAspectRatio="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <linearGradient id="idcPurpleB" x1="0" y1="0" x2="1" y2="1">
+                <linearGradient id="idcPurpleB{{ cid }}" x1="0" y1="0" x2="1" y2="1">
                     <stop offset="0" stop-color="#66186e"/><stop offset="1" stop-color="#380b40"/>
                 </linearGradient>
-                <linearGradient id="idcGoldB" x1="0" y1="0" x2="1" y2="0">
+                <linearGradient id="idcGoldB{{ cid }}" x1="0" y1="0" x2="1" y2="0">
                     <stop offset="0" stop-color="#a8791a"/><stop offset=".3" stop-color="#f2dc93"/>
                     <stop offset=".62" stop-color="#d4af37"/><stop offset="1" stop-color="#9a7412"/>
                 </linearGradient>
             </defs>
             <!-- purple header band with wavy gold edge -->
-            <path d="M0 0 H860 V175 C730 238 580 244 430 204 C300 170 150 154 0 194 Z" fill="url(#idcPurpleB)"/>
-            <path d="M0 194 C150 154 300 170 430 204 C580 244 730 238 860 175 V225 C724 286 568 292 420 252 C290 218 145 202 0 242 Z" fill="url(#idcGoldB)"/>
+            <path d="M0 0 H860 V175 C730 238 580 244 430 204 C300 170 150 154 0 194 Z" fill="url(#idcPurpleB{{ cid }})"/>
+            <path d="M0 194 C150 154 300 170 430 204 C580 244 730 238 860 175 V225 C724 286 568 292 420 252 C290 218 145 202 0 242 Z" fill="url(#idcGoldB{{ cid }})"/>
             <!-- bottom-right corner accent -->
-            <path d="M860 398 C796 434 746 478 726 540 H860 Z" fill="url(#idcPurpleB)"/>
-            <path d="M860 370 C790 408 740 454 720 540 H698 C726 464 776 416 860 348 Z" fill="url(#idcGoldB)"/>
+            <path d="M860 398 C796 434 746 478 726 540 H860 Z" fill="url(#idcPurpleB{{ cid }})"/>
+            <path d="M860 370 C790 408 740 454 720 540 H698 C726 464 776 416 860 348 Z" fill="url(#idcGoldB{{ cid }})"/>
         </svg>
         <img class="idc-wm idc-wm-back" src="{% static 'images/royal_shield.png' %}" alt="">
 
@@ -139,3 +144,4 @@
         <button type="button" class="idc-btn idc-btn-pdf" onclick="idcPdfOne(this)">Download PDF</button>
     </div>
 </div>
+{% endwith %}
