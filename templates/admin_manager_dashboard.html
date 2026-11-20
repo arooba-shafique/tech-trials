@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Console — Royal International School</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -709,7 +710,34 @@
                 if (empty) empty.style.display = n ? 'none' : 'block';
             }
 
-            function preparePrint(list){
+            // Chrome takes the Save-as-PDF filename from document.title, and this
+            // page had no <title>, so it fell back to the URL. Swap the title in for
+            // the card's name while the print dialog is open, then put it back.
+            var idcTitleBefore = null;
+            function idcSetTitle(name){
+                if (idcTitleBefore === null) { idcTitleBefore = document.title; }
+                document.title = name;
+            }
+            function idcRestoreTitle(){
+                if (idcTitleBefore !== null) { document.title = idcTitleBefore; idcTitleBefore = null; }
+            }
+            function idcTitleCase(str){
+                return String(str || '').replace(/\s+/g, ' ').trim()
+                    .replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+            }
+            // "ID-Card-Arooba Shafique" for one student, "Student-ID-Cards" for many
+            function idcPrintTitle(list){
+                if (list.length === 1) {
+                    var n = idcTitleCase(list[0].getAttribute('data-name'));
+                    if (n) { return 'ID-Card-' + n; }
+                }
+                var title = 'Student-ID-Cards';
+                var sel = document.getElementById('idcClassFilter');
+                if (sel && sel.value) { title += '-' + idcTitleCase(sel.options[sel.selectedIndex].text); }
+                return title;
+            }
+
+            function preparePrint(list, title){
                 var area = document.getElementById('idcPrintArea');
                 area.innerHTML = '';
                 var uid = 0;
@@ -743,10 +771,12 @@
                 var st = document.getElementById('idcPageStyle');
                 if (!st){ st = document.createElement('style'); st.id = 'idcPageStyle'; document.head.appendChild(st); }
                 st.textContent = '@page{ size:86mm 54mm; margin:0; }';
+                if (title) { idcSetTitle(title); }
                 document.documentElement.classList.add('idc-printing');
                 void document.body.offsetHeight; // flush styles before printing
             }
             function finishPrint(){
+                idcRestoreTitle();
                 document.documentElement.classList.remove('idc-printing');
                 var st = document.getElementById('idcPageStyle');
                 if (st && st.parentNode) st.parentNode.removeChild(st);
@@ -759,13 +789,13 @@
             window.idcPrintAll = function(){
                 var list = visibleCards();
                 if (!list.length){ alert('No student cards to print.'); return; }
-                preparePrint(list);
+                preparePrint(list, idcPrintTitle(list));
                 window.print();
             };
             window.idcPrintOne = function(btn){
                 var card = btn.closest ? btn.closest('.idc') : null;
                 if (!card) return;
-                preparePrint([card]);
+                preparePrint([card], idcPrintTitle([card]));
                 window.print();
             };
             window.idcVisible = visibleCards;
