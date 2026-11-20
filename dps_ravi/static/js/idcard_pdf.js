@@ -1,9 +1,14 @@
 /* =====================================================
-   Student ID Cards → PDF  (html2canvas + jsPDF)
+   Student ID Cards -> PDF  (html2canvas + jsPDF)
+   Every PDF page is exactly 86mm x 54mm (true card size):
+   page 1 = front, page 2 = back, then the next student.
    Used by the Admin Manager dashboard "ID Cards" section.
    ===================================================== */
 (function () {
     'use strict';
+
+    var CARD_W = 86;   // mm
+    var CARD_H = 54;   // mm
 
     function libsReady() {
         return typeof window.html2canvas === 'function' &&
@@ -17,7 +22,7 @@
             .trim() || 'Student';
     }
 
-    /* Render a single .idc element (front + back) onto a canvas. */
+    /* Render one card face (.idc-front / .idc-back) onto a canvas. */
     function capture(el) {
         return window.html2canvas(el, {
             backgroundColor: '#ffffff',
@@ -28,48 +33,49 @@
                 Array.prototype.slice.call(doc.querySelectorAll('.idc-actions')).forEach(function (n) {
                     if (n.parentNode) { n.parentNode.removeChild(n); }
                 });
-                Array.prototype.slice.call(doc.querySelectorAll('.idc')).forEach(function (n) {
-                    n.style.display = 'flex';
+                Array.prototype.slice.call(doc.querySelectorAll('.idc-card')).forEach(function (n) {
                     n.style.width = '500px';
-                    n.style.maxWidth = 'none';
+                    n.style.height = 'auto';
+                    n.style.aspectRatio = '86 / 54';
+                    n.style.borderRadius = '0';
+                    n.style.boxShadow = 'none';
                     n.style.margin = '0';
-                    n.style.breakInside = 'auto';
                 });
-                var area = doc.getElementById('idcPrintArea');
-                if (area) { area.style.display = 'none'; }
             }
         });
     }
 
-    /* One landscape A4 page per student (front + back together). */
-    function compose(cards, filename, onProgress) {
-        var jsPDF = window.jspdf.jsPDF;
+    function addFace(pdf, canvas) {
+        if (!pdf) {
+            pdf = new window.jspdf.jsPDF({ unit: 'mm', format: [CARD_W, CARD_H], orientation: 'landscape' });
+        } else {
+            pdf.addPage([CARD_W, CARD_H], 'landscape');
+        }
+        // JPEG at 0.95 keeps the colours identical while keeping file size sane
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, CARD_W, CARD_H);
+        return pdf;
+    }
+
+    /* One 86x54mm page per card face. */
+    function compose(wraps, filename, onProgress) {
         var pdf = null;
         var i = 0;
 
         function next() {
-            if (i >= cards.length) {
+            if (i >= wraps.length) {
                 if (pdf) { pdf.save(filename); }
-                return Promise.resolve(cards.length);
+                return Promise.resolve(wraps.length);
             }
-            var el = cards[i++];
-            if (onProgress) { onProgress(i, cards.length); }
-            return capture(el).then(function (canvas) {
-                if (!pdf) {
-                    pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-                } else {
-                    pdf.addPage('a4', 'landscape');
-                }
-                var pw = pdf.internal.pageSize.getWidth();
-                var ph = pdf.internal.pageSize.getHeight();
-                var margin = 8;
-                var maxW = pw - margin * 2;
-                var maxH = ph - margin * 2;
-                var w = maxW;
-                var h = canvas.height * w / canvas.width;
-                if (h > maxH) { h = maxH; w = canvas.width * h / canvas.height; }
-                pdf.addImage(canvas.toDataURL('image/jpeg', 0.92), 'JPEG', (pw - w) / 2, (ph - h) / 2, w, h);
-            }).then(next);
+            var wrap = wraps[i++];
+            if (onProgress) { onProgress(i, wraps.length); }
+            var front = wrap.querySelector('.idc-front');
+            var back = wrap.querySelector('.idc-back');
+            if (!front || !back) { return next(); }
+            return capture(front)
+                .then(function (canvas) { pdf = addFace(pdf, canvas); })
+                .then(function () { return capture(back); })
+                .then(function (canvas) { pdf = addFace(pdf, canvas); })
+                .then(next);
         }
 
         return next();
@@ -86,7 +92,7 @@
         }
         if (cards.length > 60 &&
             !window.confirm('This will generate ' + cards.length + ' ID cards into one PDF.\nIt may take a minute — continue?')) {
-            return;
+            return Promise.resolve(0);
         }
 
         var label = btn ? btn.innerHTML : '';

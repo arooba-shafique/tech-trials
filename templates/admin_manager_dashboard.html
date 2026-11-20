@@ -582,54 +582,54 @@
             .idc-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(0, 500px)); gap:26px; justify-content:center; }
             .idc{ width:100%; max-width:500px; display:flex; flex-direction:column; gap:10px; }
             .idc-card{
-                position:relative; width:100%; aspect-ratio:1040/470;
+                position:relative; width:100%; aspect-ratio:86/54; /* exact ID-card ratio: 86mm x 54mm */
                 container-type:inline-size;
                 border-radius:4cqw; overflow:hidden;
                 box-shadow:0 8px 22px rgba(59,10,64,.18);
                 background:#fffcf6;
             }
             .idc-deco{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-            .idc-wm{ position:absolute; right:4cqw; top:52%; transform:translateY(-50%); width:24cqw; opacity:.10; z-index:1; pointer-events:none; }
-            .idc-wm-back{ left:3cqw; right:auto; width:24cqw; opacity:.10; }
-            .idc-inner{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:3cqw 4.5cqw; }
+            .idc-wm{ position:absolute; right:4cqw; top:54%; transform:translateY(-50%); width:23cqw; opacity:.10; z-index:1; pointer-events:none; }
+            .idc-wm-back{ left:3cqw; right:auto; top:auto; bottom:4cqw; transform:none; width:23cqw; opacity:.10; }
+            .idc-inner{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; padding:3.5cqw 4.5cqw; }
             .idc-head{ display:flex; align-items:center; gap:2.6cqw; }
-            .idc-logo{ height:7.4cqw; width:auto; display:block; }
-            .idc-head-line{ width:.5cqw; min-width:2px; height:8cqw; background:#6d1a74; border-radius:2px; flex:0 0 auto; }
-            .idc-school{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:3.4cqw; line-height:1.18; color:#43104b; letter-spacing:.02em; }
-            .idc-main{ flex:1; display:flex; align-items:center; gap:4cqw; min-height:0; }
+            .idc-logo{ height:8cqw; width:auto; display:block; }
+            .idc-head-line{ width:.5cqw; min-width:2px; height:9cqw; background:#6d1a74; border-radius:2px; flex:0 0 auto; }
+            .idc-school{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:3.6cqw; line-height:1.18; color:#43104b; letter-spacing:.02em; }
+            .idc-main{ flex:1; display:flex; align-items:center; gap:5cqw; min-height:0; }
             .idc-photo{
-                flex:0 0 auto; width:19.5cqw; aspect-ratio:200/272;
+                flex:0 0 auto; width:24cqw; aspect-ratio:3/4;
                 border:.7cqw solid #d9b45a; border-radius:2cqw; overflow:hidden;
                 background:#efe9f3; display:flex; align-items:center; justify-content:center;
                 box-shadow:0 2px 6px rgba(0,0,0,.14);
             }
             .idc-photo img{ width:100%; height:100%; object-fit:cover; display:block; }
-            .idc-initials{ font-family:Georgia,'Times New Roman',serif; font-size:8cqw; font-weight:700; color:#6b1f6e; }
+            .idc-initials{ font-family:Georgia,'Times New Roman',serif; font-size:9cqw; font-weight:700; color:#6b1f6e; }
             .idc-info{ flex:1; min-width:0; }
-            .idc-name{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:4.2cqw; color:#3b0d44; line-height:1.1; }
-            .idc-rule{ width:68%; height:.5cqw; min-height:2px; margin:1cqw 0 1.3cqw; background:linear-gradient(90deg,#b8860b,#f2dc93,#c9a227); border-radius:2px; }
-            .idc-fields{ margin:0; display:grid; gap:.5cqw; }
-            .idc-field{ display:grid; grid-template-columns:40% 1fr; align-items:baseline; font-size:2.7cqw; line-height:1.15; }
+            .idc-name{ font-family:Georgia,'Times New Roman',serif; font-weight:700; font-size:4.8cqw; color:#3b0d44; line-height:1.1; }
+            .idc-rule{ width:70%; height:.5cqw; min-height:2px; margin:1.4cqw 0 1.8cqw; background:linear-gradient(90deg,#b8860b,#f2dc93,#c9a227); border-radius:2px; }
+            .idc-fields{ margin:0; display:grid; gap:1.1cqw; }
+            .idc-field{ display:grid; grid-template-columns:40% 1fr; align-items:baseline; font-size:3.1cqw; line-height:1.15; }
             .idc-field dt{ color:#3b0d44; font-weight:700; }
             .idc-field dd{ margin:0; color:#3b0d44; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
             .idc-back{ background:linear-gradient(160deg,#fffdf7,#fdf7ec); }
-            .idc-back-inner{ padding:0 4.5cqw 3.4cqw; }
-            .idc-back .idc-head{ height:19cqw; }
+            .idc-back-inner{ padding:0 4.5cqw 3.5cqw; }
+            .idc-back .idc-head{ height:22cqw; }
             .idc-head-light .idc-school{ color:#fff; }
             .idc-head-light .idc-head-line{ background:#f0d684; }
-            .idc-back-body{ flex:1; display:flex; align-items:center; gap:4cqw; min-height:0; }
+            .idc-back-body{ flex:1; display:flex; align-items:center; gap:4cqw; min-height:0; padding-top:7cqw; }
             .idc-details{ flex:1; min-width:0; }
-            .idc-details h3{ margin:0 0 1.6cqw; font-family:Georgia,'Times New Roman',serif; font-size:3.4cqw; letter-spacing:.08em; text-transform:uppercase; color:#43104b; }
-            .idc-details ul{ list-style:none; margin:0; padding:0; display:grid; gap:1.3cqw; }
-            .idc-details li{ display:flex; align-items:center; gap:1.7cqw; font-size:2.8cqw; color:#2f0b36; font-weight:600; min-width:0; }
+            .idc-details h3{ margin:0 0 1.8cqw; font-family:Georgia,'Times New Roman',serif; font-size:3.6cqw; letter-spacing:.08em; text-transform:uppercase; color:#43104b; }
+            .idc-details ul{ list-style:none; margin:0; padding:0; display:grid; gap:1.6cqw; }
+            .idc-details li{ display:flex; align-items:center; gap:1.8cqw; font-size:3.1cqw; color:#2f0b36; font-weight:600; min-width:0; }
             .idc-details li > span:last-child{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-            .idc-ico{ width:4.4cqw; height:4.4cqw; min-width:16px; min-height:16px; border-radius:50%; background:#4b1252; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
-            .idc-ico svg{ width:2.5cqw; height:2.5cqw; min-width:9px; min-height:9px; display:block; }
-            .idc-sign{ position:relative; flex:0 0 33%; display:flex; flex-direction:column; align-items:center; gap:1.4cqw; padding-top:5cqw; }
-            .idc-sign::before{ content:""; position:absolute; top:-4cqw; bottom:-2cqw; left:-2cqw; width:.4cqw; min-width:2px; background:linear-gradient(180deg,#e6c766,#b8860b); }
+            .idc-ico{ width:4.8cqw; height:4.8cqw; min-width:16px; min-height:16px; border-radius:50%; background:#4b1252; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+            .idc-ico svg{ width:2.7cqw; height:2.7cqw; min-width:9px; min-height:9px; display:block; }
+            .idc-sign{ position:relative; flex:0 0 33%; display:flex; flex-direction:column; align-items:center; gap:1.6cqw; padding-top:6cqw; }
+            .idc-sign::before{ content:""; position:absolute; top:-5cqw; bottom:-2cqw; left:-2cqw; width:.4cqw; min-width:2px; background:linear-gradient(180deg,#e6c766,#b8860b); }
             .idc-sign-line{ width:100%; height:.4cqw; min-height:2px; background:#3b0d44; }
-            .idc-sign span{ font-size:2.4cqw; color:#3b0d44; font-weight:600; text-align:center; white-space:nowrap; }
+            .idc-sign span{ font-size:2.7cqw; color:#3b0d44; font-weight:600; text-align:center; white-space:nowrap; }
 
             .idc-actions{ display:flex; gap:8px; justify-content:center; }
             .idc-btn{ font-size:12px; font-weight:600; padding:6px 14px; border-radius:6px; border:1px solid #e5e7eb; background:#fff; color:#374151; cursor:pointer; font-family:inherit; transition:.15s; }
@@ -637,11 +637,17 @@
             .idc-btn-pdf{ background:#4b1252; border-color:#4b1252; color:#fff; }
             .idc-btn-pdf:hover{ background:#5f1868; border-color:#5f1868; }
             #idcPrintArea{ display:none; }
+            html.idc-printing body{ margin:0 !important; padding:0 !important; }
             html.idc-printing body > *:not(#idcPrintArea){ display:none !important; }
             html.idc-printing #idcPrintArea{ display:block !important; }
-            #idcPrintArea .idc{ width:500px !important; max-width:none !important; margin:0 auto 8mm; break-inside:avoid; page-break-inside:avoid; }
+            /* Every printed page is one card face at true size: 86mm x 54mm */
+            #idcPrintArea .idc{ display:block !important; width:86mm !important; max-width:none !important; margin:0 !important; gap:0 !important; }
+            #idcPrintArea .idc-card{
+                width:86mm !important; height:54mm !important; aspect-ratio:auto !important;
+                border-radius:3.4mm !important; box-shadow:none !important; margin:0 !important;
+                break-inside:avoid; page-break-inside:avoid;
+            }
             #idcPrintArea .idc-actions{ display:none !important; }
-            #idcPrintArea .idc-card{ box-shadow:none !important; }
             @media (max-width:560px){
                 .idc-grid{ grid-template-columns:1fr; }
                 .idc{ max-width:100%; }
@@ -706,15 +712,37 @@
             function preparePrint(list){
                 var area = document.getElementById('idcPrintArea');
                 area.innerHTML = '';
+                var uid = 0;
                 list.forEach(function(el){
                     var c = el.cloneNode(true);
                     var a = c.querySelector('.idc-actions');
                     if (a && a.parentNode) a.parentNode.removeChild(a);
+                    // The clone keeps the same SVG gradient ids as the hidden on-screen
+                    // card, and url(#idcPurple) would resolve to that hidden copy (which
+                    // paints nothing). Re-key the ids so the clone resolves its own defs.
+                    var map = {};
+                    Array.prototype.slice.call(c.querySelectorAll('[id]')).forEach(function(n){
+                        var old = n.id;
+                        if (!old) { return; }
+                        map[old] = old + '-print-' + (++uid);
+                        n.id = map[old];
+                    });
+                    if (Object.keys(map).length) {
+                        Array.prototype.slice.call(c.querySelectorAll('[fill],[stroke]')).forEach(function(n){
+                            ['fill', 'stroke'].forEach(function(attr){
+                                var v = n.getAttribute(attr);
+                                if (v && v.indexOf('url(#') === 0) {
+                                    var k = v.slice(5, v.indexOf(')'));
+                                    if (map[k]) { n.setAttribute(attr, 'url(#' + map[k] + ')'); }
+                                }
+                            });
+                        });
+                    }
                     area.appendChild(c);
                 });
                 var st = document.getElementById('idcPageStyle');
                 if (!st){ st = document.createElement('style'); st.id = 'idcPageStyle'; document.head.appendChild(st); }
-                st.textContent = '@page{ size:A4 landscape; margin:8mm; }';
+                st.textContent = '@page{ size:86mm 54mm; margin:0; }';
                 document.documentElement.classList.add('idc-printing');
                 void document.body.offsetHeight; // flush styles before printing
             }
@@ -2057,7 +2085,7 @@
 
 <script src="{% static 'js/admin_dashboard.js' %}?v=7"></script>
 <script src="{% static 'js/slip_pdf.js' %}?v=1"></script>
-<script src="{% static 'js/idcard_pdf.js' %}?v=2"></script>
+<script src="{% static 'js/idcard_pdf.js' %}?v=3"></script>
 
 <!-- Credentials JS -->
 <script>
